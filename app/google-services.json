@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "93332277132",
+    "firebase_url": "https://carotandstick-35d0e.firebaseio.com",
+    "project_id": "carotandstick-35d0e",
+    "storage_bucket": "carotandstick-35d0e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93332277132:android:35e9d5239b3d43c9",
+        "android_client_info": {
+          "package_name": "com.huza.carrot_and_stick"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "93332277132-u921qvg5sgn9uju3v3mkcov0bphdetec.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPhQHFuei_xA3nUVTNEyFV8d3CF_QqJ_Y"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

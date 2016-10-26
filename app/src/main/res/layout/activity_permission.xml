@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_permission"
+    android:background="#808080"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.huza.carrot_and_stick.PermissionActivity">
+
+    <LinearLayout
+        android:id="@+id/linear_layout"
+        android:orientation="horizontal"
+        android:gravity="right"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <Space
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <com.matthewtamlin.sliding_intro_screen_library.indicators.DotIndicator
+            android:id="@+id/indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="3" />
+
+        <Button
+            android:text="다음"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:onClick="btn_next_clicked"
+            android:id="@+id/btn_next"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_above="@id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </android.support.v4.view.ViewPager>
+
+</RelativeLayout>
