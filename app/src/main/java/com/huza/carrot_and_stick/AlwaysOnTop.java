@@ -63,10 +63,6 @@ public class AlwaysOnTop extends Service {
     public void onCreate() {
         super.onCreate();
 
-        //// 비정산 처리 ㄱㄱ ////
-        settle_up();
-        //////////////////////////
-
         //// 혹시 몰라 noti 지우기 ////
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         nm.cancel(737);
@@ -99,6 +95,10 @@ public class AlwaysOnTop extends Service {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 tv_credit.setText(dataSnapshot.getValue().toString());
                 user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
+
+                //// 비정산 처리 ㄱㄱ ////
+                settle_up();
+                //////////////////////////
             }
 
             @Override
@@ -267,11 +267,14 @@ public class AlwaysOnTop extends Service {
         SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
         if (!(pref.getString("startTIME", "none").equals("none"))) {
 
-            Calendar now_time = Calendar.getInstance();
-
             Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : 사용시작 : "+ pref.getString("startTIME", "none").toString());
             Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : 사용시간 : " + pref.getInt("second",-1));
-            Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : 사용끝 : ...은 계산해야합니다");
+
+            ///////// Credit 차감 (비정상) //////////
+            databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(user_credit-pref.getInt("second",0));
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : 차감 완료");
+            ////////////////////////////////
+
 
             SharedPreferences.Editor editor = pref.edit();
             editor.remove("startTIME");

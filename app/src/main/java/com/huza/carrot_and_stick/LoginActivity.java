@@ -44,6 +44,8 @@ public class LoginActivity extends AppCompatActivity {
 
         et_login_email = (EditText) findViewById(R.id.et_login_email);
         et_login_password = (EditText) findViewById(R.id.et_login_password);
+        if (pref.getString("recent_user", null) != null)
+            et_login_email.setText(pref.getString("recent_user",null));
 
     }
 
@@ -55,9 +57,18 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    public void log_in_clicked(View v) {
+    public boolean signin_check_inputdata() {
 
         if (et_login_email.getText().toString().length()*et_login_password.getText().toString().length() == 0){
+            return false;
+        }
+        return true;
+
+    }
+
+    public void log_in_clicked(View v) {
+
+        if (!signin_check_inputdata()){
             Toast.makeText(LoginActivity.this, "아이디와 비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -76,6 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                             SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
 
                             SharedPreferences.Editor editor = pref.edit();
+                            editor.putString("recent_user", et_login_email.getText().toString());
                             editor.putBoolean("isLoggedin", true);
                             editor.putString("user_uid", mAuth.getCurrentUser().getUid());
                             editor.commit();

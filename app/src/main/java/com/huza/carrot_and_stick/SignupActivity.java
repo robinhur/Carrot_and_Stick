@@ -43,7 +43,22 @@ public class SignupActivity extends AppCompatActivity {
         
     }
 
+    public boolean signup_check_inputdata() {
+
+        if (et_signup_email.getText().toString().length()*et_signup_password.getText().toString().length()*et_signup_name.getText().toString().length() == 0){
+            return false;
+        }
+        return true;
+
+    }
+
     public void register_clicked(View v) {
+
+        if (!signup_check_inputdata()){
+            Toast.makeText(SignupActivity.this, "항목을 모두 입력해주세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         mAuth.createUserWithEmailAndPassword(et_signup_email.getText().toString(), et_signup_password.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
