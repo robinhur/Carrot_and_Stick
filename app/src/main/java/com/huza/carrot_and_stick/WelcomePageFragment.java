@@ -12,12 +12,12 @@ import android.widget.ImageView;
  * Created by HuZA on 2016-10-26.
  */
 
-public class PageFragment extends Fragment {
+public class WelcomePageFragment extends Fragment {
 
     int myPageNumber;
 
-    public static PageFragment create(int PageNumber) {
-        PageFragment fragment = new PageFragment();
+    public static WelcomePageFragment create(int PageNumber) {
+        WelcomePageFragment fragment = new WelcomePageFragment();
         Bundle args = new Bundle();
         args.putInt("page", PageNumber);
         fragment.setArguments(args);

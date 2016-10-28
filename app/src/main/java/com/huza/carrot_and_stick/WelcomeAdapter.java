@@ -28,7 +28,7 @@ public class WelcomeAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        return PageFragment.create(welcome_images[position]);
+        return WelcomePageFragment.create(welcome_images[position]);
     }
 
 }
