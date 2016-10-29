@@ -1,71 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="#666666"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/head_button"
         android:layout_width="match_parent"
+        android:layout_height="50dp"
         android:orientation="horizontal"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="(서비스 종료)"
-                android:onClick="btn_finalclose_clicked"
-                android:id="@+id/button2" />
-        </LinearLayout>
+        android:gravity="center"
+        android:layout_alignParentStart="true">
 
-        <LinearLayout
+        <TextView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:layout_weight="1">
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Credit 사용하기"
-                android:onClick="btn_close_clicked"
-                android:id="@+id/button" />
-        </LinearLayout>
+            android:layout_height="match_parent"
+            android:gravity="right|center_vertical"
+            android:paddingRight="20dp"
+            android:textSize="13dp"
+            android:text="현재시간"
+            android:layout_weight="3"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="left|center_vertical"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="hh : MM : ss"
+            android:id="@+id/tv_time"
+            android:layout_weight="3" />
+
     </LinearLayout>
 
-    <TextView
+    <android.support.v4.view.ViewPager
+        android:id="@+id/AOT_viewpager"
+        android:layout_below="@+id/head_button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="hh : MM : ss"
-        android:id="@+id/tv_time" />
+        android:layout_height="match_parent"
+        android:layout_above="@+id/tail_button">
+    </android.support.v4.view.ViewPager>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/tail_button"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_height="75dp">
 
-        <TextView
-            android:text="Credit "
-            android:gravity="bottom|center"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:textSize="25dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView2" />
+            android:layout_height="match_parent"
+            android:gravity="center">
 
-        <TextView
-            android:text="로딩 중"
-            android:gravity="top|center"
-            android:layout_width="match_parent"
-            android:textSize="25dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:id="@+id/tv_credit" />
+            <LinearLayout
+                android:layout_width="130dp"
+                android:layout_height="match_parent"
+                android:gravity="left|center_vertical"
+                android:paddingLeft="10dp"
+                android:orientation="vertical"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="내 Credit"
+                    android:gravity="center"
+                    android:textSize="15dp"/>
+                <TextView
+                    android:layout_width="100dp"
+                    android:id="@+id/tv_main_credit"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textSize="30dp"
+                    android:text="#####" />
+
+            </LinearLayout>
+
+            <com.matthewtamlin.sliding_intro_screen_library.indicators.DotIndicator
+                android:id="@+id/AOT_indicator"
+                android:layout_alignParentBottom="true"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:orientation="vertical">
+                <Button
+                    android:layout_width="100dp"
+                    android:layout_height="70dp"
+                    android:text="Credit\n사용하기"
+                    android:onClick="btn_close_clicked"
+                    android:id="@+id/button"
+                    android:layout_weight="1" />
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
