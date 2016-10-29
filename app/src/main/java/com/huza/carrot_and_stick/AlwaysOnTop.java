@@ -117,8 +117,6 @@ public class AlwaysOnTop extends Service {
 
         tv_time = (TextView) OnTop_view.findViewById(R.id.tv_time);
         tv_main_credit = (TextView) OnTop_view.findViewById(R.id.tv_main_credit);
-        //tv_credit = (TextView) aot_adapter.findViewById_pager(R.id.tv_credit);
-        //tv_credit = (TextView) OnTop_view.findViewById(R.id.tv_credit);
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -172,6 +170,8 @@ public class AlwaysOnTop extends Service {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.getKey().toString().equals("credit")) {
+                    aot_indicator.setSelectedItem(1, true);
+                    aot_pager.setCurrentItem(1);
                     tv_credit.setText(dataSnapshot.getValue().toString());
                     tv_main_credit.setText(dataSnapshot.getValue().toString());
                     user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
