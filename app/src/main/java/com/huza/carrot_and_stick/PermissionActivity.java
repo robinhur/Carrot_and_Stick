@@ -37,10 +37,16 @@ public class PermissionActivity extends FragmentActivity {
                 btn_next.setText("활성화하기");
                 break;
             case 1:   // 1 -> 2로
-                now_pos = 6;
-                pager.setCurrentItem(2);
-                btn_next.setText("활성화하기");
-                break;
+
+                if (hasWindowOverlayPermission(getApplicationContext())) {
+                    now_pos = 6;
+                    pager.setCurrentItem(2);
+                    btn_next.setText("활성화하기");
+                    break;
+                } else {
+                    now_pos = 2;
+                }
+
             case 2:   // 2 -> 3로
                 now_pos = 3;
                 pager.setCurrentItem(3);
@@ -68,9 +74,14 @@ public class PermissionActivity extends FragmentActivity {
             case 6:
                 // overlay
 
-                Uri uri = Uri.fromParts("package", getPackageName(), null);
-                Intent i2 = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, uri);
-                startActivityForResult(i2 , 6);
+                if (hasWindowOverlayPermission(getApplicationContext())) {
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    Intent i2 = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, uri);
+                    startActivityForResult(i2 , 6);
+                } else {
+                    now_pos = 2;
+                    btn_next_clicked(null);
+                }
 
                 break;
         }
