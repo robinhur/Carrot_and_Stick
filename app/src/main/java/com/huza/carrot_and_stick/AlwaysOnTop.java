@@ -6,12 +6,16 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
@@ -23,6 +27,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.matthewtamlin.sliding_intro_screen_library.indicators.DotIndicator;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -37,8 +42,14 @@ public class AlwaysOnTop extends Service {
     final String CreditTicker_SERVICE_NAME = "com.huza.carrot_and_stick.CreditTickerService";
 
     View OnTop_view;
+
+    AOTAdapter aot_adapter;
+    ViewPager aot_pager;
+    DotIndicator aot_indicator;
+
     TextView tv_time;
     TextView tv_credit;
+    TextView tv_main_credit;
     WindowManager w_manager;
 
     SimpleDateFormat time_format = new SimpleDateFormat("hh : mm : ss", Locale.KOREA);
@@ -71,8 +82,43 @@ public class AlwaysOnTop extends Service {
         //// AoT 생성 ////
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         OnTop_view = inflater.inflate(R.layout.service_alwaysontop, null);
+
+        aot_pager = (ViewPager) OnTop_view.findViewById(R.id.AOT_viewpager);
+        aot_adapter = new AOTAdapter(getBaseContext());
+        aot_pager.setClipToPadding(false);
+        aot_pager.setPadding(100,15,100,0);
+        aot_pager.setPageMargin(50);
+        aot_pager.setAdapter(aot_adapter);
+        aot_pager.setCurrentItem(1);
+
+        aot_indicator = (DotIndicator) OnTop_view.findViewById(R.id.AOT_indicator);
+        aot_indicator.setSelectedDotColor(Color.parseColor("#FFFFFF"));
+        aot_indicator.setSelectedDotDiameterDp(10);
+        aot_indicator.setUnselectedDotColor(Color.parseColor("#888888"));
+        aot_indicator.setNumberOfItems(aot_adapter.getCount());
+        aot_indicator.setSelectedItem(1, false);
+
+        aot_pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                aot_indicator.setSelectedItem(aot_pager.getCurrentItem(), true);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
         tv_time = (TextView) OnTop_view.findViewById(R.id.tv_time);
-        tv_credit = (TextView) OnTop_view.findViewById(R.id.tv_credit);
+        tv_main_credit = (TextView) OnTop_view.findViewById(R.id.tv_main_credit);
+        //tv_credit = (TextView) aot_adapter.findViewById_pager(R.id.tv_credit);
+        //tv_credit = (TextView) OnTop_view.findViewById(R.id.tv_credit);
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
@@ -80,6 +126,15 @@ public class AlwaysOnTop extends Service {
                 WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT);
+
+        final int ui_Options = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                //| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                //| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                //| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                //| View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+
+        OnTop_view.setSystemUiVisibility(ui_Options);
 
         w_manager = (WindowManager) getSystemService(WINDOW_SERVICE);
         w_manager.addView(OnTop_view, params);
@@ -94,6 +149,7 @@ public class AlwaysOnTop extends Service {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 tv_credit.setText(dataSnapshot.getValue().toString());
+                tv_main_credit.setText(dataSnapshot.getValue().toString());
                 user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
 
                 //// 비정산 처리 ㄱㄱ ////
@@ -117,6 +173,7 @@ public class AlwaysOnTop extends Service {
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.getKey().toString().equals("credit")) {
                     tv_credit.setText(dataSnapshot.getValue().toString());
+                    tv_main_credit.setText(dataSnapshot.getValue().toString());
                     user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
                 }
             }
@@ -149,13 +206,13 @@ public class AlwaysOnTop extends Service {
         ///////////////////////
 
         //// 임시 서비스 종료 버튼 ////
-        Button btn_finalclose = (Button) OnTop_view.findViewById(R.id.button2);
-        btn_finalclose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                btn_finalclose_clicked(view);
-            }
-        });
+        //Button btn_finalclose = (Button) OnTop_view.findViewById(R.id.button2);
+        //btn_finalclose.setOnClickListener(new View.OnClickListener() {
+        //    @Override
+        //    public void onClick(View view) {
+        //        btn_finalclose_clicked(view);
+        //    }
+        //});
         ////////////////////////////////
     }
 
@@ -283,4 +340,54 @@ public class AlwaysOnTop extends Service {
 
         }
     }
+
+    public class AOTAdapter extends PagerAdapter {
+
+        final String PACKAGE_NAME = "Carrot_and_Stick";
+        int[] aot_screen = {
+                R.layout.aot_menu,
+                R.layout.aot_main,
+                R.layout.aot_history
+        };
+
+        Context mContext;
+
+        public AOTAdapter(Context context) {
+            this.mContext = context;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            ViewGroup layout = (ViewGroup) inflater.inflate(aot_screen[position], container, false);
+            container.addView(layout);
+
+
+            if (position == 1){
+                tv_credit = (TextView) layout.findViewById(R.id.tv_credit);
+            }
+
+
+            return layout;
+
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView((View) object);
+        }
+
+        @Override
+        public int getCount() {
+            return aot_screen.length;
+        }
+
+        @Override
+        public boolean isViewFromObject(View view, Object object) {
+            return view == object;
+        }
+
+    }
+
 }

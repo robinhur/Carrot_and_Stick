@@ -3,11 +3,13 @@ package com.huza.carrot_and_stick;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +30,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE|WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
         Log.d(PACKAGE_NAME, "LoginActivity : 로그인 : "+ pref.getBoolean("isLoggedin", false));
         if (pref.getBoolean("isLoggedin", false)) {
@@ -46,6 +50,17 @@ public class LoginActivity extends AppCompatActivity {
         et_login_password = (EditText) findViewById(R.id.et_login_password);
         if (pref.getString("recent_user", null) != null)
             et_login_email.setText(pref.getString("recent_user",null));
+
+        et_login_password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    log_in_clicked(null);
+                    return true;
+                }
+                return false;
+            }
+        });
 
     }
 
@@ -77,7 +92,7 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(et_login_email.getText().toString(), et_login_password.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    public void onComplete(Task<AuthResult> task) {
 
                         if (!task.isSuccessful()) {
                             Toast.makeText(LoginActivity.this, "로그인 실패!!\nNIY!!!", Toast.LENGTH_SHORT).show();
