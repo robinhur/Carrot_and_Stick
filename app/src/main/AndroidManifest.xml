@@ -27,10 +27,10 @@
             android:theme="@style/AppTheme_NoActionBar" />
         <activity
             android:name=".LoginActivity"
-            android:theme="@style/AppTheme_NoActionBar" />
+            android:theme="@style/AppTheme_NoActionBar"/>
         <activity
             android:name=".SignupActivity"
-            android:theme="@style/AppTheme_NoActionBar" />
+            android:theme="@style/AppTheme_NoActionBar"/>
         <activity android:name=".MainActivity" />
 
         <service

@@ -90,7 +90,7 @@ public class SplashActivity extends AppCompatActivity {
             }
             return true;
         }
-        return false;
+        return true;
     }
 
 }

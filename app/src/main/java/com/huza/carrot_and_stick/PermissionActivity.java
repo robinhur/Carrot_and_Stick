@@ -32,13 +32,21 @@ public class PermissionActivity extends FragmentActivity {
     public void btn_next_clicked(View v) {
         switch (now_pos) {
             case 0:   // 0 -> 1로
-                now_pos = 5;
-                pager.setCurrentItem(1);
-                btn_next.setText("활성화하기");
-                break;
+
+                adminComponent = new ComponentName(getApplicationContext(), DeviceAdmin_Receiver.class);
+                devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+                if (!devicePolicyManager.isAdminActive(adminComponent)) {
+                    now_pos = 5;
+                    pager.setCurrentItem(1);
+                    btn_next.setText("활성화하기");
+                    break;
+                } else {
+                    now_pos = 1;
+                }
+
             case 1:   // 1 -> 2로
 
-                if (hasWindowOverlayPermission(getApplicationContext())) {
+                if (!hasWindowOverlayPermission(getApplicationContext())) {
                     now_pos = 6;
                     pager.setCurrentItem(2);
                     btn_next.setText("활성화하기");
@@ -59,8 +67,8 @@ public class PermissionActivity extends FragmentActivity {
             case 5:
                 // 기기관리자
 
-                adminComponent = new ComponentName(getApplicationContext(), DeviceAdmin_Receiver.class);
-                devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+                //adminComponent = new ComponentName(getApplicationContext(), DeviceAdmin_Receiver.class);
+                //devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 
                 Intent i1 = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
                 i1.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN,adminComponent);
@@ -74,7 +82,7 @@ public class PermissionActivity extends FragmentActivity {
             case 6:
                 // overlay
 
-                if (hasWindowOverlayPermission(getApplicationContext())) {
+                if (!hasWindowOverlayPermission(getApplicationContext())) {
                     Uri uri = Uri.fromParts("package", getPackageName(), null);
                     Intent i2 = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, uri);
                     startActivityForResult(i2 , 6);
@@ -158,6 +166,6 @@ public class PermissionActivity extends FragmentActivity {
             }
             return true;
         }
-        return false;
+        return true;
     }
 }
