@@ -32,7 +32,7 @@ public class StateListenerReceiver extends BroadcastReceiver {
         Log.d(PACKAGE_NAME, "StateListenerReceiver : StateListenerReceiver 생성");
 
         context = mcontext;
-        //checkAoTServiceRunning(context);
+        checkAoTServiceRunning(context);
     }
 
     @Override
