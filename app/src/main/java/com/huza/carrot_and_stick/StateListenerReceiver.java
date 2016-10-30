@@ -32,7 +32,7 @@ public class StateListenerReceiver extends BroadcastReceiver {
         Log.d(PACKAGE_NAME, "StateListenerReceiver : StateListenerReceiver 생성");
 
         context = mcontext;
-        checkAoTServiceRunning(context);
+        //checkAoTServiceRunning(context);
     }
 
     @Override
@@ -66,21 +66,20 @@ public class StateListenerReceiver extends BroadcastReceiver {
         }
     }
 
-    Messenger mService = null;
-    boolean mBound;
-    private ServiceConnection mConnection = new ServiceConnection() {
-
+    Messenger mService_CreditTicker = null;
+    boolean mBound_CreditTicker;
+    private ServiceConnection mConnection_CreditTicker = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mService = new Messenger(iBinder);
-            mBound = true;
+            mService_CreditTicker = new Messenger(iBinder);
+            mBound_CreditTicker = true;
             checkCreditTickerServiceRunning(context);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            mService = null;
-            mBound = false;
+            mService_CreditTicker = null;
+            mBound_CreditTicker = false;
         }
     };
 
@@ -89,34 +88,68 @@ public class StateListenerReceiver extends BroadcastReceiver {
         serviceChecker = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo runningServiceInfo:serviceChecker.getRunningServices(Integer.MAX_VALUE)) {
             if (CreditTicker_SERVICE_NAME.equals(runningServiceInfo.service.getClassName())) {
-                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkCreditTickerServiceRunning service 찾음 : " + mBound);
+                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkCreditTickerServiceRunning service 찾음 : " + mBound_CreditTicker);
 
-                if (!mBound) {
-                    context.bindService(new Intent(context, CreditTickerService.class), mConnection, Context.BIND_AUTO_CREATE);
-                    return ;
+                if (!mBound_CreditTicker) {
+                    context.bindService(new Intent(context, CreditTickerService.class), mConnection_CreditTicker, Context.BIND_AUTO_CREATE);
+                    return;
                 }
 
                 Log.d(PACKAGE_NAME, "StateListenerReceiver : checkCreditTickerServiceRunning Message 날린다?");
                 Message msg = Message.obtain(null, 1, 0, 0);
                 try {
-                    mService.send(msg);
+                    mService_CreditTicker.send(msg);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
 
-                context.unbindService(mConnection);
-                mConnection.onServiceDisconnected(null);
+                context.unbindService(mConnection_CreditTicker);
+                mConnection_CreditTicker.onServiceDisconnected(null);
             }
         }
 
     }
+
+    Messenger mService_AoT = null;
+    boolean mBound_AoT;
+    private ServiceConnection mConnection_AoT = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mService_AoT = new Messenger(iBinder);
+            mBound_AoT = true;
+            checkAoTServiceRunning(context);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mService_AoT = null;
+            mBound_AoT = false;
+        }
+    };
 
     public void checkAoTServiceRunning(Context context) {
 
         serviceChecker = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo runningServiceInfo:serviceChecker.getRunningServices(Integer.MAX_VALUE)) {
             if (AoT_SERVICE_NAME.equals(runningServiceInfo.service.getClassName())) {
-                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning service 찾음");
+                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning service 찾음 : " + mBound_AoT);
+
+                if (!mBound_AoT) {
+                    context.bindService(new Intent(context, AlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
+                    return;
+                }
+
+                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning Message 날린다?");
+                Message msg = Message.obtain(null, 1, 0, 0);
+                try {
+                    mService_AoT.send(msg);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
+                context.unbindService(mConnection_AoT);
+                mConnection_AoT.onServiceDisconnected(null);
                 return;
             }
         }

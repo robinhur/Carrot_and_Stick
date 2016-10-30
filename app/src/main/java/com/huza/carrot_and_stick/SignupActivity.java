@@ -6,7 +6,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,9 @@ public class SignupActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
+
+    ProgressBar progressBar;
+    Button btn_signup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +60,9 @@ public class SignupActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        btn_signup = (Button) findViewById(R.id.btn_signup_register);
     }
 
     public boolean signup_check_inputdata() {
@@ -72,6 +80,10 @@ public class SignupActivity extends AppCompatActivity {
             Toast.makeText(SignupActivity.this, "항목을 모두 입력해주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        btn_signup.setText("");
+        btn_signup.setEnabled(false);
+        progressBar.setVisibility(View.VISIBLE);
         
         mAuth.createUserWithEmailAndPassword(et_signup_email.getText().toString(), et_signup_password.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -80,6 +92,10 @@ public class SignupActivity extends AppCompatActivity {
                         Log.d(PACKAGE_NAME, et_signup_email.getText().toString() +" - " + et_signup_password.getText().toString());
                         if (!task.isSuccessful()){
                             Toast.makeText(SignupActivity.this, "계정 생성 실패!!!!!", Toast.LENGTH_SHORT).show();
+
+                            btn_signup.setText("회원 가입");
+                            btn_signup.setEnabled(true);
+                            progressBar.setVisibility(View.INVISIBLE);
                         } else {
                             saveUser();
                             Toast.makeText(SignupActivity.this, "계정 생성 완료\n로그인 해주세요", Toast.LENGTH_SHORT).show();

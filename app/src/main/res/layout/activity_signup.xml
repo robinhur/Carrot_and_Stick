@@ -200,7 +200,7 @@
                     android:enabled="false" />
             </LinearLayout>
 
-            <LinearLayout
+            <RelativeLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -208,7 +208,15 @@
                 android:gravity="center"
                 android:layout_weight="1">
 
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:visibility="invisible"
+                    android:layout_centerInParent="true" />
+
                 <Button
+                    android:layout_centerInParent="true"
                     android:text="회원 가입"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -217,7 +225,7 @@
                     android:id="@+id/btn_signup_register"
                     style="@style/Widget.AppCompat.Button.Colored" />
 
-            </LinearLayout>
+            </RelativeLayout>
 
         </LinearLayout>
 

@@ -8,7 +8,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +25,8 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText et_login_email;
     EditText et_login_password;
+    ProgressBar progressBar;
+    Button btn_login;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +66,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        btn_login = (Button) findViewById(R.id.btn_login_okay);
+
     }
 
     public void find_pw_clicked(View v) {
@@ -88,6 +95,10 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        btn_login.setText("");
+        btn_login.setEnabled(false);
+        progressBar.setVisibility(View.VISIBLE);
+
         final FirebaseAuth mAuth = FirebaseAuth.getInstance();
         mAuth.signInWithEmailAndPassword(et_login_email.getText().toString(), et_login_password.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -96,6 +107,10 @@ public class LoginActivity extends AppCompatActivity {
 
                         if (!task.isSuccessful()) {
                             Toast.makeText(LoginActivity.this, "로그인 실패!!\nNIY!!!", Toast.LENGTH_SHORT).show();
+
+                            btn_login.setText("로그인");
+                            btn_login.setEnabled(true);
+                            progressBar.setVisibility(View.INVISIBLE);
                         } else {
 
                             //// Login - SharegPreferences

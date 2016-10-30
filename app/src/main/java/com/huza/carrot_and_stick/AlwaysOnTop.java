@@ -10,6 +10,8 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -51,6 +53,18 @@ public class AlwaysOnTop extends Service {
     TextView tv_credit;
     TextView tv_main_credit;
     WindowManager w_manager;
+    final int ui_Options = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            //| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            //| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            //| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            //| View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+    WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+            PixelFormat.TRANSLUCENT);
 
     SimpleDateFormat time_format = new SimpleDateFormat("hh : mm : ss", Locale.KOREA);
     Calendar now_time;
@@ -117,20 +131,6 @@ public class AlwaysOnTop extends Service {
 
         tv_time = (TextView) OnTop_view.findViewById(R.id.tv_time);
         tv_main_credit = (TextView) OnTop_view.findViewById(R.id.tv_main_credit);
-
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-                PixelFormat.TRANSLUCENT);
-
-        final int ui_Options = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                //| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                //| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                //| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                //| View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 
         OnTop_view.setSystemUiVisibility(ui_Options);
 
@@ -274,6 +274,7 @@ public class AlwaysOnTop extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand");
         timer_start();
         return super.onStartCommand(intent, flags, startId);
 
@@ -302,12 +303,6 @@ public class AlwaysOnTop extends Service {
         };
 
         handler.post(updater);
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     public void settle_up() {
@@ -390,4 +385,40 @@ public class AlwaysOnTop extends Service {
 
     }
 
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mMessenger.getBinder();
+    }
+
+    final Messenger mMessenger = new Messenger(new IncomingHandler());
+
+    class IncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : IncomingHandler = " + msg.what);
+
+            //////////////////////////  code  ////////////////////////
+            ////// 1 : setSystemUiVisibility & select main card //////
+            //////////////////////////////////////////////////////////
+
+            switch (msg.what) {
+                case 1:
+                    Log.d(PACKAGE_NAME, "CreditTickerService : IncomingHandler : 화면 설정!!!");
+
+                    OnTop_view.setSystemUiVisibility(ui_Options);
+
+                    w_manager = (WindowManager) getSystemService(WINDOW_SERVICE);
+                    w_manager.addView(OnTop_view, params);
+
+                    Log.d(PACKAGE_NAME, "CreditTickerService : IncomingHandler : Main Card 선택!!!");
+                    aot_indicator.setSelectedItem(1, false);
+                    aot_pager.setCurrentItem(1);
+
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
 }

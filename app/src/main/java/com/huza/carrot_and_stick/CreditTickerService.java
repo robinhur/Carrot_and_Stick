@@ -22,7 +22,6 @@ import java.util.TimerTask;
 public class CreditTickerService extends Service {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
-    final String BACKGROUND_SERVICE = "com.huza.carrot_and_stick.BackgroundService";
 
     NotificationManager nm;
     PendingIntent pendingIntent;
@@ -31,7 +30,6 @@ public class CreditTickerService extends Service {
 
     Timer timer = new Timer();
     TimerTask timerTask;
-    Handler handler = new Handler();
 
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;

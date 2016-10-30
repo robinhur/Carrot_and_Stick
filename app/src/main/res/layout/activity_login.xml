@@ -110,15 +110,28 @@
                 android:gravity="center"
                 android:layout_weight="1">
 
-                <Button
-                    android:text="로그인"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:onClick="log_in_clicked"
-                    android:id="@+id/btn_login_okay"
-                    style="@style/Widget.AppCompat.Button.Colored" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:visibility="invisible"
+                        android:layout_centerInParent="true" />
+
+                    <Button
+                        android:layout_centerInParent="true"
+                        android:text="로그인"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:onClick="log_in_clicked"
+                        android:id="@+id/btn_login_okay"
+                        style="@style/Widget.AppCompat.Button.Colored" />
+
+                </RelativeLayout>
                 <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
