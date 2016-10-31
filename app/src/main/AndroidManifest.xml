@@ -11,6 +11,7 @@
         android:icon="@mipmap/alarm_clock_icon"
         android:label="MyAlarm"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:theme="@style/AppTheme">
         <activity
             android:name=".SplashActivity"

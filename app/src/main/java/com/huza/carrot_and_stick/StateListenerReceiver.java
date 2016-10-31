@@ -26,11 +26,14 @@ public class StateListenerReceiver extends BroadcastReceiver {
 
     ActivityManager serviceChecker;
 
+    boolean aot_started;
+
     public StateListenerReceiver() {
     }
     public StateListenerReceiver(Context mcontext) {
         Log.d(PACKAGE_NAME, "StateListenerReceiver : StateListenerReceiver 생성");
 
+        aot_started = true;
         context = mcontext;
         checkAoTServiceRunning(context);
     }
@@ -39,6 +42,7 @@ public class StateListenerReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         // TODO: This method is called when the BroadcastReceiver is receiving
         // an Intent broadcast.
+        Log.d(PACKAGE_NAME, "StateListenerReceiver : aot_started : " + aot_started);
 
         switch (intent.getAction()) {
 
@@ -56,6 +60,7 @@ public class StateListenerReceiver extends BroadcastReceiver {
             case "com.huza.carrot_and_stick.restartAoTSERVICE":
                 Log.d(PACKAGE_NAME, "StateListenerReceiver : ACTION_USER_PRESENT");
                 checkAoTServiceRunning(context);
+                aot_started = true;
                 break;
 
             case Intent.ACTION_SCREEN_OFF:
@@ -84,6 +89,7 @@ public class StateListenerReceiver extends BroadcastReceiver {
     };
 
     public void checkCreditTickerServiceRunning(Context context) {
+        Log.d(PACKAGE_NAME, "StateListenerReceiver : checkCreditTickerServiceRunning");
 
         serviceChecker = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo runningServiceInfo:serviceChecker.getRunningServices(Integer.MAX_VALUE)) {
@@ -105,9 +111,9 @@ public class StateListenerReceiver extends BroadcastReceiver {
 
                 context.unbindService(mConnection_CreditTicker);
                 mConnection_CreditTicker.onServiceDisconnected(null);
+                return;
             }
         }
-
     }
 
     Messenger mService_AoT = null;
@@ -129,27 +135,33 @@ public class StateListenerReceiver extends BroadcastReceiver {
     };
 
     public void checkAoTServiceRunning(Context context) {
+        Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning");
 
         serviceChecker = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo runningServiceInfo:serviceChecker.getRunningServices(Integer.MAX_VALUE)) {
             if (AoT_SERVICE_NAME.equals(runningServiceInfo.service.getClassName())) {
-                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning service 찾음 : " + mBound_AoT);
+                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning service 찾음 : " + "aot_started : " + aot_started + "  mBound_AoT : " + mBound_AoT);
 
-                if (!mBound_AoT) {
-                    context.bindService(new Intent(context, AlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
-                    return;
+                if (aot_started) {
+                    if (!mBound_AoT) {
+                        context.bindService(new Intent(context, AlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
+                        return;
+                    }
+
+                    Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning Message 날린다?");
+                    Message msg = Message.obtain(null, 1, 0, 0);
+                    try {
+                        mService_AoT.send(msg);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+                    context.unbindService(mConnection_AoT);
+                    mConnection_AoT.onServiceDisconnected(null);
                 }
 
-                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning Message 날린다?");
-                Message msg = Message.obtain(null, 1, 0, 0);
-                try {
-                    mService_AoT.send(msg);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+                Log.d(PACKAGE_NAME, "StateListenerReceiver : checkAoTServiceRunning service 찾음 : " + "aot_started : " + aot_started);
 
-                context.unbindService(mConnection_AoT);
-                mConnection_AoT.onServiceDisconnected(null);
                 return;
             }
         }
@@ -160,6 +172,7 @@ public class StateListenerReceiver extends BroadcastReceiver {
     }
 
     public void checkBackgroundServiceRunning(Context context) {
+        Log.d(PACKAGE_NAME, "StateListenerReceiver : checkBackgroundServiceRunning");
 
         serviceChecker = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo runningServiceInfo:serviceChecker.getRunningServices(Integer.MAX_VALUE)) {

@@ -53,11 +53,14 @@ public class AlwaysOnTop extends Service {
     TextView tv_credit;
     TextView tv_main_credit;
     WindowManager w_manager;
-    final int ui_Options = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            //| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+    final int ui_Options =
+            //View.SYSTEM_UI_FLAG_FULLSCREEN
             //| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            //View.SYSTEM_UI_FLAG_LOW_PROFILE
+            //| View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             //| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            //| View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
     WindowManager.LayoutParams params = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -65,7 +68,7 @@ public class AlwaysOnTop extends Service {
             WindowManager.LayoutParams.TYPE_PHONE,
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
             PixelFormat.TRANSLUCENT);
-
+    //// TYPE_SYSTEM_ERROR or TYPE_PRIORITY_PHONE or TYPE_PHONE
     SimpleDateFormat time_format = new SimpleDateFormat("hh : mm : ss", Locale.KOREA);
     Calendar now_time;
 
@@ -195,6 +198,35 @@ public class AlwaysOnTop extends Service {
         });
         ///////////////////////
 
+        //// indicator listener 장착 ////
+        aot_pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                aot_indicator.setSelectedItem(aot_pager.getCurrentItem(), true);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        ////////////////////////////////
+
+        //// OnTop_view setOnSystemUiVisibilityChangeListener 장착 ////
+        OnTop_view.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
+            @Override
+            public void onSystemUiVisibilityChange(int i) {
+                Log.d(PACKAGE_NAME, "OnTop_view : 비정상 setOnSystemUiVisibilityChangeListener : before" + i);
+                OnTop_view.setSystemUiVisibility(ui_Options);
+                Log.d(PACKAGE_NAME, "OnTop_view : 비정상 setOnSystemUiVisibilityChangeListener : after" + i);
+            }
+        });
+        ////////////////////////////////
+
         //// 사용하기 버튼 ////
         Button btn_close = (Button) OnTop_view.findViewById(R.id.button);
         btn_close.setOnClickListener(new View.OnClickListener() {
@@ -222,6 +254,10 @@ public class AlwaysOnTop extends Service {
         editor.putBoolean("isLoggedin", false);
         editor.commit();
         Log.d(PACKAGE_NAME, "AlwaysOnTop : 로그아웃 완료!! : " + pref.getBoolean("isLoggedin", false));
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");
+        OnTop_view.setOnSystemUiVisibilityChangeListener(null);
+        OnTop_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : BackgroundService 소멸 요청");
         stopService(new Intent(this, BackgroundService.class));
@@ -405,15 +441,13 @@ public class AlwaysOnTop extends Service {
             switch (msg.what) {
                 case 1:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : IncomingHandler : 화면 설정!!!");
+                    //OnTop_view.setSystemUiVisibility(ui_Options);
 
-                    OnTop_view.setSystemUiVisibility(ui_Options);
-
-                    w_manager = (WindowManager) getSystemService(WINDOW_SERVICE);
-                    w_manager.removeView(OnTop_view);
-                    w_manager.addView(OnTop_view, params);
+                    //w_manager = (WindowManager) getSystemService(WINDOW_SERVICE);
+                    //w_manager.updateViewLayout(OnTop_view, params);
 
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : IncomingHandler : Main Card 선택!!!");
-                    aot_indicator.setSelectedItem(1, false);
+                    aot_indicator.setSelectedItem(1, true);
                     aot_pager.setCurrentItem(1);
 
                     break;
