@@ -441,10 +441,7 @@ public class AlwaysOnTop extends Service {
             switch (msg.what) {
                 case 1:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : IncomingHandler : 화면 설정!!!");
-                    //OnTop_view.setSystemUiVisibility(ui_Options);
-
-                    //w_manager = (WindowManager) getSystemService(WINDOW_SERVICE);
-                    //w_manager.updateViewLayout(OnTop_view, params);
+                    OnTop_view.setSystemUiVisibility(2);
 
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : IncomingHandler : Main Card 선택!!!");
                     aot_indicator.setSelectedItem(1, true);
