@@ -64,10 +64,13 @@
                     android:paddingRight="10dp"
                     android:paddingBottom="5dp"
                     android:inputType="textEmailAddress"
+                    android:nextFocusRight="@+id/et_login_password"
                     android:hint="mail@address.com"
                     android:textColorHint="#30000000"
                     android:id="@+id/et_login_email"
-                    android:maxLines="1" />
+                    android:maxLines="1" >
+                <requestFocus />
+                </EditText>
 
             </LinearLayout>
 
@@ -97,6 +100,7 @@
                     android:paddingRight="10dp"
                     android:paddingBottom="5dp"
                     android:inputType="textPassword"
+                    android:imeOptions="actionDone"
                     android:fontFamily="sans-serif"
                     android:maxLines="1"
                     android:id="@+id/et_login_password" />

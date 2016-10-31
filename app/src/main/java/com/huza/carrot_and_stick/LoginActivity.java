@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -34,10 +35,10 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE|WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
-        Log.d(PACKAGE_NAME, "LoginActivity : 로그인 : "+ pref.getBoolean("isLoggedin", false));
+        Log.d(PACKAGE_NAME, "LoginActivity : 로그인 : " + pref.getBoolean("isLoggedin", false));
         if (pref.getBoolean("isLoggedin", false)) {
 
             Log.d(PACKAGE_NAME, "LoginActivity : BackgroundService 소환");
@@ -52,13 +53,15 @@ public class LoginActivity extends AppCompatActivity {
 
         et_login_email = (EditText) findViewById(R.id.et_login_email);
         et_login_password = (EditText) findViewById(R.id.et_login_password);
-        if (pref.getString("recent_user", null) != null)
-            et_login_email.setText(pref.getString("recent_user",null));
+        if (pref.getString("recent_user", null) != null) {
+            et_login_email.setText(pref.getString("recent_user", null));
+            et_login_password.requestFocus();
+        }
 
         et_login_password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                if ((actionId == EditorInfo.IME_ACTION_DONE) || (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     log_in_clicked(null);
                     return true;
                 }
@@ -81,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public boolean signin_check_inputdata() {
 
-        if (et_login_email.getText().toString().length()*et_login_password.getText().toString().length() == 0){
+        if (et_login_email.getText().toString().length() * et_login_password.getText().toString().length() == 0) {
             return false;
         }
         return true;
@@ -90,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public void log_in_clicked(View v) {
 
-        if (!signin_check_inputdata()){
+        if (!signin_check_inputdata()) {
             Toast.makeText(LoginActivity.this, "아이디와 비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -122,15 +125,15 @@ public class LoginActivity extends AppCompatActivity {
                             editor.putString("user_uid", mAuth.getCurrentUser().getUid());
                             editor.commit();
 
-                            Log.d(PACKAGE_NAME, "LoginActivity : 로그인 : "+ pref.getBoolean("isLoggedin", false));
+                            Log.d(PACKAGE_NAME, "LoginActivity : 로그인 : " + pref.getBoolean("isLoggedin", false));
                             //// Login - SharegPreferences
 
                             Intent i = new Intent(getApplicationContext(), MainActivity.class);
                             startActivity(i);
                             finish();
-                            
+
                         }
-                        
+
                     }
                 });
 
