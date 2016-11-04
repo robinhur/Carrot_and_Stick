@@ -1,11 +1,16 @@
 package com.huza.carrot_and_stick;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Handler;
@@ -15,11 +20,16 @@ import android.os.Messenger;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,8 +60,8 @@ public class AlwaysOnTop extends Service {
     DotIndicator aot_indicator;
 
     TextView tv_time;
-    TextView tv_credit;
     TextView tv_main_credit;
+    ImageView iv_main_credit;
     WindowManager w_manager;
     final int ui_Options =
             //View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -69,6 +79,7 @@ public class AlwaysOnTop extends Service {
             WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
             PixelFormat.TRANSLUCENT);
     //// TYPE_SYSTEM_ERROR or TYPE_PRIORITY_PHONE or TYPE_PHONE
+    int AoT_MaintextColor;
     SimpleDateFormat time_format = new SimpleDateFormat("hh : mm : ss", Locale.KOREA);
     Calendar now_time;
 
@@ -90,6 +101,13 @@ public class AlwaysOnTop extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = getApplicationContext().getTheme();
+        theme.resolveAttribute(android.R.attr.textColorTertiary, typedValue, true);
+        TypedArray arr = getApplicationContext().obtainStyledAttributes(typedValue.data, new int[]{android.R.attr.textColorTertiary});
+        AoT_MaintextColor = arr.getColor(0,-1);
+        arr.recycle();
 
         //// 혹시 몰라 noti 지우기 ////
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -134,6 +152,7 @@ public class AlwaysOnTop extends Service {
 
         tv_time = (TextView) OnTop_view.findViewById(R.id.tv_time);
         tv_main_credit = (TextView) OnTop_view.findViewById(R.id.tv_main_credit);
+        iv_main_credit = (ImageView) OnTop_view.findViewById(R.id.iv_main_updown);
 
         OnTop_view.setSystemUiVisibility(ui_Options);
 
@@ -149,7 +168,6 @@ public class AlwaysOnTop extends Service {
         databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                tv_credit.setText(dataSnapshot.getValue().toString());
                 tv_main_credit.setText(dataSnapshot.getValue().toString());
                 user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
 
@@ -173,11 +191,26 @@ public class AlwaysOnTop extends Service {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.getKey().toString().equals("credit")) {
+
+                    if (tv_main_credit.getText().equals(dataSnapshot.getKey().toString().equals("credit")))
+                        return;
+
+                    int updown;
+
+                    if (
+                            Integer.valueOf(tv_main_credit.getText().toString())
+                                    >
+                            Integer.valueOf(dataSnapshot.getValue().toString())
+                       )
+                        updown = -1;
+                    else
+                        updown = 1;
+
                     aot_indicator.setSelectedItem(1, true);
                     aot_pager.setCurrentItem(1);
-                    tv_credit.setText(dataSnapshot.getValue().toString());
                     tv_main_credit.setText(dataSnapshot.getValue().toString());
                     user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
+                    credit_updown_effect(tv_main_credit, updown);
                 }
             }
 
@@ -220,9 +253,7 @@ public class AlwaysOnTop extends Service {
         OnTop_view.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
             @Override
             public void onSystemUiVisibilityChange(int i) {
-                Log.d(PACKAGE_NAME, "OnTop_view : 비정상 setOnSystemUiVisibilityChangeListener : before" + i);
                 OnTop_view.setSystemUiVisibility(ui_Options);
-                Log.d(PACKAGE_NAME, "OnTop_view : 비정상 setOnSystemUiVisibilityChangeListener : after" + i);
             }
         });
         ////////////////////////////////
@@ -246,6 +277,53 @@ public class AlwaysOnTop extends Service {
         //    }
         //});
         ////////////////////////////////
+    }
+
+    public void credit_updown_effect(final TextView textView, int mode){
+
+        if (textView == null) return;
+
+        ObjectAnimator animator = null;
+
+        switch (mode) {
+            case 1: /// UP
+                iv_main_credit.setImageResource(R.drawable.up_image_1);
+                animator = ObjectAnimator.ofInt(textView, "textColor", Color.RED, AoT_MaintextColor);
+                break;
+            case -1: /// DONW
+                iv_main_credit.setImageResource(R.drawable.down_image_1);
+                animator = ObjectAnimator.ofInt(textView, "textColor", Color.BLUE, AoT_MaintextColor);
+                break;
+        }
+        iv_main_credit.setAlpha((float) 1.0);
+
+        Animation fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        fadeInAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                iv_main_credit.setAlpha((float) 0.0);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animator.setDuration(500L);
+        animator.setEvaluator(new ArgbEvaluator());
+        animator.setInterpolator(new DecelerateInterpolator(2));
+        animator.setRepeatCount(2);
+        animator.setRepeatMode(ValueAnimator.RESTART);
+
+        iv_main_credit.startAnimation(fadeInAnimation);
+        animator.start();
+
+
     }
 
     public void btn_finalclose_clicked(View v) {
@@ -291,6 +369,10 @@ public class AlwaysOnTop extends Service {
         startService(i);
 
         //////
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");
+        OnTop_view.setOnSystemUiVisibilityChangeListener(null);
+        OnTop_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
         stopSelf();
     }
@@ -360,8 +442,9 @@ public class AlwaysOnTop extends Service {
 
             ///////// Credit 차감 (비정상) //////////
             databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(user_credit-pref.getInt("second",0));
+            credit_updown_effect(tv_main_credit, -1);
             Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : 차감 완료");
-            ////////////////////////////////
+            /////////////////////////////////////////
 
 
             SharedPreferences.Editor editor = pref.edit();
@@ -391,14 +474,23 @@ public class AlwaysOnTop extends Service {
         public Object instantiateItem(ViewGroup container, int position) {
 
             LayoutInflater inflater = LayoutInflater.from(mContext);
+
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiating : "+ position);
             ViewGroup layout = (ViewGroup) inflater.inflate(aot_screen[position], container, false);
+
             container.addView(layout);
 
-
-            if (position == 1){
-                tv_credit = (TextView) layout.findViewById(R.id.tv_credit);
+            switch(position) {
+                case 0:
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 0");
+                    break;
+                case 1:
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 1");
+                    break;
+                case 2:
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 2");
+                    break;
             }
-
 
             return layout;
 
