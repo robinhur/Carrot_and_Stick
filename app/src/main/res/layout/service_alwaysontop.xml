@@ -8,7 +8,7 @@
     <LinearLayout
         android:id="@+id/head_button"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="60dp"
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_alignParentStart="true">
@@ -18,14 +18,14 @@
             android:layout_height="match_parent"
             android:gravity="right|center_vertical"
             android:paddingRight="20dp"
-            android:textSize="13dp"
+            android:textSize="15dp"
             android:text="현재시간"
             android:layout_weight="3"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="left|center_vertical"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="25dp"
             android:text="hh : MM : ss"
             android:id="@+id/tv_time"
             android:layout_weight="3" />
@@ -43,10 +43,12 @@
     <LinearLayout
         android:id="@+id/tail_button"
         android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_height="75dp">
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_height="75dp"
+        android:layout_above="@+id/ad_space">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -57,23 +59,42 @@
                 android:layout_width="130dp"
                 android:layout_height="match_parent"
                 android:gravity="left|center_vertical"
-                android:paddingLeft="10dp"
-                android:orientation="vertical"
-                android:layout_weight="1">
+                android:paddingLeft="5dp"
+                android:orientation="vertical">
 
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp">
+
+                    <Space
+                        android:layout_width="20dp"
+                        android:layout_weight="1"
+                        android:layout_height="match_parent" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="내 Credit"
+                        android:layout_gravity="left"
+                        android:gravity="center"
+                        android:textSize="15dp"/>
+
+                    <ImageView
+                        android:padding="3dp"
+                        android:scaleType="fitStart"
+                        android:layout_weight="1"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/iv_main_updown"/>
+
+                </LinearLayout>
                 <TextView
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:text="내 Credit"
-                    android:gravity="center"
-                    android:textSize="15dp"/>
-                <TextView
-                    android:layout_width="100dp"
+                    android:layout_width="match_parent"
                     android:id="@+id/tv_main_credit"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textSize="30dp"
-                    android:text="#####" />
+                    android:text="######" />
 
             </LinearLayout>
 
@@ -88,17 +109,23 @@
                 android:layout_width="130dp"
                 android:layout_height="wrap_content"
                 android:gravity="right"
+                android:paddingRight="5dp"
                 android:orientation="vertical">
                 <Button
-                    android:layout_width="100dp"
+                    android:layout_width="110dp"
                     android:layout_height="70dp"
                     android:text="Credit\n사용하기"
                     android:onClick="btn_close_clicked"
-                    android:id="@+id/button"
-                    android:layout_weight="1" />
+                    android:id="@+id/button"/>
             </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
 
+    <View
+        android:layout_alignParentBottom="true"
+        android:id="@+id/ad_space"
+        android:background="#660000"
+        android:layout_width="match_parent"
+        android:layout_height="90dp" />
 </RelativeLayout>
