@@ -442,6 +442,13 @@ public class AlwaysOnTop extends Service {
 
             ///////// Credit 차감 (비정상) //////////
             databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(user_credit-pref.getInt("second",0));
+
+                 ////////////// log 작성 //////////////
+            LogData log = new LogData(System.currentTimeMillis()/1000, "-", user_credit-pref.getInt("second",0));
+            DatabaseReference user = databaseReference.child("logs").child(pref.getString("user_uid", null));
+            user.setValue(log);
+                 //////////////////////////////////////
+
             credit_updown_effect(tv_main_credit, -1);
             Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : 차감 완료");
             /////////////////////////////////////////
