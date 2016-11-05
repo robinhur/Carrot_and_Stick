@@ -5,33 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/head_button"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_alignParentStart="true">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="right|center_vertical"
-            android:paddingRight="20dp"
-            android:textSize="15dp"
-            android:text="현재시간"
-            android:layout_weight="3"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="left|center_vertical"
-            android:textSize="25dp"
-            android:text="hh : MM : ss"
-            android:id="@+id/tv_time"
-            android:layout_weight="3" />
-
-    </LinearLayout>
-
     <android.support.v4.view.ViewPager
         android:id="@+id/AOT_viewpager"
         android:layout_below="@+id/head_button"
@@ -128,4 +101,51 @@
         android:background="#660000"
         android:layout_width="match_parent"
         android:layout_height="90dp" />
+
+    <LinearLayout
+        android:id="@+id/head_button"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+
+
+        <Button
+            android:text="Q"
+            android:onClick="btn_finalclose_clicked"
+            android:layout_gravity="center"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/button3" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="15dp"
+                android:text="현재시간"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="25dp"
+                android:text="전후 hh : MM : ss"
+                android:id="@+id/tv_time" />
+
+        </LinearLayout>
+
+        <android.support.v4.widget.Space
+            android:layout_width="50dp"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 </RelativeLayout>

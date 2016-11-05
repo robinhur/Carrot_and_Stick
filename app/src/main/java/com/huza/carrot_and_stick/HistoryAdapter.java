@@ -59,9 +59,13 @@ public class HistoryAdapter extends BaseAdapter {
         today.set(Calendar.MINUTE, 0);
         today.set(Calendar.SECOND, 0);
 
-        if ((today.getTimeInMillis()-Long.valueOf(timestamp)*1000) < 86400)
+        Log.d(PACKAGE_NAME, "HistoryAdapter : getDate1 : today : " + today.getTimeInMillis());
+        Log.d(PACKAGE_NAME, "HistoryAdapter : getDate2 : stamp : " + Long.valueOf(timestamp)*1000);
+        Log.d(PACKAGE_NAME, "HistoryAdapter : getDate3 : diff  : " + (today.getTimeInMillis()-Long.valueOf(timestamp)*1000));
+
+        if ((Long.valueOf(timestamp)*1000-today.getTimeInMillis()) > 0)
             date = "오늘";
-        else if ((today.getTimeInMillis()-Long.valueOf(timestamp)*1000) < 172800)
+        else if ((today.getTimeInMillis()-Long.valueOf(timestamp)*1000) < 86400000)
             date = "어제";
 
         return date;
@@ -70,6 +74,10 @@ public class HistoryAdapter extends BaseAdapter {
         Calendar cal = Calendar.getInstance(Locale.KOREAN);
         cal.setTimeInMillis(Long.valueOf(timestamp));
         String time = format_hms.format(cal.getTime());
+
+        Log.d(PACKAGE_NAME, "HistoryAdapter : getTime1 : today : " + System.currentTimeMillis()/1000);
+        Log.d(PACKAGE_NAME, "HistoryAdapter : getTime2 : stamp : " + timestamp);
+        Log.d(PACKAGE_NAME, "HistoryAdapter : getTime3 : diff  : " + (System.currentTimeMillis()/1000-Long.valueOf(timestamp)));
 
         if ((System.currentTimeMillis()/1000-Long.valueOf(timestamp)) < 300)
             time = "방금";

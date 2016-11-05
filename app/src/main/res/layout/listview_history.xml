@@ -13,32 +13,48 @@
         android:orientation="horizontal"
         android:paddingTop="@dimen/pref_MAINpadding"
         android:paddingBottom="@dimen/pref_MAINpadding"
-        android:paddingLeft="@dimen/pref_MAINpadding_left"
-        android:paddingRight="@dimen/pref_MAINpadding_right">
+        android:paddingLeft="@dimen/pref_MAINpadding"
+        android:paddingRight="@dimen/pref_MAINpadding">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:id="@+id/hist_item_ymd"
+                android:textSize="@dimen/hist_smallTEXT"
+                android:text="16년10월30일"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:id="@+id/hist_item_hms"
+                android:textStyle="bold"
+                android:textSize="@dimen/hist_middleTEXT"
+                android:text="오전 11:06"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+        </LinearLayout>
 
         <TextView
-            android:layout_width="70dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:id="@+id/hist_item_ymd"
-            android:textSize="@dimen/hist_smallTEXT"
-            android:text="16년10월30일"/>
-        <TextView
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:id="@+id/hist_item_hms"
-            android:textStyle="bold"
-            android:textSize="@dimen/hist_middleTEXT"
-            android:text="오전 11:06"/>
-        <TextView
-            android:layout_width="match_parent"
+            android:layout_width="130dp"
+            android:paddingRight="15dp"
             android:layout_height="match_parent"
             android:textSize="@dimen/hist_largeTEXT"
             android:id="@+id/hist_item_updown"
-            android:gravity="end"
+            android:gravity="end|center_vertical"
             android:textStyle="bold"
-            android:text="+99999"/>
+            android:text="+99999999"/>
 
     </LinearLayout>
 

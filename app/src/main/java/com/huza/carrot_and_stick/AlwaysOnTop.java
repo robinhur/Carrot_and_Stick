@@ -31,7 +31,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -87,7 +86,7 @@ public class AlwaysOnTop extends Service {
             PixelFormat.TRANSLUCENT);
     //// TYPE_SYSTEM_ERROR or TYPE_PRIORITY_PHONE or TYPE_PHONE
     int AoT_MaintextColor;
-    SimpleDateFormat time_format = new SimpleDateFormat("hh : mm : ss", Locale.KOREA);
+    SimpleDateFormat time_format = new SimpleDateFormat("aa hh : mm : ss", Locale.KOREA);
     Calendar now_time;
 
     TimerTask timertask;
@@ -593,9 +592,9 @@ public class AlwaysOnTop extends Service {
     public void initLOGListener() {
         SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
 
-        final DataSnapshot[] temp_snapshot = new DataSnapshot[10];
+        final DataSnapshot[] temp_snapshot = new DataSnapshot[100];
 
-        databaseReference.child("logs").child(pref.getString("user_uid", null)).orderByKey().endAt(last_forlistview).limitToLast(11).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("logs").child(pref.getString("user_uid", null)).orderByKey().endAt(last_forlistview).limitToLast(101).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -604,14 +603,14 @@ public class AlwaysOnTop extends Service {
                 if (dataSnapshot.exists()) {
                     Iterator<DataSnapshot> it = dataSnapshot.getChildren().iterator();
                     isFirst = true;
-                    int pos = 10;
+                    int pos = 100;
 
                     while (it.hasNext()) {
                         DataSnapshot now_temp = it.next();
 
                         if (isFirst) {
                             isFirst = false;
-                            if (dataSnapshot.getChildrenCount() < 11) {
+                            if (dataSnapshot.getChildrenCount() < 101) {
                                 last_forlistview = "0";
                             } else {
                                 last_forlistview = now_temp.getKey();
@@ -623,7 +622,7 @@ public class AlwaysOnTop extends Service {
                         //Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ pos +" key : " + now_temp.getKey() + " type : " + now_temp.child("updown").getValue() + " delta : " + now_temp.child("delta").getValue());
                     }
 
-                    for (int i = 0; i < 10; i++) {
+                    for (int i = 0; i < 100; i++) {
                         if (temp_snapshot[i]==null) continue;
                         //Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ i +" snapshot : " + temp_snapshot[i]);
                         history_adapter.addHistory(temp_snapshot[i].getKey(), temp_snapshot[i].child("updown").getValue().toString(), temp_snapshot[i].child("delta").getValue().toString(), 1);
