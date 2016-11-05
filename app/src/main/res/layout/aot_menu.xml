@@ -4,9 +4,12 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:padding="@dimen/AoT_page_padding"
     android:background="@color/AoT_background">
+
     <ScrollView
         android:layout_width="match_parent"
+        android:background="@color/AoT_item_background"
         android:layout_height="wrap_content">
         <LinearLayout
             android:orientation="vertical"
@@ -45,7 +48,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/pref_largeTEXT"
                         android:textStyle="bold"
-                        android:text="[임기기능] 프로그램 종료"/>
+                        android:text="[임시기능] 프로그램 종료"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -91,7 +94,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/pref_largeTEXT"
                         android:textStyle="bold"
-                        android:text="[임기기능] 광고 영역 숨기기"/>
+                        android:text="[임시기능] 광고 영역 숨기기"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

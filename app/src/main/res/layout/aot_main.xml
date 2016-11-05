@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#bbbbbb">
+    android:background="@color/AoT_background"
+    android:padding="@dimen/AoT_page_padding">
 
     <TextView
         android:text="Credit "

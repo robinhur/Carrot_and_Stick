@@ -1,0 +1,53 @@
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- 새 아이템 시작 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:background="@color/AoT_item_background"
+        android:orientation="horizontal"
+        android:layout_marginLeft="@dimen/pref_MAINpadding"
+        android:layout_marginRight="@dimen/pref_MAINpadding"
+        android:paddingTop="@dimen/pref_MAINpadding"
+        android:paddingBottom="@dimen/pref_MAINpadding"
+        android:paddingLeft="@dimen/pref_MAINpadding_left"
+        android:paddingRight="@dimen/pref_MAINpadding_right">
+
+        <TextView
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:id="@+id/hist_item_ymd"
+            android:textSize="@dimen/hist_smallTEXT"
+            android:text="16년10월30일"/>
+        <TextView
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:id="@+id/hist_item_hms"
+            android:textStyle="bold"
+            android:textSize="@dimen/hist_middleTEXT"
+            android:text="오전 11:06"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/hist_largeTEXT"
+            android:id="@+id/hist_item_updown"
+            android:gravity="end"
+            android:textStyle="bold"
+            android:text="+99999"/>
+
+    </LinearLayout>
+
+    <!-- 이것이 LINE!!!!! -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#646464"/>
+
+</LinearLayout>

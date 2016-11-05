@@ -60,12 +60,12 @@ public class CreditTickerService extends Service {
             //////////////////////////////
 
             ///////// Credit 차감 //////////
-            databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(second);
+            databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(Credit-second);
 
                 ////////////// log 작성 //////////////
-            LogData log = new LogData(System.currentTimeMillis()/1000, "-", Credit-second);
-            DatabaseReference user = databaseReference.child("logs").child(pref.getString("user_uid", null));
-            user.push().setValue(log);
+            LogData log = new LogData(System.currentTimeMillis()/1000, "-", second);
+            DatabaseReference user = databaseReference.child("logs").child(pref.getString("user_uid", null)).child(String.valueOf(log.getTimestamp()));
+            user.setValue(log);
                 //////////////////////////////////////
 
 
