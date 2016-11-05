@@ -1,0 +1,27 @@
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- 새 아이템 시작 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:background="@color/AoT_item_background"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/pref_MAINpadding"
+        android:paddingBottom="@dimen/pref_MAINpadding"
+        android:paddingLeft="@dimen/pref_MAINpadding"
+        android:paddingRight="@dimen/pref_MAINpadding">
+
+    </LinearLayout>
+
+    <!-- 이것이 LINE!!!!! -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#646464"/>
+
+</LinearLayout>
