@@ -31,6 +31,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -177,6 +178,7 @@ public class AlwaysOnTop extends Service {
         iv_main_credit = (ImageView) OnTop_view.findViewById(R.id.iv_main_updown);
 
         OnTop_view.setSystemUiVisibility(ui_Options);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange1 : " + ui_Options);
 
         w_manager = (WindowManager) getSystemService(WINDOW_SERVICE);
         w_manager.addView(OnTop_view, params);
@@ -233,6 +235,7 @@ public class AlwaysOnTop extends Service {
                     tv_main_credit.setText(dataSnapshot.getValue().toString());
                     user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
                     credit_updown_effect(tv_main_credit, updown);
+
                 }
             }
 
@@ -275,6 +278,8 @@ public class AlwaysOnTop extends Service {
         OnTop_view.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
             @Override
             public void onSystemUiVisibilityChange(int i) {
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_listen : " + i);
+
                 OnTop_view.setSystemUiVisibility(ui_Options);
             }
         });
@@ -357,6 +362,7 @@ public class AlwaysOnTop extends Service {
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");
         OnTop_view.setOnSystemUiVisibilityChangeListener(null);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_exit");
         OnTop_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : BackgroundService 소멸 요청");
@@ -394,6 +400,7 @@ public class AlwaysOnTop extends Service {
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");
         OnTop_view.setOnSystemUiVisibilityChangeListener(null);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_exit");
         OnTop_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
         stopSelf();
@@ -656,6 +663,7 @@ public class AlwaysOnTop extends Service {
             switch (msg.what) {
                 case 1:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : IncomingHandler : 화면 설정!!!");
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibility3 : " + 2);
                     OnTop_view.setSystemUiVisibility(2);
 
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : IncomingHandler : Main Card 선택!!!");

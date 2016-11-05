@@ -2,15 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/AoT_background"
-    android:padding="@dimen/AoT_page_padding">
+    android:background="@color/AoT_background">
 
     <ListView
         android:id="@+id/AoT_history"
         android:layout_width="match_parent"
         android:background="@color/AoT_item_background"
-        android:layout_height="match_parent"
-        android:padding="@dimen/pref_MAINpadding"
-        android:layout_weight="1" />
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

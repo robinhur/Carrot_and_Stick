@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
+    android:id="@+id/aot_menu_list"
     android:padding="@dimen/AoT_page_padding"
     android:background="@color/AoT_background">
 
@@ -26,6 +27,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:clickable="true"
+                android:onClick="btn_finalclose_clicked"
                 android:id="@+id/pref_1_close_all"
                 android:background="@drawable/ripple"
                 android:orientation="horizontal"

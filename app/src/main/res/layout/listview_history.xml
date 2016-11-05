@@ -11,8 +11,6 @@
         android:gravity="center_vertical"
         android:background="@color/AoT_item_background"
         android:orientation="horizontal"
-        android:layout_marginLeft="@dimen/pref_MAINpadding"
-        android:layout_marginRight="@dimen/pref_MAINpadding"
         android:paddingTop="@dimen/pref_MAINpadding"
         android:paddingBottom="@dimen/pref_MAINpadding"
         android:paddingLeft="@dimen/pref_MAINpadding_left"

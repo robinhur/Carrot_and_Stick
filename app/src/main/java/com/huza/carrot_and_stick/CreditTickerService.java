@@ -12,8 +12,11 @@ import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Calendar;
 import java.util.Timer;
@@ -94,6 +97,21 @@ public class CreditTickerService extends Service {
 
             Credit = intent.getIntExtra("Credit", -1);
             Log.d(PACKAGE_NAME, "CreditTickerService : Received credit " + Credit);
+
+            SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+            databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Credit = Integer.valueOf(dataSnapshot.getValue().toString());
+                    Log.d(PACKAGE_NAME, "CreditTickerService : Credit Changed " + Credit);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
 
             nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             nm.cancel(737);
