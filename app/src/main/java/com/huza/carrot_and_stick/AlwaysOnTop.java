@@ -3,6 +3,7 @@ package com.huza.carrot_and_stick;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -129,7 +130,7 @@ public class AlwaysOnTop extends Service {
         aot_pager = (ViewPager) OnTop_view.findViewById(R.id.AOT_viewpager);
         aot_adapter = new AOTAdapter(getBaseContext());
         aot_pager.setClipToPadding(false);
-        aot_pager.setPadding(100,15,100,0);
+        aot_pager.setPadding(100,15,100,15);
         aot_pager.setPageMargin(50);
         aot_pager.setAdapter(aot_adapter);
         aot_pager.setCurrentItem(1);
@@ -191,7 +192,10 @@ public class AlwaysOnTop extends Service {
         databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                tv_main_credit.setText(dataSnapshot.getValue().toString());
+                if (Integer.valueOf(dataSnapshot.getValue().toString())<1000000)
+                    tv_main_credit.setText(dataSnapshot.getValue().toString());
+                else
+                    tv_main_credit.setText("999999+");
                 user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
 
                 //// 비정산 처리 ㄱㄱ ////
@@ -215,13 +219,13 @@ public class AlwaysOnTop extends Service {
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if (dataSnapshot.getKey().toString().equals("credit")) {
 
-                    if (tv_main_credit.getText().equals(dataSnapshot.getKey().toString().equals("credit")))
+                    if (user_credit == Integer.valueOf(dataSnapshot.getValue().toString()))
                         return;
 
                     int updown;
 
                     if (
-                            Integer.valueOf(tv_main_credit.getText().toString())
+                            user_credit
                                     >
                             Integer.valueOf(dataSnapshot.getValue().toString())
                        )
@@ -231,7 +235,10 @@ public class AlwaysOnTop extends Service {
 
                     aot_indicator.setSelectedItem(1, true);
                     aot_pager.setCurrentItem(1);
-                    tv_main_credit.setText(dataSnapshot.getValue().toString());
+                    if (Integer.valueOf(dataSnapshot.getValue().toString())<1000000)
+                        tv_main_credit.setText(dataSnapshot.getValue().toString());
+                    else
+                        tv_main_credit.setText("999999+");
                     user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
                     credit_updown_effect(tv_main_credit, updown);
 
@@ -343,7 +350,7 @@ public class AlwaysOnTop extends Service {
         animator.setDuration(500L);
         animator.setEvaluator(new ArgbEvaluator());
         animator.setInterpolator(new DecelerateInterpolator(2));
-        animator.setRepeatCount(2);
+        animator.setRepeatCount(3);
         animator.setRepeatMode(ValueAnimator.RESTART);
 
         iv_main_credit.startAnimation(fadeInAnimation);
@@ -505,13 +512,25 @@ public class AlwaysOnTop extends Service {
             this.mContext = context;
         }
 
+        @TargetApi(21)
+        public View moveup_layout(View layout) {
+
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : moved up!!");
+            layout.setElevation((float)10.0);
+            return layout;
+
+        }
+
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
 
             LayoutInflater inflater = LayoutInflater.from(mContext);
 
             Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiating : "+ position);
-            ViewGroup layout = (ViewGroup) inflater.inflate(aot_screen[position], container, false);
+            View layout = (View) inflater.inflate(aot_screen[position], container, false);
+            layout.setBackgroundResource(R.drawable.aot_corner);
+
+            layout = moveup_layout(layout);
 
             container.addView(layout);
 

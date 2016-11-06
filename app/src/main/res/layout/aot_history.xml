@@ -18,8 +18,8 @@
     <ListView
         android:id="@+id/AoT_history"
         android:layout_width="match_parent"
-        android:background="@color/AoT_item_background"
         android:layout_height="match_parent"
+        android:dividerHeight="1dp"
         android:layout_marginLeft="@dimen/AoT_page_padding"
         android:layout_marginRight="@dimen/AoT_page_padding"
         android:layout_marginBottom="@dimen/AoT_page_padding"/>

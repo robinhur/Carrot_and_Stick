@@ -19,7 +19,7 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginBottom="10dp"
         android:layout_height="75dp"
         android:layout_above="@+id/ad_space">
 
@@ -108,9 +108,9 @@
         android:layout_height="65dp"
         android:orientation="horizontal"
         android:gravity="center"
+        android:layout_marginTop="5dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true">
-
 
         <Button
             android:text="Q"
