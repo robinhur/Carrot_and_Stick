@@ -9,10 +9,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:background="@color/AoT_item_background"
+        android:background="@drawable/aot_item_corner"
         android:orientation="horizontal"
-        android:paddingTop="@dimen/pref_MAINpadding"
-        android:paddingBottom="@dimen/pref_MAINpadding"
+        android:paddingTop="@dimen/pref_MAINpadding_left"
+        android:paddingBottom="@dimen/pref_MAINpadding_left"
         android:paddingLeft="@dimen/pref_MAINpadding"
         android:paddingRight="@dimen/pref_MAINpadding">
 
@@ -32,6 +32,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:paddingTop="@dimen/pref_smallTOPpadding"
                 android:gravity="center"
                 android:id="@+id/hist_item_hms"
                 android:textStyle="bold"
@@ -57,6 +58,5 @@
             android:text="+99999999"/>
 
     </LinearLayout>
-
 
 </LinearLayout>

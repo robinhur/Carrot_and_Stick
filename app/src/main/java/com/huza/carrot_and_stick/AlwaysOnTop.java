@@ -66,6 +66,9 @@ public class AlwaysOnTop extends Service {
     String last_forlistview;
     HistoryAdapter history_adapter;
 
+    ListView aot_setting;
+    SettingAdapter setting_adapter;
+
     TextView tv_time;
     TextView tv_main_credit;
     ImageView iv_main_credit;
@@ -501,7 +504,7 @@ public class AlwaysOnTop extends Service {
 
         final String PACKAGE_NAME = "Carrot_and_Stick";
         int[] aot_screen = {
-                R.layout.aot_menu,
+                R.layout.aot_setting,
                 R.layout.aot_main,
                 R.layout.aot_history
         };
@@ -536,18 +539,22 @@ public class AlwaysOnTop extends Service {
 
             switch(position) {
                 case 0:
-                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 0");
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 0(setting)");
+                    aot_setting = (ListView) layout.findViewById(R.id.AoT_setting);
+                    setting_adapter = new SettingAdapter(getBaseContext());
+                    aot_setting.setAdapter(setting_adapter);
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : setting initialized");
                     break;
                 case 1:
-                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 1");
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 1(main)");
                     break;
                 case 2:
-                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 2");
-                    /// add listener in listview from firebase
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 2(history)");
                     aot_history = (ListView) layout.findViewById(R.id.AoT_history);
                     history_adapter = new HistoryAdapter(getBaseContext());
                     aot_history.setAdapter(history_adapter);
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : history initialized");
+                    /// add listener in listview from firebase
                     initLOGListener();
                     break;
             }
