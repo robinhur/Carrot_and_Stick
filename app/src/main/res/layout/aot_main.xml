@@ -7,7 +7,7 @@
     android:padding="@dimen/AoT_page_padding">
 
     <TextView
-        android:text="Credit "
+        android:text="asdf"
         android:gravity="bottom|center"
         android:layout_width="match_parent"
         android:textSize="25dp"
@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/textView2" />
     <TextView
-        android:text="로딩 중"
+        android:text="fdsa"
         android:gravity="top|center"
         android:layout_width="match_parent"
         android:textSize="25dp"

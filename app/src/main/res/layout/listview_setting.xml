@@ -23,7 +23,7 @@
             android:layout_height="match_parent"
             android:paddingLeft="@dimen/pref_MAINpadding_left"
             android:orientation="vertical"
-            android:layout_weight="1">
+            android:layout_weight="15">
 
             <TextView
                 android:layout_width="match_parent"
@@ -31,28 +31,28 @@
                 android:id="@+id/sett_item_big_text"
                 android:textStyle="bold"
                 android:textSize="@dimen/hist_middleTEXT"
-                android:text="[임시기능] 광고 영역 숨기기"/>
+                android:text="sett_item_big_text"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/pref_smallTOPpadding"
                 android:id="@+id/sett_item_small_text"
                 android:textSize="@dimen/hist_smallTEXT"
-                android:text="하단 광고 영역을 숨깁니다."/>
+                android:text="sett_item_small_text"/>
         </LinearLayout>
+
+
         <!-- 이것이 우측!!!!! -->
         <LinearLayout
+            android:id="@+id/set_item_widget"
+            android:orientation="horizontal"
             android:layout_width="@dimen/pref_widgetWIDTH"
+            android:padding="0dp"
             android:gravity="center"
-            android:layout_height="match_parent">
+            android:layout_height="35dp"
+            android:layout_weight="1">
 
-            <Switch
-                android:id="@+id/pref_2_view_ad_space"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:elevation="0dp" />
         </LinearLayout>
-
 
     </LinearLayout>
 

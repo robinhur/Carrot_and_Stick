@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -22,6 +23,11 @@ public class BackgroundService extends Service {
     public void onCreate() {
         Log.d(PACKAGE_NAME, "BackgroundService : onCreate 호출");
 
+        SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("isFirst", true);
+        editor.commit();
+
         if (statelistener == null) {
 
             statelistener = new StateListenerReceiver(this);
@@ -38,7 +44,6 @@ public class BackgroundService extends Service {
             Log.d(PACKAGE_NAME, "BackgroundService : StateListenerReceiver 등록");
 
         }
-
     }
 
     @Override
@@ -53,6 +58,11 @@ public class BackgroundService extends Service {
         stopService(new Intent(this, CreditTickerService.class));
         unregisterReceiver(statelistener);
         Log.d(PACKAGE_NAME, "BackgroundService : StateListenerReceiver 소멸 후 onDestroy");
+
+        SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.remove("isFirst");
+        editor.commit();
     }
 
     @Override

@@ -19,8 +19,7 @@
         android:id="@+id/AoT_setting"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/aot_corner"
-        android:divider="@color/AoT_background"
+        android:dividerHeight="1dp"
         android:layout_marginLeft="@dimen/AoT_page_padding"
         android:layout_marginRight="@dimen/AoT_page_padding"
         android:layout_marginBottom="@dimen/AoT_page_padding"/>

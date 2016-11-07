@@ -23,7 +23,6 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -108,6 +107,24 @@ public class AlwaysOnTop extends Service {
         user_credit = -1;
     }
 
+    public Boolean isItFirst(int mode) {
+
+        SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+
+        switch (mode) {
+            case 0: // just check
+                return pref.getBoolean("isFirst", true);
+            case 1: // make it second!!! not first
+                editor.putBoolean("isFirst", false);
+                editor.commit();
+                break;
+        }
+
+        return false;
+
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -145,19 +162,25 @@ public class AlwaysOnTop extends Service {
         aot_indicator.setNumberOfItems(aot_adapter.getCount());
         aot_indicator.setSelectedItem(1, false);
 
-        /////// 로딩 중에 스크롤 안되게 함 ////////
-        aot_pager.setOnTouchListener(new View.OnTouchListener() {
+        //// 사용하기 버튼 ////
+        final Button btn_close = (Button) OnTop_view.findViewById(R.id.button);
+        btn_close.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (user_credit < 0) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
+            public void onClick(View view) {
+                close_AoT_service();
             }
         });
-        //////////////////////////////////////////
+        ///////////////////////
+
+        //// 임시 서비스 종료 버튼 ////
+        //Button btn_finalclose = (Button) OnTop_view.findViewById(R.id.button2);
+        //btn_finalclose.setOnClickListener(new View.OnClickListener() {
+        //    @Override
+        //    public void onClick(View view) {
+        //        btn_finalclose_clicked(view);
+        //    }
+        //});
+        ////////////////////////////////
 
         aot_pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -201,9 +224,12 @@ public class AlwaysOnTop extends Service {
                     tv_main_credit.setText("999999+");
                 user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
 
-                //// 비정산 처리 ㄱㄱ ////
+                //// 비정상 정산 처리 ㄱㄱ ////
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : settle_up called");
                 settle_up();
                 //////////////////////////
+
+                btn_close.setEnabled(true);
             }
 
             @Override
@@ -263,6 +289,8 @@ public class AlwaysOnTop extends Service {
 
             }
         });
+
+        addLOGListener();
         ///////////////////////
 
         //// indicator listener 장착 ////
@@ -294,25 +322,6 @@ public class AlwaysOnTop extends Service {
         });
         ////////////////////////////////
 
-        //// 사용하기 버튼 ////
-        Button btn_close = (Button) OnTop_view.findViewById(R.id.button);
-        btn_close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                close_AoT_service();
-            }
-        });
-        ///////////////////////
-
-        //// 임시 서비스 종료 버튼 ////
-        //Button btn_finalclose = (Button) OnTop_view.findViewById(R.id.button2);
-        //btn_finalclose.setOnClickListener(new View.OnClickListener() {
-        //    @Override
-        //    public void onClick(View view) {
-        //        btn_finalclose_clicked(view);
-        //    }
-        //});
-        ////////////////////////////////
     }
 
     public void credit_updown_effect(final TextView textView, int mode){
@@ -482,10 +491,15 @@ public class AlwaysOnTop extends Service {
             databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(user_credit-pref.getInt("second",0));
 
                 ////////////// log 작성 //////////////
-            LogData log = new LogData(System.currentTimeMillis()/1000, "-", pref.getInt("second",0));
+            LogData log = new LogData(System.currentTimeMillis()/1000, "-", pref.getInt("second",0), "비정상 정산");
             DatabaseReference user = databaseReference.child("logs").child(pref.getString("user_uid", null)).child(String.valueOf(log.getTimestamp()));
             user.setValue(log);
                 //////////////////////////////////////
+
+            //Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : addLOGListener() : " + isItFirst(0));
+            //addLOGListener();
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : initLOGListener() : " + isItFirst(0));
+            initLOGListener();
 
             credit_updown_effect(tv_main_credit, -1);
             Log.d(PACKAGE_NAME, "AlwaysOnTop : 비정상 정산 : 차감 완료");
@@ -580,21 +594,26 @@ public class AlwaysOnTop extends Service {
 
     }
 
-    boolean isFirst;
-
     public void addLOGListener() {
         SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : addLOGListener called : " + isItFirst(0));
+        if (!isItFirst(0)) return;
 
         databaseReference.child("logs").child(pref.getString("user_uid", null)).orderByKey().limitToLast(1).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (isFirst==true) {
-                    isFirst = false;
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : addLOGListener : onChildAdded : " + isItFirst(0));
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : addLOGListener : onChildAdded : " + dataSnapshot.toString() + " : " + s);
+
+                if (isItFirst(0)==true) {
+                    isItFirst(1);
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : addLOGListener : first init!!! : " + isItFirst(0));
                     return;
                 }
 
-                history_adapter.addHistory(dataSnapshot.getKey().toString(), dataSnapshot.child("updown").getValue().toString(), dataSnapshot.child("delta").getValue().toString(), 0);
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : history new item!!! : " + dataSnapshot.getKey() + " : " + dataSnapshot.child("updown").getValue() + dataSnapshot.child("delta").getValue());
+                history_adapter.addHistory(dataSnapshot.getKey().toString(), dataSnapshot.child("updown").getValue().toString(), dataSnapshot.child("delta").getValue().toString(), dataSnapshot.child("content").getValue().toString(), 0);
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : addLOGListener : history new item!!! : " + dataSnapshot.getKey() + " : " + dataSnapshot.child("updown").getValue() + dataSnapshot.child("delta").getValue());
             }
 
             @Override
@@ -615,20 +634,28 @@ public class AlwaysOnTop extends Service {
         });
     }
 
+    public void temp_initLOGListener() {
+        initLOGListener();
+    }
+
     public void initLOGListener() {
         SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
 
         final DataSnapshot[] temp_snapshot = new DataSnapshot[100];
 
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : initLOGListener called");
+
         databaseReference.child("logs").child(pref.getString("user_uid", null)).orderByKey().endAt(last_forlistview).limitToLast(101).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : history init item!!! : " + dataSnapshot.getChildrenCount());
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : initLOGListener : onDataChange!! : " + dataSnapshot.getChildrenCount());
 
                 if (dataSnapshot.exists()) {
+
+                    boolean isFirst = true;
+
                     Iterator<DataSnapshot> it = dataSnapshot.getChildren().iterator();
-                    isFirst = true;
                     int pos = 100;
 
                     while (it.hasNext()) {
@@ -637,7 +664,7 @@ public class AlwaysOnTop extends Service {
                         if (isFirst) {
                             isFirst = false;
                             if (dataSnapshot.getChildrenCount() < 101) {
-                                last_forlistview = "0";
+                                //last_forlistview = "0";
                             } else {
                                 last_forlistview = now_temp.getKey();
                                 continue;
@@ -645,20 +672,27 @@ public class AlwaysOnTop extends Service {
                         }
 
                         temp_snapshot[--pos] = now_temp;
-                        //Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ pos +" key : " + now_temp.getKey() + " type : " + now_temp.child("updown").getValue() + " delta : " + now_temp.child("delta").getValue());
+                        Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ pos +" key : " + now_temp.getKey() + " type : " + now_temp.child("updown").getValue() + " delta : " + now_temp.child("delta").getValue());
                     }
 
+                    int offset = 0;
+                    history_adapter.reset_history();
+
                     for (int i = 0; i < 100; i++) {
-                        if (temp_snapshot[i]==null) continue;
-                        //Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ i +" snapshot : " + temp_snapshot[i]);
-                        history_adapter.addHistory(temp_snapshot[i].getKey(), temp_snapshot[i].child("updown").getValue().toString(), temp_snapshot[i].child("delta").getValue().toString(), 1);
+                        if (temp_snapshot[i]==null) {
+                            offset++;
+                            continue;
+                        }
+                        Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ i + " " + offset +" snapshot : " + temp_snapshot[i]);
+                        history_adapter.addHistory(temp_snapshot[i].getKey(), temp_snapshot[i].child("updown").getValue().toString(), temp_snapshot[i].child("delta").getValue().toString(),temp_snapshot[i].child("content").getValue().toString(), -1);
                     }
 
                     //Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : lastIndex : " + last_forlistview);
-
-                    isFirst = true;
-                    addLOGListener();
                 }
+
+                //if (isItFirst(0))
+                    //addLOGListener();
+
 
             }
 
@@ -683,6 +717,7 @@ public class AlwaysOnTop extends Service {
 
             //////////////////////////  code  ////////////////////////
             ////// 1 : setSystemUiVisibility & select main card //////
+            ////// 2 : final close all                          //////
             //////////////////////////////////////////////////////////
 
             switch (msg.what) {
@@ -695,6 +730,10 @@ public class AlwaysOnTop extends Service {
                     aot_indicator.setSelectedItem(1, true);
                     aot_pager.setCurrentItem(1);
 
+                    break;
+                case 2:
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : IncomingHandler : 완전 종료!!!");
+                    btn_finalclose_clicked(null);
                     break;
                 default:
                     super.handleMessage(msg);

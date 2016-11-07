@@ -9,13 +9,15 @@ public class LogData {
     long timestamp;
     String updown;
     int delta;
+    String content;
 
     public LogData() {
     }
-    public LogData(long timestamp, String updown, int delta) {
+    public LogData(long timestamp, String updown, int delta, String content) {
         this.timestamp = timestamp;
         this.updown = updown;
         this.delta = delta;
+        this.content = content;
     }
 
     public long getTimestamp() {

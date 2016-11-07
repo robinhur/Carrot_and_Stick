@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
@@ -66,11 +67,10 @@ public class CreditTickerService extends Service {
             databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(Credit-second);
 
                 ////////////// log 작성 //////////////
-            LogData log = new LogData(System.currentTimeMillis()/1000, "-", second);
+            LogData log = new LogData(System.currentTimeMillis()/1000, "-", second, "정산");
             DatabaseReference user = databaseReference.child("logs").child(pref.getString("user_uid", null)).child(String.valueOf(log.getTimestamp()));
             user.setValue(log);
                 //////////////////////////////////////
-
 
             ////////////////////////////////
 
@@ -78,7 +78,13 @@ public class CreditTickerService extends Service {
 
         Log.d(PACKAGE_NAME, "CreditTickerService : CreditTicker 소멸");
         timer.cancel();
+
+        ////// 노티 지우기 //////
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(737);
         nm = null;
+        /////////////////////////
+
         super.onDestroy();
         try {
             pendingIntent.send();

@@ -19,7 +19,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_width="100dp"
+            android:layout_width="80dp"
             android:layout_height="wrap_content">
 
             <TextView
@@ -41,21 +41,24 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <TextView
             android:layout_width="1dp"
+            android:id="@+id/hist_item_content"
+            android:text="비정상 정산"
+            android:gravity="center"
+            android:textSize="@dimen/hist_middleTEXT"
             android:layout_height="match_parent"
             android:layout_weight="1">
-        </LinearLayout>
+        </TextView>
 
         <TextView
-            android:layout_width="130dp"
-            android:paddingRight="15dp"
+            android:layout_width="95dp"
             android:layout_height="match_parent"
             android:textSize="@dimen/hist_largeTEXT"
             android:id="@+id/hist_item_updown"
             android:gravity="end|center_vertical"
             android:textStyle="bold"
-            android:text="+99999999"/>
+            android:text="+9999999"/>
 
     </LinearLayout>
 
