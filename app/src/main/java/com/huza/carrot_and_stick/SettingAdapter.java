@@ -29,16 +29,54 @@ public class SettingAdapter extends BaseAdapter {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
 
-    String[][] setting;
-    int setting_count = 4;
-
     Context mContext;
+
+    String[][] setting;
+    int setting_count = 8;
+
+    public SettingAdapter(Context context) {
+        mContext = context;
+
+        setting = new String[setting_count][3];
+
+        setting[0][0] = "광고영역 표시";
+        setting[0][1] = "잠금상태에서 하단 광고영역을 숨깁니다.";
+        setting[0][2] = "!Switch";
+
+        setting[1][0] = "네비게이션바 표시";
+        setting[1][1] = "잠금상태에서 하단 네비게이션바를 표시합니다.";
+        setting[1][2] = "Switch";
+
+        setting[2][0] = "알림영역 새로고침";
+        setting[2][1] = "당근을 사용 시, 알림바를 매 초 갱신합니다.";
+        setting[2][2] = "!Switch";
+
+        setting[3][0] = "메인화면 자동복귀";
+        setting[3][1] = "Credit에 변화가 있을 시, 자동으로 메인화면으로 돌아옵니다.";
+        setting[3][2] = "!Switch";
+
+        setting[4][0] = "Credit 변화효과";
+        setting[4][1] = "Credit에 변화가 있을 시, 깜빡이는 효과를 적용합니다.";
+        setting[4][2] = "!Switch";
+
+        setting[5][0] = "홈화면으로 이동";
+        setting[5][1] = "잠금상태가 시작될 때, 홈화면으로 이동합니다.";
+        setting[5][2] = "!Switch";
+
+        setting[6][0] = "어플리케이션 완전 종료";
+        setting[6][1] = "어플리케이션을 로그아웃하고 종료합니다.";
+        setting[6][2] = "Button";
+
+        setting[7][0] = "어플리케이션 삭제";
+        setting[7][1] = "어플리케이션을 기기에서 삭제합니다.";
+        setting[7][2] = "Button";
+    }
 
     View.OnClickListener setting_btn_click = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             switch (view.getId()-1){
-                case 3:
+                case 6:
                     send_final_close_msg();
                     Toast.makeText(mContext, "어플리케이션 완전 종료", Toast.LENGTH_SHORT).show();
                     break;
@@ -49,10 +87,10 @@ public class SettingAdapter extends BaseAdapter {
         @Override
         public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
-            if (b)
+            /*if (b)
                 Toast.makeText(mContext, setting[compoundButton.getId()-1][0] + " : true", Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(mContext, setting[compoundButton.getId()-1][0] + " : false", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, setting[compoundButton.getId()-1][0] + " : false", Toast.LENGTH_SHORT).show();*/
 
             switch (compoundButton.getId()-1) {
                 case 0:
@@ -106,29 +144,6 @@ public class SettingAdapter extends BaseAdapter {
         mConnection_AoT.onServiceDisconnected(null);
     }
 
-
-    public SettingAdapter(Context context) {
-        mContext = context;
-
-        setting = new String[setting_count][3];
-
-        setting[0][0] = "광고영역 표시";
-        setting[0][1] = "잠금상태에서 하단 광고영역을 숨깁니다.";
-        setting[0][2] = "!Switch";
-
-        setting[1][0] = "네비게이션바 표시";
-        setting[1][1] = "잠금상태에서 하단 네비게이션바를 표시합니다.";
-        setting[1][2] = "Switch";
-
-        setting[2][0] = "알림영역 새로고침";
-        setting[2][1] = "당근을 사용 시, 알림바를 매 초 갱신합니다.";
-        setting[2][2] = "!Switch";
-
-        setting[3][0] = "어플리케이션 완전 종료";
-        setting[3][1] = "어플리케이션을 로그아웃하고 종료합니다.";
-        setting[3][2] = "Button";
-    }
-
     @Override
     public int getCount() {
         return setting.length;
@@ -155,11 +170,13 @@ public class SettingAdapter extends BaseAdapter {
         TextView sett_item_big_text = (TextView) view.findViewById(R.id.sett_item_big_text);
         TextView sett_item_small_text = (TextView) view.findViewById(R.id.sett_item_small_text);
         LinearLayout set_item_widget = (LinearLayout) view.findViewById(R.id.set_item_widget);
+        set_item_widget.removeAllViews();
 
         sett_item_big_text.setText(setting[i][0]);
         sett_item_small_text.setText(setting[i][1]);
 
         String widget_type = setting[i][2];
+        Log.d(PACKAGE_NAME, "SettingAdapter : "+  i  +  " : " + widget_type);
         Boolean widget_selected = false;
         if (widget_type.substring(0,1).equals("!")) {
             widget_type = widget_type.substring(1,widget_type.length());

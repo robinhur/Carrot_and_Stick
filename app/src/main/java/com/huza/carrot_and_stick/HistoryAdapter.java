@@ -100,12 +100,13 @@ public class HistoryAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.listview_history, viewGroup, false);
         }
 
-        Log.d(PACKAGE_NAME, "HistoryAdapter : getView called history : " + history.get(i).get(0) + " : " + history.get(i).get(1)+history.get(i).get(2) + " : " + history.get(i).get(3));
+        //Log.d(PACKAGE_NAME, "HistoryAdapter : getView called history : " + history.get(i).get(0) + " : " + history.get(i).get(1)+history.get(i).get(2) + " : " + history.get(i).get(3));
         TextView tv_ymd = (TextView) view.findViewById(R.id.hist_item_ymd);
         TextView tv_hms = (TextView) view.findViewById(R.id.hist_item_hms);
         TextView tv_updown = (TextView) view.findViewById(R.id.hist_item_updown);
         TextView tv_content = (TextView) view.findViewById(R.id.hist_item_content);
 
+        Log.d(PACKAGE_NAME, "HistoryAdapter : getView called : " + i + " : " + history.get(i).get(1)+history.get(i).get(2));
         tv_ymd.setText(getDate(history.get(i).get(0)));
         tv_hms.setText(getTime(history.get(i).get(0)));
         tv_content.setText(history.get(i).get(3));
@@ -119,7 +120,7 @@ public class HistoryAdapter extends BaseAdapter {
             tv_updown.setTextColor(Color.RED);
         }
 
-        Log.d(PACKAGE_NAME, "HistoryAdapter : getView called textview : " + tv_ymd.getText() + " : " + tv_hms.getText() + " : " + tv_updown.getText() + " : " + tv_content.getText());
+        //Log.d(PACKAGE_NAME, "HistoryAdapter : getView called textview : " + tv_ymd.getText() + " : " + tv_hms.getText() + " : " + tv_updown.getText() + " : " + tv_content.getText());
 
         return view;
 
@@ -143,6 +144,8 @@ public class HistoryAdapter extends BaseAdapter {
         item_history.add(delta);
         item_history.add(content);
 
+        check_al();
+
         if (mode == -1)
             history.add(item_history);
         else
@@ -150,14 +153,16 @@ public class HistoryAdapter extends BaseAdapter {
 
         Log.d(PACKAGE_NAME, "HistoryAdapter : addHistory added : " + delta);
 
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable(){
-            @Override
-            public void run(){
-                Log.d(PACKAGE_NAME, "HistoryAdapter : addHistory : notifyDataSetChanged called (delayed)");
-                notifyDataSetChanged();
-            }
-        }, 1000);
+        check_al();
 
+    }
+
+    public void check_al() {
+        Log.d(PACKAGE_NAME, "HistoryAdapter : ----------------------------");
+        Log.d(PACKAGE_NAME, "HistoryAdapter : " + String.valueOf(history.size()));
+        for (int i = 0; i < history.size(); i++) {
+            Log.d(PACKAGE_NAME, "HistoryAdapter : item : " + history.get(i).toString());
+        }
+        Log.d(PACKAGE_NAME, "HistoryAdapter : ----------------------------");
     }
 }

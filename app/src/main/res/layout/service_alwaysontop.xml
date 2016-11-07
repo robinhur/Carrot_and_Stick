@@ -112,15 +112,15 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true">
 
-        <Button
+        <android.support.v4.widget.Space
             android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:onClick="temp_initLOGListener"/>
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
+            android:paddingTop="3dp"
             android:layout_height="match_parent"
             android:orientation="vertical">
 

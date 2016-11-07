@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -125,11 +126,43 @@ public class AlwaysOnTop extends Service {
 
     }
 
+    //////// 홈화면 나가기 ////////
+    public void gotoHomeScreen() {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
+    }
+    //////////////////////////////
+
+    /////// 디바이스 잠금/해제 ////////
+    PowerManager mPowerManager;
+    PowerManager.WakeLock mWakeLock;
+
+    public void turnOnScreen() {
+        // UnderConstruction //
+        //Log.v(PACKAGE_NAME, "turnOnScreen!!!");
+        //mWakeLock = mPowerManager.newWakeLock(PowerManager.FLAG_KEEP_SCREEN_ON | PowerManager.ACQUIRE_CAUSES_WAKEUP, "Carrot_and_Stick");
+        //mWakeLock.acquire();
+        ///////////////////////
+    }
+
+    @TargetApi(21)
+    public void turnOffScreen() {
+        //Log.v(PACKAGE_NAME, "turnOffScreen!!!");
+        //mWakeLock = mPowerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "tag");
+        //mWakeLock.acquire();
+    }
+    ///////////////////////////////////
+
+
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         last_forlistview = "9999999999";
+        gotoHomeScreen();
 
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = getApplicationContext().getTheme();
@@ -614,6 +647,9 @@ public class AlwaysOnTop extends Service {
 
                 history_adapter.addHistory(dataSnapshot.getKey().toString(), dataSnapshot.child("updown").getValue().toString(), dataSnapshot.child("delta").getValue().toString(), dataSnapshot.child("content").getValue().toString(), 0);
                 Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : addLOGListener : history new item!!! : " + dataSnapshot.getKey() + " : " + dataSnapshot.child("updown").getValue() + dataSnapshot.child("delta").getValue());
+
+                initLOGListener();
+                //history_adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -632,10 +668,6 @@ public class AlwaysOnTop extends Service {
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-    }
-
-    public void temp_initLOGListener() {
-        initLOGListener();
     }
 
     public void initLOGListener() {
@@ -675,17 +707,15 @@ public class AlwaysOnTop extends Service {
                         Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ pos +" key : " + now_temp.getKey() + " type : " + now_temp.child("updown").getValue() + " delta : " + now_temp.child("delta").getValue());
                     }
 
-                    int offset = 0;
                     history_adapter.reset_history();
 
                     for (int i = 0; i < 100; i++) {
-                        if (temp_snapshot[i]==null) {
-                            offset++;
-                            continue;
-                        }
-                        Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ i + " " + offset +" snapshot : " + temp_snapshot[i]);
+                        if (temp_snapshot[i]==null) continue;
+                        Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : "+ i  +" snapshot : " + temp_snapshot[i]);
                         history_adapter.addHistory(temp_snapshot[i].getKey(), temp_snapshot[i].child("updown").getValue().toString(), temp_snapshot[i].child("delta").getValue().toString(),temp_snapshot[i].child("content").getValue().toString(), -1);
                     }
+
+                    history_adapter.notifyDataSetChanged();
 
                     //Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : initLOGListener : lastIndex : " + last_forlistview);
                 }
