@@ -39,16 +39,6 @@ public class SlidingLayout extends LinearLayout {
     }
 
     public void check_area() {
-
-        width = thisView.getMeasuredWidth();
-        height = thisView.getMeasuredHeight();
-
-        Log.d(PACKAGE_NAME, "SlidingLayout : height : " + height);
-        Log.d(PACKAGE_NAME, "SlidingLayout : width : " + width);
-
-        thisView.getLocationOnScreen(location);
-
-        Log.d(PACKAGE_NAME, "SlidingLayout : (x,y) : " + location[0] + " , " + location[1]);
     }
 
     public void init() {
@@ -57,10 +47,22 @@ public class SlidingLayout extends LinearLayout {
 
         thisView = this;
 
+        check_area();
+
         thisView.post(new Runnable() {
             @Override
             public void run() {
                 Log.d(PACKAGE_NAME, "SlidingLayout : post called");
+
+                width = thisView.getMeasuredWidth();
+                height = thisView.getMeasuredHeight();
+
+                Log.d(PACKAGE_NAME, "SlidingLayout : height : " + height);
+                Log.d(PACKAGE_NAME, "SlidingLayout : width : " + width);
+
+                thisView.getLocationOnScreen(location);
+
+                Log.d(PACKAGE_NAME, "SlidingLayout : (x,y) : " + location[0] + " , " + location[1]);
 
                 thisView.clearAnimation();
                 thisView.setTranslationY(-height*3/4);
@@ -132,6 +134,7 @@ public class SlidingLayout extends LinearLayout {
                         //// end : height
 
                         release_y = ((int)motionEvent.getRawY() - location[1]);
+                        Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : " + release_y);
 
                         if (release_y < height/4)
                             thisView.setTranslationY(-height*3/4);

@@ -29,6 +29,7 @@
 
                 </LinearLayout>
                 <FrameLayout
+                    android:id="@+id/aot_framelayout"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1">
@@ -39,22 +40,43 @@
                         android:layout_height="match_parent">
 
                         <ImageView
+                            android:id="@+id/image_phonestate"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@drawable/phone_state_idle"/>
+                            android:src="@drawable/phone_state_idle"
+                            android:scaleType="fitStart"/>
 
                     </LinearLayout>
 
                     <com.huza.carrot_and_stick.SlidingLayout
+                        android:id="@+id/aot_custom_slidinglayout"
                         android:orientation="vertical"
+                        android:paddingRight="5dp"
+                        android:paddingBottom="5dp"
+                        android:elevation="5dp"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
                         <LinearLayout
                             android:background="#ffffff"
+                            android:orientation="vertical"
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="3">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:text="멀봐 띠부럴"/>
+                            <Button
+                                android:layout_width="wrap_content"
+                                android:layout_height="10dp"
+                                android:layout_weight="1"
+                                android:layout_gravity="center"
+                                android:text="test" />
+
 
                         </LinearLayout>
                         <LinearLayout

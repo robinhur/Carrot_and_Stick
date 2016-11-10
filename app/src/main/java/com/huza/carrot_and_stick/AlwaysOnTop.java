@@ -21,6 +21,8 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -31,6 +33,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -61,6 +64,9 @@ public class AlwaysOnTop extends Service {
     AOTAdapter aot_adapter;
     ViewPager aot_pager;
     DotIndicator aot_indicator;
+
+    TelephonyManager manager;
+    ImageView image_phonestate;
 
     ListView aot_history;
     String last_forlistview;
@@ -594,6 +600,9 @@ public class AlwaysOnTop extends Service {
                     break;
                 case 1:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 1(main)");
+                    image_phonestate = (ImageView) layout.findViewById(R.id.image_phonestate);
+                    manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    manager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
                     break;
                 case 2:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 2(history)");
@@ -626,6 +635,33 @@ public class AlwaysOnTop extends Service {
         }
 
     }
+
+    private PhoneStateListener phoneStateListener = new PhoneStateListener() {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            switch(state){
+                case TelephonyManager.CALL_STATE_IDLE:
+                    image_phonestate.setImageResource(R.drawable.phone_state_idle);
+                    //평상시
+                    break;
+                case TelephonyManager.CALL_STATE_OFFHOOK:
+                    image_phonestate.setImageResource(R.drawable.phone_state_offhook);
+                    //전화중
+                    break;
+                case TelephonyManager.CALL_STATE_RINGING:
+                    image_phonestate.setImageResource(R.drawable.phone_state_ringing);
+                    //울리는중
+                    break;
+            }
+
+
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | state:" + state
+                    + "(ringing:" + TelephonyManager.CALL_STATE_RINGING
+                    + ", offhook:" + TelephonyManager.CALL_STATE_OFFHOOK
+                    + ", idle:" + TelephonyManager.CALL_STATE_IDLE + ")"
+                    + "|number:" + incomingNumber + "|");
+        }
+    };
 
     public void addLOGListener() {
         SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
