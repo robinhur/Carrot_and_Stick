@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.huza.carrot_and_stick">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/alarm_clock_icon"
+        android:label="MyAlarm"
+        android:supportsRtl="true"
+        android:largeHeap="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".SplashActivity"
+            android:icon="@mipmap/carrot_icon"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme_NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".PermissionActivity"
+            android:theme="@style/AppTheme_NoActionBar" />
+        <activity
+            android:name=".LoginActivity"
+            android:theme="@style/AppTheme_NoActionBar"/>
+        <activity
+            android:name=".SignupActivity"
+            android:theme="@style/AppTheme_NoActionBar"/>
+        <activity android:name=".MainActivity" />
+
+        <service
+            android:name=".BackgroundService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".CreditTickerService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".AlwaysOnTop"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".StateListenerReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.huza.carrot_and_stick.restartBACKGROUNDSERVICE" />
+                <action android:name="com.huza.carrot_and_stick.restartAoTSERVICE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".DeviceAdmin_Receiver"
+            android:enabled="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_policies" />
+
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
+                <action android:name="android.app.action.DEVICE_ADMIN_DISABLE_REQUESTED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
