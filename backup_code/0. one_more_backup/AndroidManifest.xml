@@ -5,17 +5,18 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/alarm_clock_icon"
         android:label="MyAlarm"
-        android:largeHeap="true"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ActivityMain"
+            android:name=".SplashActivity"
             android:icon="@mipmap/carrot_icon"
             android:label="@string/app_name"
             android:theme="@style/AppTheme_NoActionBar">
@@ -25,36 +26,41 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ActivityPermission"
+        <activity android:name=".PermissionActivity"
             android:theme="@style/AppTheme_NoActionBar" />
         <activity
-            android:name=".ActivityLogin"
-            android:theme="@style/AppTheme_NoActionBar" />
+            android:name=".LoginActivity"
+            android:theme="@style/AppTheme_NoActionBar"/>
         <activity
-            android:name=".ActivitySignup"
-            android:theme="@style/AppTheme_NoActionBar" />
-
+            android:name=".SignupActivity"
+            android:theme="@style/AppTheme_NoActionBar"/>
+        <activity android:name=".MainActivity" />
 
         <service
-            android:name=".ServiceBackground"
+            android:name=".BackgroundService"
             android:enabled="true"
-            android:exported="true"></service>
-
+            android:exported="true" />
+        <service
+            android:name=".CreditTickerService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".AlwaysOnTop"
+            android:enabled="true"
+            android:exported="true" />
 
         <receiver
-            android:name=".ReceiverStateListener"
+            android:name=".StateListenerReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="com.huza.carrot_and_stick.restartBACKGROUNDSERVICE" />
                 <action android:name="com.huza.carrot_and_stick.restartAoTSERVICE" />
-                <action android:name="com.huza.carrot_and_stick.finally_close" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".ReceiverDeviceAdmin"
+            android:name=".DeviceAdmin_Receiver"
             android:enabled="true"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
