@@ -11,18 +11,21 @@ using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Threading;
+using Firebase.Database;
 
 namespace Carrot_and_Stick_PC
 {
-    public partial class Form1 : Form
+    public partial class Carrot1 : Form
     {
-        public Form1()
+        public Carrot1()
         {
             InitializeComponent();
 
             this.ShowInTaskbar = false;
             this.notifyIcon1.Visible = true;
             notifyIcon1.ContextMenuStrip = contextMenuStrip1;
+
+            webBrowser1.Navigate("https://carotandstick-35d0e.firebaseapp.com/");
         }
 
         //////////////////////////////////////////////
@@ -61,7 +64,7 @@ namespace Carrot_and_Stick_PC
             }
         }
         /* Code to Disable Ctrl+Alt+Del Ends Here */
-        //////////////////////////////////////////////
+        ////////////////////////////////////////////
 
 
         ///////////////////////////////////////////////////////////
@@ -92,7 +95,6 @@ namespace Carrot_and_Stick_PC
         //Declaring Global objects     
         private IntPtr ptrHook;
         private LowLevelKeyboardProc objKeyboardProcess;
-
         private IntPtr captureKey(int nCode, IntPtr wp, IntPtr lp)
         {
             if (nCode >= 0)
@@ -108,14 +110,12 @@ namespace Carrot_and_Stick_PC
             }
             return CallNextHookEx(ptrHook, nCode, wp, lp);
         }
-
         bool HasAltModifier(int flags)
         {
             return (flags & 0x20) == 0x20;
         }
-
         /* Code to Disable WinKey, Alt+Tab, Ctrl+Esc Ends Here */
-        ///////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////
 
 
         //////////////////////////////////////////////
@@ -124,10 +124,8 @@ namespace Carrot_and_Stick_PC
         private static extern int FindWindow(string className, string windowText);
         [DllImport("user32.dll")]
         private static extern int ShowWindow(int hwnd, int command);
-
         private const int SW_HIDE = 0;
         private const int SW_SHOW = 1;
-
         public static void ShowStartMenu()
         {
             int hwnd = FindWindow("Shell_TrayWnd", "");
@@ -148,19 +146,33 @@ namespace Carrot_and_Stick_PC
         public static extern int SendMessage(int hWnd, uint Msg, int wParam, int lParam);
         public const int WM_SYSCOMMAND = 0x0112;
         public const int SC_CLOSE = 0xF060;
+        public const int WM_COMMAND = 0x111;
+        public const int MIN_ALL = 419;
+        public const int MIN_ALL_UNDO = 416;
 
         public void checkAlert(object state)
         {
-            Console.WriteLine("checkAlert");
+            //Console.WriteLine("checkAlert");
 
-            int window = FindWindow(null, "Task Manager1");
+            int window = FindWindow(null, "Task Manager");
             if (window != 0)
             {
-                Console.WriteLine("Task Manager");
+                //Console.WriteLine("Task Manager");
                 SendMessage((int)window, WM_SYSCOMMAND, SC_CLOSE, 0);
-            } else
+            }
+            else
             {
-                Console.WriteLine("Nope");
+                //Console.WriteLine("Nope");
+            }
+            window = FindWindow(null, "작업 관리자");
+            if (window != 0)
+            {
+                //Console.WriteLine("Task Manager");
+                SendMessage((int)window, WM_SYSCOMMAND, SC_CLOSE, 0);
+            }
+            else
+            {
+                //Console.WriteLine("Nope");
             }
         }
 
@@ -171,7 +183,72 @@ namespace Carrot_and_Stick_PC
 
         public void activate_window_fullscreen()
         {
+            /*
+            방법 1
+            this.StartPosition = FormStartPosition.Manual;
+
+            Rectangle fullScreen_bounds = Rectangle.Empty;
+
+            foreach (var screen in Screen.AllScreens)
+            {
+                fullScreen_bounds = Rectangle.Union(fullScreen_bounds, screen.Bounds);
+            }
+            this.ClientSize = new Size(fullScreen_bounds.Width, fullScreen_bounds.Height);
+            this.Location = new Point(fullScreen_bounds.Left, fullScreen_bounds.Top);
+            */
+
+            /*
+            방법 2
+            int screenLeft = SystemInformation.VirtualScreen.Left;
+            int screenTop = SystemInformation.VirtualScreen.Top;
+            int screenWidth = SystemInformation.VirtualScreen.Width;
+            int screenHeight = SystemInformation.VirtualScreen.Height;
+
+            this.Size = new System.Drawing.Size(screenWidth, screenHeight);
+            this.Location = new System.Drawing.Point(screenLeft, screenTop);
+            */
+
+            /*
+             * 주 모니터에 띄우고, 나머지 모니터는 걍 가리기
+             */
             this.WindowState = FormWindowState.Maximized;
+
+            Screen[] screens = Screen.AllScreens;
+            int order = 0;
+            foreach (Screen now_screen in screens)
+            {
+                order++;
+                if (order == 1)
+                {
+                    continue;
+                }
+
+                Console.WriteLine(now_screen.WorkingArea.Location + " | " + now_screen.WorkingArea.Size);
+
+                Form aForm = new Form();
+
+                aForm.Name = "Carrot" + order.ToString();
+                Label temp_label = new Label() { Text = order.ToString() };
+                temp_label.Size = new System.Drawing.Size(200, 200);
+                aForm.Controls.Add(temp_label);
+                temp_label.Font = new Font("나눔고딕 ExtraBold", 100, FontStyle.Bold);
+                aForm.FormBorderStyle = FormBorderStyle.None;
+                aForm.Show();  // Or just use Show(); if you don't want it to be modal.
+                aForm.Location = new System.Drawing.Point(now_screen.WorkingArea.Location.X, now_screen.WorkingArea.Location.Y);
+                //aForm.Size = new System.Drawing.Size(now_screen.WorkingArea.Size.Width, now_screen.WorkingArea.Size.Height);
+                aForm.WindowState = FormWindowState.Maximized;
+                aForm.BringToFront();
+
+                aForm.TopMost = true;
+            }
+
+            this.Activate();
+            this.Focus();
+            this.BringToFront();
+            this.TopMost = true;
+
+            textBox1.Focus();
+
         }
         public void activate_keboard_hooking()
         {
@@ -209,50 +286,48 @@ namespace Carrot_and_Stick_PC
             deactivate_alert_closer();
         }
 
-    
         private void button1_Click(object sender, EventArgs e)
         {
             this.Close();
         }
-
         private void button2_Click(object sender, EventArgs e)
         {
             activate_keboard_hooking();
         }
-
         private void button3_Click(object sender, EventArgs e)
         {
             deactivate_keboard_hooking();
         }
-
         private void button4_Click(object sender, EventArgs e)
         {
             HideStartMenu();
         }
-
         private void button5_Click(object sender, EventArgs e)
         {
             ShowStartMenu();
         }
-
         private void button7_Click(object sender, EventArgs e)
         {
             KillCtrlAltDelete();
         }
-
         private void button8_Click(object sender, EventArgs e)
         {
             EnableCTRLALTDEL();
         }
-
         private void button6_Click(object sender, EventArgs e)
         {
             activate_alert_closer();
         }
-
         private void button9_Click(object sender, EventArgs e)
         {
             deactivate_alert_closer();
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            var firebase = new FirebaseClient("https://carotandstick-35d0e.firebaseio.com/");
+            //Console.WriteLine(firebase.ToString());
+            Console.WriteLine("button!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!()");
         }
     }
 }
