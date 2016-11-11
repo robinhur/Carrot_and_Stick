@@ -21,6 +21,7 @@ public class ServiceBackground extends Service {
     public void onCreate() {
         super.onCreate();
 
+        // init service!!!!! //
         if (statelistener == null) {
 
             statelistener = new ReceiverStateListener(this);
