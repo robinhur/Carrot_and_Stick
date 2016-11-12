@@ -4,6 +4,7 @@
 var destination = get_destination();
 var rawFile;
 
+
 if (window.XMLHttpRequest) {
 	// code for modern browsers
 	rawFile = new XMLHttpRequest();
