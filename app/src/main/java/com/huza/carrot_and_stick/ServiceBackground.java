@@ -1,6 +1,7 @@
 package com.huza.carrot_and_stick;
 
 import android.app.ActivityManager;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -21,9 +22,7 @@ public class ServiceBackground extends Service {
     final String CreditTicker_SERVICE_NAME = "com.huza.carrot_and_stick.CreditTickerService";
 
     ReceiverStateListener statelistener = null;
-
-    FirebaseDatabase firebaseDatabase;
-    DatabaseReference databaseReference;
+    NotificationManager nm;
 
     public ServiceBackground() {
         Log.d(PACKAGE_NAME, "ServiceBackground 생성");
@@ -47,20 +46,6 @@ public class ServiceBackground extends Service {
 
             Log.d(PACKAGE_NAME, "ServiceBackground : init : ReceiverStateListener 등록");
         }
-
-        // init firebase!!!!! //
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference();
-        Log.d(PACKAGE_NAME, "ServiceBackground : init : Firebase 등록");
-
-        // add firebase listener!!!!! //
-        addFirebaseListener();
-
-    }
-
-    public void addFirebaseListener() {
-        Log.d(PACKAGE_NAME, "ServiceBackground : Firebase Listener 등록");
-
     }
 
     public void Start_AoT() {
@@ -73,8 +58,12 @@ public class ServiceBackground extends Service {
             Log.d(PACKAGE_NAME, "ServiceBackground : Close_CreditTicker : CreditTicker 서비스를 정지합니다");
             stopService(new Intent(this, ServiceCreditTicker.class));
         }
-    }
 
+        //// 혹시 몰라 noti 지우기 ////
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(737);
+        ///////////////////////////////
+    }
 
     public boolean checkServiceRunning(String service_name) {
 

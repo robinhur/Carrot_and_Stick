@@ -19,7 +19,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 		console.log("onAuthStateChanged : signed in");
 		firebase_user = user;
 		if (get_destination() == "login.html")
-			location.replace("?destination=main.html");
+			location.href="?destination=main.html";
 		else
 			get_user_info();
 	} else {
