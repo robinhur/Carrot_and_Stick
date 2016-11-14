@@ -51,6 +51,9 @@ public class ReceiverStateListener extends BroadcastReceiver {
     };
 
     private void sendMessage() {
+
+        Log.d(PACKAGE_NAME, "ReceiverStateListener : sendMessage = " + mBound_background);
+
         if (!mBound_background)
             mContext.bindService(new Intent(mContext, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
         else {
@@ -90,6 +93,7 @@ public class ReceiverStateListener extends BroadcastReceiver {
 
             ///// AoT gogogogo : 1 /////
             case Intent.ACTION_SCREEN_ON:
+                Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive : SCREEN_ON is now Under Construction");
             case Intent.ACTION_USER_PRESENT:
                 what = 1;
                 sendMessage();
@@ -126,12 +130,12 @@ public class ReceiverStateListener extends BroadcastReceiver {
 
         for (ActivityManager.RunningServiceInfo runningServiceInfo:serviceChecker.getRunningServices(Integer.MAX_VALUE)) {
             if (service_name.equals(runningServiceInfo.service.getClassName())){
-                Log.d(PACKAGE_NAME, "ReceiverStateListener : checkServiceRunning : "+ service_name + " = found");
+                Log.d(PACKAGE_NAME, "ReceiverStateListener : checkServiceRunning : "+ service_name + " = found!!!!");
                 return true;
             }
         }
 
-        Log.d(PACKAGE_NAME, "ReceiverStateListener : checkServiceRunning : "+ service_name + " = none");
+        Log.d(PACKAGE_NAME, "ReceiverStateListener : checkServiceRunning : "+ service_name + " = not running");
         return false;
 
     }

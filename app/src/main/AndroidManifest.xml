@@ -13,7 +13,7 @@
         android:label="MyAlarm"
         android:largeHeap="true"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme_NoActionBar">
         <activity
             android:name=".ActivityMain"
             android:icon="@mipmap/carrot_icon"
@@ -26,18 +26,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ActivityPermission"
-            android:theme="@style/AppTheme_NoActionBar" />
+            android:name=".ActivityPermission"/>
         <activity
-            android:name=".ActivityLogin"
-            android:theme="@style/AppTheme_NoActionBar" />
+            android:name=".ActivityLogin"/>
         <activity
-            android:name=".ActivitySignup"
-            android:theme="@style/AppTheme_NoActionBar" />
+            android:name=".ActivitySignup"/>
 
 
         <service
             android:name=".ServiceBackground"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service
+            android:name=".ServiceAlwaysOnTop"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service
+            android:name=".ServiceCreditTicker"
             android:enabled="true"
             android:exported="true"></service>
 

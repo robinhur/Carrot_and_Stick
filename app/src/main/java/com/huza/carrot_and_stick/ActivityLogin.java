@@ -74,6 +74,7 @@ public class ActivityLogin extends AppCompatActivity {
     }
 
     public void find_pw_clicked(View v) {
+        ////// NIY ///////
     }
 
     public void sign_up_clicked(View v) {
