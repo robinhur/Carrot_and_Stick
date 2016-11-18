@@ -12,8 +12,6 @@ firebase.initializeApp(config);
 console.log("initializeApp() called");
 
 firebase.auth().onAuthStateChanged(function(user) {
-	var new_dest;
-	
 	if (user) {
 		// User is signed in.
 		console.log("onAuthStateChanged : signed in");
@@ -25,8 +23,10 @@ firebase.auth().onAuthStateChanged(function(user) {
 	} else {
 		// No user is signed in.
 		console.log("onAuthStateChanged : no user");
-		if (get_destination() != "login.html")
-			set_destination("login.html");
+		if (get_destination() != "login.html"){
+			console.log("onAuthStateChanged : no user : return to login");
+			location.href=window.location.href.split('?')[0];
+		}
 	}
 });
 
@@ -113,7 +113,7 @@ function logout_user() {
 
 	firebase.auth().signOut().then(function() {
 	// Sign-out successful.
-		location.replace("");
+		location.href=window.location.href.split('?')[0];
 	}, function(error) {
 	// An error happened.
 	});

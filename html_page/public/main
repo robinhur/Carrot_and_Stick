@@ -5,7 +5,7 @@
 
 <div class="container">
 	<div id="main">
-	<h2><span class="fontawesome-desktop"></span>Main Page</h2>
+	<h2>Main Page</h2>
 	<form action="#" method="POST">
 	<fieldset>
 	<table>
