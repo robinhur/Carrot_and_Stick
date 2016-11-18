@@ -1,42 +1,26 @@
-﻿<script>
-	console.log("done");
-	windows.onload = get_user_info();
-</script>
+﻿<div class="script_container" style="visibility:hidden;">
+	<ul id="script">
+		<li>initialize</li>
+	</ul>
+</div>
+<div class="style_container" style="visibility:hidden;">
+	<ul id="style">
+		<li>main.css</li>
+		<!--<li>load</li>-->
+	</ul>
+</div>
 
-<div class="container">
-	<div id="main">
-	<h2>Main Page</h2>
-	<form action="#" method="POST">
-	<fieldset>
-	<table>
-
-	<tr>
-		<th>
-		<p type="user_info"><label for="email">E-mail address</label></p>
-		<p type="user_info"><label id="user_email" type="innerText">user_email</label></p>
-		</th>
-		<th>
-		<p type="user_info"><label for="name">Name</label></p>
-		<p type="user_info"><label id="user_name" type="innerText">user_name</label></p>
-		</th>
-	</tr>
-	<tr>
-		<th>
-		<p type="user_info"><label for="credit">Credit</label></p>
-		<p type="user_info"><label id="user_credit" type="innerText">user_credit</label></p>
-		</th>
-		<th>
-		<p type="user_info"><label for="email">Add Credit</label></p>
-		<p style="display:inline-block;">
-		<input type="number" id="credit_num" style="width:40%; margin:0px;">
-		<input type="button" value="Add" style="width:30%; margin:0px; display:inline;" onClick="add_credit();">
-		</p>
-		</th>
-	</tr>
-
-	</table>
-	<p><input type="button" value="Sign Out" onClick="logout_user();"></p>
-	</fieldset>
-	</form>
+<div class="html_container">
+	<div id="top_header">
+		top
 	</div> 
+	<div id="left_menu">
+		left
+	</div> 
+	<div id="main_content">
+		main
+	</div> 
+	<div id="footer">
+		footer
+	</div>
 </div>

@@ -1,0 +1,30 @@
+<ul>
+	<li>타자연습
+		<ul>
+			<li><a href="javascript:load_main('memil');">메밀꽃 필 무렵</a></li>
+			<li><a href="javascript:load_main('last_leaf');">마지막 잎새</a></li>
+			<li><a href="javascript:load_main('dongbeak');">동백꽃</a></li>
+			<li><a href="javascript:load_main('byul');">별 헤는 밤</a></li>
+			<li><a href="javascript:load_main('buza');">부자와 당나귀</a></li>
+			<li><a href="javascript:load_main('chungsando');">청산도</a></li>
+			<li><a href="javascript:load_main('aynthem');">애국가</a></li>
+			<li><a href="javascript:load_main('hanguelnal');">나의 사랑 한글날</a></li>
+			<li><a href="javascript:load_main('eul');">들사람 얼</a></li>
+			<li><a href="javascript:load_main('byul');">별</a></li>
+			<li><a href="javascript:load_main('sonagi');">소나기</a></li>
+			<li><a href="javascript:load_main('prince');">어린왕자</a></li>
+		</ul>
+	</li>
+	<li>기타
+		<ul>
+			<li><a href="javascript:load_main('typo');">맞춤법 연습</a></li>
+			<li><a href="javascript:load_main('typing_game');">타자게임</a></li>
+		</ul>
+	</li>
+	<li>학습
+		<ul>
+			<li><a href="javascript:load_main('learn_c++');">C++</a></li>
+			<li><a href="javascript:load_main('learn_java');">JAVA</a></li>
+		</ul>
+	</li>
+</ul>
