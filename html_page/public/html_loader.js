@@ -1,4 +1,4 @@
-﻿console.log("open html_loader");
+console.log("open html_loader");
 
  /**
   * function to load a given css file 
@@ -74,6 +74,11 @@ function load_stylesheet() {
 	console.log("load stylesheet");
 	
 	var ul = document.getElementById("style");
+	if (isNull(ul)){
+		console.log("nothing css");
+		return;	
+	}
+	
 	var items = ul.getElementsByTagName("li");
 	for (var i = 0; i < items.length; ++i) {		
 		console.log("script load : " + "./" + destination + "/" + items[i].innerHTML);
@@ -89,13 +94,20 @@ function load_stylesheet() {
 		//});  
 	}
 	
-	document.getElementById("style").remove();
+	for (var i = 0; i < document.getElementsByClassName("style_container").length; i++) {
+			document.getElementsByClassName("style_container")[i].remove();
+	}
 }
 
 function load_javascript() {
 	console.log("load javascript");
 	
 	var ul = document.getElementById("script");
+	if (isNull(ul)){
+		console.log("nothing script");
+		return;	
+	}
+	
 	var items = ul.getElementsByTagName("li");
 	for (var i = 0; i < items.length; ++i) {		
 		console.log("script load : " + "./" + destination + "/" + items[i].innerHTML);
@@ -110,5 +122,7 @@ function load_javascript() {
 		});  
 	}
 	
-	document.getElementById("script").remove();
+	for (var i = 0; i < document.getElementsByClassName("script_container").length; i++) {
+			document.getElementsByClassName("script_container")[i].remove();
+	}
 }

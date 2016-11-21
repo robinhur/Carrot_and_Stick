@@ -1,3 +1,9 @@
+<div class="script_container" style="visibility:hidden;">
+	<ul id="script">
+		<li>content_test</li>
+	</ul>
+</div>
+
 <ul>
 	<li>타자연습
 		<ul>
