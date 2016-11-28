@@ -51,7 +51,6 @@ public class ReceiverStateListener extends BroadcastReceiver {
     };
 
     private void sendMessage() {
-
         Log.d(PACKAGE_NAME, "ReceiverStateListener : sendMessage = " + mBound_background);
 
         if (!mBound_background)

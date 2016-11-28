@@ -12,9 +12,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
 public class ServiceBackground extends Service {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
@@ -46,12 +43,20 @@ public class ServiceBackground extends Service {
 
             Log.d(PACKAGE_NAME, "ServiceBackground : init : ReceiverStateListener 등록");
         }
+
+        Start_AoT();
     }
 
     public void Start_AoT() {
         if (checkServiceRunning(AoT_SERVICE_NAME)) return;
 
+        //// 혹시 몰라 noti 지우기 ////
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(737);
+        ///////////////////////////////
 
+        Log.d(PACKAGE_NAME, "ServiceBackground : Start_AoT : AoT 서비스를 시작합니다");
+        startService(new Intent(this, ServiceAlwaysOnTop.class));
     }
     public void Close_CreditTicker() {
         if (checkServiceRunning(CreditTicker_SERVICE_NAME)){
