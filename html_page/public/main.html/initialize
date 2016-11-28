@@ -18,6 +18,10 @@ function div2Resize() {
 	div2.style.height = window.innerHeight - 150 + 'px';
 }
 
+function load_code(code) {
+	document.getElementById('code').innerHTML = code;
+}
+
 function load_top(dest) {
 	$('#top_header').load(dest, function(){loadANDclear();});
 }
@@ -28,6 +32,17 @@ function load_left(dest) {
 
 function load_main(dest) {
 	$('#main_content').load(dest, function(){loadANDclear();});
+}
+function load_main(type, code) {
+	switch(type) {
+		case 'typing':
+			$('#main_content').load('main.html/typing', function(){loadANDclear();load_code(code);});
+			break;
+		case 'game':
+			break;
+		case 'game':
+			break;
+	}
 }
 
 function load_footer(dest) {

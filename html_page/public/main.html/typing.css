@@ -1,0 +1,11 @@
+
+#httpBox {border:1px solid #cccccc;width:600px;padding:4px;}
+#httpBox .smallBox {width:100%;background-color:#f5f5f5;border:1px solid #cccccc;padding:2px;font-size:9pt;font-family:'malgun gothic';text-align:center;}
+#httpBox .waitingBox {width:100%;background-color:#f5f5f5;border:1px solid #cccccc;padding:2px;color:#999999;font-size:6pt;font-family:'malgun gothic';text-align:center;}
+#httpBox .ph {height:4px;font-size:0px;}
+#httpBox .textbox {width:95%;border:0px;background-color:#f5f5f5;text-align:center;}
+#httpBox #status {width:100%;}
+#httpBox #status th{font-size:9pt;}
+#httpBox #status .bar {width:0px;font-size:0px;height:18px;}
+#httpBox #status .nums {font-size:9pt;height:18px;}
+#httpBox #status .barBgcolor {background-color:#cccccc}
