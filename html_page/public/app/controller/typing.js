@@ -1,37 +1,21 @@
+console.log("open typing");
 
-var http = new Http();
-http.setHttp();
+var http;
+var items = new Array();
+
+$.get("./app/model/content_typing/" + get_parameter("content") + ".cas", function(data) {
+	items = data.split("\n");
+	
+	http = new Http();
+	http.setHttp();
+});
 
 function game_end() {
 	alert("게임 끝!!!");
 }
 
-function load_array() {
-	
-	var items;
-	
-	$.get("./app/model/content_typing/" + get_parameter("content") + ".cas", function(data) {
-		items = data.split('\n');
-	});
-	
-	console.log(items.length);
-	return items;
-}
-
 function Http(){
-	this.arrStrs = load_array();
-	/*this.arrStrs = new Array(
-"계절이 지나가는 하늘에는",
-"가을로 가득 차 있습니다.",
-"",
-"나는 아무 걱정도 없이",
-"가을 속의 별들을 다 헬 듯합니다.",
-"",
-"가슴속에 하나 둘 새겨지는 별을",
-"이제 다 못 헤는 것은",
-"쉬이 아침이 오는 까닭이요,",
-"내일 밤이 남은 까닭이요,",
-"아직 나의 청춘이 다하지 않은 까닭입니다.");*/
+	this.arrStrs = items;
 	this.exString="";
 	this.inputString="";
 	this.speedCur=0;
