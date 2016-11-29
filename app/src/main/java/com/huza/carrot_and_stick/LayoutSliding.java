@@ -25,7 +25,6 @@ public class LayoutSliding extends LinearLayout {
     int release_y;
 
     ImageView btn_init;
-    Boolean isOpened;
 
     public LayoutSliding(Context context) {
         super(context);
@@ -123,9 +122,7 @@ public class LayoutSliding extends LinearLayout {
 
                 Log.d(PACKAGE_NAME, "SlidingLayout : init 애니메이션 끝");
 
-                isOpened = false;
-
-                btn_init = (ImageView) thisView.findViewById(R.id.btn_init);
+                btn_init = (ImageView) thisView.findViewById(R.id.image_phonestate);
                 btn_init.setOnTouchListener(new OnTouchListener() {
                     @Override
                     public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -144,6 +141,25 @@ public class LayoutSliding extends LinearLayout {
                             thisView.setTranslationY((-height*3/4) + (release_y-height/4));
                         }
 
+                        switch (motionEvent.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_DOWN");
+                                break;
+                            case MotionEvent.ACTION_MOVE:
+                                Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_MOVE");
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_UP");
+
+                                if (release_y < height*3/5)
+                                    open_slide();
+                                else
+                                    close_slide();
+
+                                break;
+                        }
+
+
                         return false;
                     }
 
@@ -157,23 +173,19 @@ public class LayoutSliding extends LinearLayout {
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
-    public void open_slide(View v){
+    public void close_slide(){
+        //thisView.setTranslationY(-height*3/4);
+        thisView.animate()
+                .translationY(0)
+                .setDuration(250)
+                .start();
+    }
 
-        if (!isOpened) {
-            //thisView.setTranslationY(-height*3/4);
-            thisView.animate()
-                    .translationY(0)
-                    .setDuration(250)
-                    .start();
-        } else {
-            //thisView.setTranslationY(0);
-            thisView.animate()
-                    .translationY(-height*3/4)
-                    .setDuration(250)
-                    .start();
-        }
-
-        isOpened = !isOpened;
-
+    public void open_slide(){
+        //thisView.setTranslationY(0);
+        thisView.animate()
+                .translationY(-height*3/4)
+                .setDuration(250)
+                .start();
     }
 }

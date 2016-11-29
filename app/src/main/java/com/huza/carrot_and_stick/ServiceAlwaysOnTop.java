@@ -292,4 +292,49 @@ public class ServiceAlwaysOnTop extends Service {
         }
     };
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (OnTop_view != null) {
+            w_manager.removeView(OnTop_view);
+            OnTop_view = null;
+        }
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT 소멸");
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand");
+        timer_start();
+        return super.onStartCommand(intent, flags, startId);
+
+    }
+
+    private void timer_start() {
+
+        timertask = new TimerTask() {
+            @Override
+            public void run() {
+                textview_update();
+            }
+        };
+
+        timer.schedule(timertask, 0, 1000);
+
+    }
+
+    private void textview_update() {
+        Runnable updater = new Runnable() {
+            @Override
+            public void run() {
+                now_time = Calendar.getInstance();
+                tv_time.setText(time_format.format(now_time.getTime()));
+            }
+        };
+
+        handler.post(updater);
+    }
 }

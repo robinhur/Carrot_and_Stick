@@ -4,8 +4,8 @@ destination??? -> page_config.js   layout , menu , main
 
 
 system
-	loader.js
-	account.js
+	core_service.js
+	account_checker.js
 	url_checker.js
 	page_config.js (layout, menu)
 	html_loader.js
