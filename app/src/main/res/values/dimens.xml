@@ -19,4 +19,6 @@
     <dimen name="hist_smallTEXT">10dp</dimen>
 
     <dimen name="AoT_page_padding">50px</dimen>
+
+    <dimen name="AoT_slide_radius">20dp</dimen>
 </resources>

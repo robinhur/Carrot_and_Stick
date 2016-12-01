@@ -2,12 +2,16 @@ package com.huza.carrot_and_stick;
 
 import android.animation.Animator;
 import android.content.Context;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by HuZA on 2016-11-09.
@@ -22,7 +26,9 @@ public class LayoutSliding extends LinearLayout {
 
     int height, width;
     int[] location = new int[2];
-    int release_y;
+    int release_y, reference_y = -1;
+
+    boolean isOpened;
 
     ImageView btn_init;
 
@@ -37,17 +43,10 @@ public class LayoutSliding extends LinearLayout {
         init();
     }
 
-    public void check_area() {
-    }
-
     public void init() {
-
         Log.d(PACKAGE_NAME, "SlidingLayout : init called");
 
         thisView = this;
-
-        check_area();
-
         thisView.post(new Runnable() {
             @Override
             public void run() {
@@ -64,13 +63,13 @@ public class LayoutSliding extends LinearLayout {
                 Log.d(PACKAGE_NAME, "SlidingLayout : (x,y) : " + location[0] + " , " + location[1]);
 
                 thisView.clearAnimation();
-                thisView.setTranslationY(-height*3/4);
+                thisView.setTranslationY(-height*1/2);
                 thisView.setVisibility(VISIBLE);
 
                 Log.d(PACKAGE_NAME, "SlidingLayout : 접었음");
 
                 thisView.animate()
-                        .translationYBy(height*3/4)
+                        .translationYBy(height*1/2)
                         .setDuration(250)
                         .setStartDelay(250)
                         .setListener(new Animator.AnimatorListener() {
@@ -82,7 +81,7 @@ public class LayoutSliding extends LinearLayout {
                             @Override
                             public void onAnimationEnd(Animator animator) {
                                 thisView.animate()
-                                        .translationYBy(-height*3/4)
+                                        .translationYBy(-height*1/2)
                                         .setDuration(250)
                                         .setListener(new Animator.AnimatorListener() {
                                             @Override
@@ -121,6 +120,15 @@ public class LayoutSliding extends LinearLayout {
                         .start();
 
                 Log.d(PACKAGE_NAME, "SlidingLayout : init 애니메이션 끝");
+                isOpened = false;
+
+                thisView.setOnTouchListener(new OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        timer_start();
+                        return false;
+                    }
+                });
 
                 btn_init = (ImageView) thisView.findViewById(R.id.image_phonestate);
                 btn_init.setOnTouchListener(new OnTouchListener() {
@@ -132,14 +140,36 @@ public class LayoutSliding extends LinearLayout {
 
                         release_y = ((int)motionEvent.getRawY() - location[1]);
                         Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : " + release_y);
+                        Log.d(PACKAGE_NAME, "SlidingLayout : isOpened : " + isOpened);
 
-                        if (release_y < height/4)
-                            thisView.setTranslationY(-height*3/4);
-                        else if (release_y > height)
-                            thisView.setTranslationY(0);
-                        else {
-                            thisView.setTranslationY((-height*3/4) + (release_y-height/4));
+                        if (isOpened){
+                            if (reference_y == -1) {
+                                reference_y = release_y - (height/2);
+                            }
+
+                            release_y -= reference_y;
+
+                            if (release_y < 0)
+                                thisView.setTranslationY(-height*1/2);
+                            else if (release_y < height/2)
+                                thisView.setTranslationY((-height*1/2) + (release_y));
+                            else {
+                                thisView.setTranslationY(0);
+                            }
                         }
+                        else{
+                            if (release_y < height/2)
+                                thisView.setTranslationY(-height*1/2);
+                            else if (release_y > height)
+                                thisView.setTranslationY(0);
+                            else {
+                                thisView.setTranslationY((-height*1/2) + (release_y-height/2));
+                            }}
+
+                        /*if (release_y < height/2)
+                            thisView.setTranslationY(-height*1/2);
+                        else if (release_y > height)
+                            thisView.setTranslationY(0);*/
 
                         switch (motionEvent.getAction()) {
                             case MotionEvent.ACTION_DOWN:
@@ -150,15 +180,27 @@ public class LayoutSliding extends LinearLayout {
                                 break;
                             case MotionEvent.ACTION_UP:
                                 Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_UP");
+                                //if (release_y > height) isOpened = true;
+                                //if (release_y < 0) isOpened = false;
 
-                                if (release_y < height*3/5)
-                                    open_slide();
-                                else
-                                    close_slide();
+                                if (isOpened) {
+                                    if (release_y < height*7/8)
+                                        close_slide();
+                                    else
+                                        open_slide();
+                                } else {
+                                    if (release_y < height/2 && release_y > 0)
+                                        open_slide();
+                                    else if (release_y < height*5/8)
+                                        close_slide();
+                                    else
+                                        open_slide();
+                                }
+
+                                reference_y = -1;
 
                                 break;
                         }
-
 
                         return false;
                     }
@@ -174,18 +216,91 @@ public class LayoutSliding extends LinearLayout {
     }
 
     public void close_slide(){
-        //thisView.setTranslationY(-height*3/4);
+        Log.d(PACKAGE_NAME, "SlidingLayout : close_slide");
+        //thisView.setTranslationY(0);
         thisView.animate()
-                .translationY(0)
-                .setDuration(250)
+                .translationY(-height*1/2)
+                .setDuration(200)
                 .start();
+        isOpened = false;
     }
 
     public void open_slide(){
-        //thisView.setTranslationY(0);
+        Log.d(PACKAGE_NAME, "SlidingLayout : open_slide");
+        //thisView.setTranslationY(-height*3/4);
         thisView.animate()
-                .translationY(-height*3/4)
-                .setDuration(250)
+                .translationY(0)
+                .setDuration(200)
                 .start();
+        isOpened = true;
+        timer_start();
     }
+
+    public void now_CALL_STATE_OFFHOOK() {
+
+        //image_phonestate.setImageResource(R.drawable.phone_state_offhook);
+        //text_phonestate.setText("전화 통화 중");
+        close_slide();
+
+    }
+
+    public void now_CALL_STATE_RINGING() {
+
+        //image_phonestate.setImageResource(R.drawable.phone_state_ringing);
+        //text_phonestate.setText("전화 수신 중");
+        open_slide();
+
+    }
+
+    public void now_CALL_STATE_IDLE() {
+
+        //image_phonestate.setImageResource(R.drawable.phone_state_ringing);
+        //text_phonestate.setText("전화 수신 중");
+        close_slide();
+
+    }
+
+
+    TimerTask timertask;
+    Timer timer = new Timer();
+    Handler handler = new Handler();
+
+    private void timer_start() {
+
+        Log.d(PACKAGE_NAME, "timer_start : start");
+
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+
+        timertask = new TimerTask() {
+            @Override
+            public void run() {
+                times_up();
+            }
+        };
+
+        timer = new Timer();
+        timer.schedule(timertask, 2000);
+
+    }
+
+    private void times_up() {
+        Log.d(PACKAGE_NAME, "timer_start : times_up");
+        Runnable updater = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(PACKAGE_NAME, "timer_start : times_up : run");
+                close_slide();
+            }
+        };
+
+        handler.post(updater);
+        timertask = null;
+        timer.cancel();
+        timer.purge();
+        Log.d(PACKAGE_NAME, "timer_start : times_up : ended");
+    }
+
 }

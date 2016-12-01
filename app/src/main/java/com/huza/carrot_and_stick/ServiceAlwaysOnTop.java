@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Handler;
@@ -13,6 +15,7 @@ import android.support.v4.view.ViewPager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,8 +49,10 @@ public class ServiceAlwaysOnTop extends Service {
     ViewPager aot_pager;
     DotIndicator aot_indicator;
 
+    LayoutSliding aot_custom_slidinglayout;
     TelephonyManager manager;
     ImageView image_phonestate;
+    TextView text_phonestate;
 
     ListView aot_history;
     String last_forlistview;
@@ -103,6 +108,13 @@ public class ServiceAlwaysOnTop extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = getApplicationContext().getTheme();
+        theme.resolveAttribute(android.R.attr.textColorTertiary, typedValue, true);
+        TypedArray arr = getApplicationContext().obtainStyledAttributes(typedValue.data, new int[]{android.R.attr.textColorTertiary});
+        AoT_MaintextColor = arr.getColor(0,-1);
+        arr.recycle();
 
         ///홈버튼누르기///
         gotoHomeScreen();
@@ -230,7 +242,9 @@ public class ServiceAlwaysOnTop extends Service {
                     break;
                 case 1:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 1(main)");
+                    aot_custom_slidinglayout = (LayoutSliding) layout.findViewById(R.id.aot_custom_slidinglayout);
                     image_phonestate = (ImageView) layout.findViewById(R.id.image_phonestate);
+                    text_phonestate = (TextView) layout.findViewById(R.id.text_phonestate);
                     manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     manager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
                     break;
@@ -272,14 +286,23 @@ public class ServiceAlwaysOnTop extends Service {
             switch(state){
                 case TelephonyManager.CALL_STATE_IDLE:
                     image_phonestate.setImageResource(R.drawable.phone_state_idle);
+                    text_phonestate.setTextColor(AoT_MaintextColor);
+                    text_phonestate.setText("전화 대기 중");
+                    aot_custom_slidinglayout.now_CALL_STATE_IDLE();
                     //평상시
                     break;
                 case TelephonyManager.CALL_STATE_OFFHOOK:
                     image_phonestate.setImageResource(R.drawable.phone_state_offhook);
+                    text_phonestate.setTextColor(Color.GREEN);
+                    text_phonestate.setText("전화 통화 중");
+                    aot_custom_slidinglayout.now_CALL_STATE_OFFHOOK();
                     //전화중
                     break;
                 case TelephonyManager.CALL_STATE_RINGING:
                     image_phonestate.setImageResource(R.drawable.phone_state_ringing);
+                    text_phonestate.setTextColor(Color.YELLOW);
+                    text_phonestate.setText("전화 수신 중");
+                    aot_custom_slidinglayout.now_CALL_STATE_RINGING();
                     //울리는중
                     break;
             }
@@ -301,7 +324,7 @@ public class ServiceAlwaysOnTop extends Service {
             OnTop_view = null;
         }
 
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT 소멸");
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : A4oT 소멸");
     }
 
     @Override
