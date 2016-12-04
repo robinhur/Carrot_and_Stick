@@ -2,18 +2,22 @@ package com.huza.carrot_and_stick;
 
 import android.annotation.TargetApi;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -28,7 +32,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.matthewtamlin.sliding_intro_screen_library.indicators.DotIndicator;
 
@@ -45,14 +51,16 @@ import java.util.TimerTask;
 public class ServiceAlwaysOnTop extends Service {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
-    final String AoT_SERVICE_NAME = "com.huza.carrot_and_stick.AlwaysOnTop";
-    final String CreditTicker_SERVICE_NAME = "com.huza.carrot_and_stick.CreditTickerService";
 
     View OnTop_view;
 
     AdapterAOT aot_adapter;
     ViewPager aot_pager;
     DotIndicator aot_indicator;
+
+    Button btn_close;
+    ProgressBar PB1;
+    ProgressBar PB2;
 
     LayoutSliding aot_custom_slidinglayout;
     TelephonyManager manager;
@@ -101,6 +109,59 @@ public class ServiceAlwaysOnTop extends Service {
         user_credit = -1;
     }
 
+    int what;
+    String extra_data;
+
+    Messenger mService_background = null;
+    boolean mBound_background;
+    private ServiceConnection mConnection_background = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mService_background = new Messenger(iBinder);
+            mBound_background = true;
+            what = 10;
+            sendMessage();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mService_background = null;
+            mBound_background = false;
+        }
+    };
+
+    private void sendMessage() {
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : sendMessage = " + mBound_background + " : " + what);
+
+        if (!mBound_background)
+            bindService(new Intent(getApplicationContext(), ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
+        else {
+            if (what == 0) return;
+
+            Message msg = Message.obtain(null, what, 0, 0);
+
+            if (extra_data != null) {
+                Bundle data = new Bundle();
+                data.putString("extra_data" , extra_data);
+                msg.setData(data);
+            }
+
+            try {
+                mService_background.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
+            if (what == 199) {
+                unbindService(mConnection_background);
+                mConnection_background.onServiceDisconnected(null);
+            }
+        }
+
+        what = 0;
+        extra_data = null;
+    }
+
     //////// 홈화면 나가기 ////////
     public void gotoHomeScreen() {
         Intent startMain = new Intent(Intent.ACTION_MAIN);
@@ -113,6 +174,10 @@ public class ServiceAlwaysOnTop extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        what = 0;
+        extra_data = null;
+        bindService(new Intent(getApplicationContext(), ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
 
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = getApplicationContext().getTheme();
@@ -144,15 +209,18 @@ public class ServiceAlwaysOnTop extends Service {
         aot_indicator.setSelectedItem(1, false);
 
         //// 사용하기 버튼 ////
-        final Button btn_close = (Button) OnTop_view.findViewById(R.id.button);
+        btn_close = (Button) OnTop_view.findViewById(R.id.button);
+        btn_close.setText("");
         btn_close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //close_AoT_service();
+                close_AoT_service();
             }
         });
         ///////////////////////
 
+        PB1 = (ProgressBar) OnTop_view.findViewById(R.id.progress_bar1);
+        PB2 = (ProgressBar) OnTop_view.findViewById(R.id.progress_bar2);
         tv_time = (TextView) OnTop_view.findViewById(R.id.tv_time);
         tv_main_credit = (TextView) OnTop_view.findViewById(R.id.tv_main_credit);
         iv_main_credit = (ImageView) OnTop_view.findViewById(R.id.iv_main_updown);
@@ -189,10 +257,42 @@ public class ServiceAlwaysOnTop extends Service {
 
                 OnTop_view.setSystemUiVisibility(ui_Options);
 
+                if (aot_custom_slidinglayout != null)
+                    aot_custom_slidinglayout.adjust_location();
                 //Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_listen : " + OnTop_view.getWindowSystemUiVisibility());
             }
         });
         ////////////////////////////////
+    }
+
+    public void close_AoT_service() {
+        if (user_credit <= 0){
+            if (user_credit == -1) Toast.makeText(this, "현재 로딩 중입니다.\n잠시만 기다려주세요", Toast.LENGTH_SHORT).show();
+            if (user_credit == 0) Toast.makeText(this, "Credit이 0으로 사용할 수 없습니다.\nCredit을 쌓아보세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        //SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        //SharedPreferences.Editor editor = pref.edit();
+
+        //Calendar now_time = Calendar.getInstance();
+        //editor.putString("startTIME", now_time.getTime().toString());
+
+        //Log.d(PACKAGE_NAME, "AlwaysOnTop : 사용시작 : "+now_time.getTime().toString());
+
+        //editor.commit();
+
+        //////
+
+        //Log.d(PACKAGE_NAME, "AlwaysOnTop : CreditTickerService 생성");
+        //Intent i = new Intent(AlwaysOnTop.this, CreditTickerService.class);
+        //i.putExtra("Credit", user_credit);
+        //startService(i);
+
+        //////
+
+        what = 199;
+        sendMessage();
     }
 
     @Override
@@ -205,20 +305,35 @@ public class ServiceAlwaysOnTop extends Service {
     class AoTIncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            Log.d(PACKAGE_NAME, "ServiceBackground : BackgroundIncomingHandler = " + msg.what);
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler = " + msg.what);
 
-            ///////////////////////////////////
-            ///// AoT gogogogo       : 1  /////
-            ///// CreditTicker close : 2  /////
-            ///// Finally Close      : 3  /////
-            ///////////////////////////////////
+            /////////////////////////////////////
+            ///// Connected with BG  : 100  /////
+            ///// Receive Credit     : 101  /////
+            ///// Finally Close      : 199  /////
+            /////////////////////////////////////
 
             switch (msg.what) {
-                case 1:
+                case 100:
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler : Background connected");
                     break;
-                case 2:
+                case 101:
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler = " + msg.getData().getString("extra_data"));
+                    btn_close.setText("Credit\n사용하기");
+                    btn_close.setEnabled(true);
+                    tv_main_credit.setText(msg.getData().getString("extra_data").toString());
+                    user_credit = Integer.valueOf(tv_main_credit.getText().toString());
+
+                    PB1.setVisibility(View.INVISIBLE);
+                    PB2.setVisibility(View.INVISIBLE);
                     break;
-                case 3:
+                case 199:
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");
+                    OnTop_view.setOnSystemUiVisibilityChangeListener(null);
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_exit");
+                    OnTop_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
+                    stopSelf();
                     break;
             }
 
@@ -361,6 +476,7 @@ public class ServiceAlwaysOnTop extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand");
+        OnTop_view.setSystemUiVisibility(ui_Options);
         timer_start();
         return super.onStartCommand(intent, flags, startId);
 
@@ -390,7 +506,6 @@ public class ServiceAlwaysOnTop extends Service {
 
         handler.post(updater);
     }
-
 
 
     public void aot_test_call(View v) {

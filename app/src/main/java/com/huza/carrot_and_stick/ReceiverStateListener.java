@@ -22,9 +22,9 @@ public class ReceiverStateListener extends BroadcastReceiver {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
     final String Main_ACTIVITY_NAME = "com.huza.carrot_and_stick.ActivityMain";
-    final String AoT_SERVICE_NAME = "com.huza.carrot_and_stick.AlwaysOnTop";
+    final String AoT_SERVICE_NAME = "com.huza.carrot_and_stick.ServiceAlwaysOnTop";
     final String Background_SERVICE_NAME = "com.huza.carrot_and_stick.ServiceBackground";
-    final String CreditTicker_SERVICE_NAME = "com.huza.carrot_and_stick.CreditTickerService";
+    final String CreditTicker_SERVICE_NAME = "com.huza.carrot_and_stick.ServiceCreditTicker";
 
     Context mContext;
     int what;
@@ -53,7 +53,7 @@ public class ReceiverStateListener extends BroadcastReceiver {
     };
 
     private void sendMessage() {
-        Log.d(PACKAGE_NAME, "ReceiverStateListener : sendMessage = " + mBound_background);
+        Log.d(PACKAGE_NAME, "ReceiverStateListener : MESSAGE : sendMessage = " + mBound_background + " : " + what);
 
         if (!mBound_background)
             mContext.bindService(new Intent(mContext, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
@@ -78,12 +78,15 @@ public class ReceiverStateListener extends BroadcastReceiver {
                 mContext.unbindService(mConnection_background);
                 mConnection_background.onServiceDisconnected(null);
             }
+
+            what = 0;
+            extra_data = null;
         }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive = " + intent.getAction());
+        Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive : MESSAGE : " + intent.getAction());
         mContext = context;
         what = 0;
         extra_data = null;
@@ -104,20 +107,25 @@ public class ReceiverStateListener extends BroadcastReceiver {
             case Intent.ACTION_SCREEN_ON:
                 Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive : SCREEN_ON is now Under Construction");
             case Intent.ACTION_USER_PRESENT:
-                what = 1;
-                sendMessage();
+                if (!checkServiceRunning(AoT_SERVICE_NAME)) {
+                    what = 1;
+                    sendMessage();
+                }
                 break;
 
-            ///// CreditTicker close : 2 /////
+            ///// CreditTicker close : 5 /////
             case Intent.ACTION_SCREEN_OFF:
+                checkServiceRunning(Background_SERVICE_NAME);
             case Intent.ACTION_SHUTDOWN:
-                what = 2;
-                sendMessage();
+                if (checkServiceRunning(CreditTicker_SERVICE_NAME)) {
+                    what = 5;
+                    sendMessage();
+                }
                 break;
 
-            ///// to AoT, NEW OUTGOING CALL : 3 /////
+            ///// to AoT, NEW OUTGOING CALL : 20 /////
             case Intent.ACTION_NEW_OUTGOING_CALL:
-                what = 3;
+                what = 20;
                 extra_data = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
                 sendMessage();
                 break;
