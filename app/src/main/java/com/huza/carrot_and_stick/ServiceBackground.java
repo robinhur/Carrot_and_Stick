@@ -37,6 +37,7 @@ public class ServiceBackground extends Service {
             intentFilter.addAction(Intent.ACTION_USER_PRESENT);
             intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
             intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+            intentFilter.addAction(Intent.ACTION_NEW_OUTGOING_CALL);
             intentFilter.setPriority(2147483647);
 
             registerReceiver(statelistener, intentFilter);
@@ -88,19 +89,20 @@ public class ServiceBackground extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return mMessenger.getBinder();
+        return BackgroundMessenger.getBinder();
     }
-    final Messenger mMessenger = new Messenger(new IncomingHandler());
-    class IncomingHandler extends Handler {
+    final Messenger BackgroundMessenger = new Messenger(new BackgroundIncomingHandler());
+    class BackgroundIncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
-            Log.d(PACKAGE_NAME, "ServiceBackground : IncomingHandler = " + msg.what);
+            Log.d(PACKAGE_NAME, "ServiceBackground : BackgroundIncomingHandler = " + msg.what);
 
-            //////////////////////////////////
-            ///// AoT gogogogo       : 1 /////
-            ///// CreditTicker close : 2 /////
-            ///// Finally Close      : 3 /////
-            //////////////////////////////////
+            ///////////////////////////////////
+            ///// AoT gogogogo       : 1  /////
+            ///// CreditTicker close : 2  /////
+            ///// NEW OUTGOING CALL  : 3  /////
+            ///// Finally Close      : 99 /////
+            ///////////////////////////////////
 
             switch (msg.what) {
                 case 1:
@@ -110,6 +112,9 @@ public class ServiceBackground extends Service {
                     Close_CreditTicker();
                     break;
                 case 3:
+                    Log.d(PACKAGE_NAME, "ServiceBackground : BackgroundIncomingHandler : 3 : " + msg.getData().getString("extra_data"));
+                    break;
+                case 99:
                     break;
             }
 

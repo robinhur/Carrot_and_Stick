@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -27,6 +28,7 @@ public class ReceiverStateListener extends BroadcastReceiver {
 
     Context mContext;
     int what;
+    String extra_data;
 
     public ReceiverStateListener() {super();}
     public ReceiverStateListener(Context context) {
@@ -59,13 +61,20 @@ public class ReceiverStateListener extends BroadcastReceiver {
             if (what == 0) return;
 
             Message msg = Message.obtain(null, what, 0, 0);
+
+            if (extra_data != null) {
+                Bundle data = new Bundle();
+                data.putString("extra_data" , extra_data);
+                msg.setData(data);
+            }
+
             try {
                 mService_background.send(msg);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
 
-            if (what == 3) {
+            if (what == 99) {
                 mContext.unbindService(mConnection_background);
                 mConnection_background.onServiceDisconnected(null);
             }
@@ -77,6 +86,7 @@ public class ReceiverStateListener extends BroadcastReceiver {
         Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive = " + intent.getAction());
         mContext = context;
         what = 0;
+        extra_data = null;
 
         switch (intent.getAction()) {
             case Intent.ACTION_BOOT_COMPLETED:
@@ -105,9 +115,16 @@ public class ReceiverStateListener extends BroadcastReceiver {
                 sendMessage();
                 break;
 
-            ///// Finally Close : 3 /////
-            case "com.huza.carrot_and_stick.finally_close":
+            ///// to AoT, NEW OUTGOING CALL : 3 /////
+            case Intent.ACTION_NEW_OUTGOING_CALL:
                 what = 3;
+                extra_data = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
+                sendMessage();
+                break;
+
+            ///// Finally Close : 99 /////
+            case "com.huza.carrot_and_stick.finally_close":
+                what = 99;
                 sendMessage();
                 break;
         }

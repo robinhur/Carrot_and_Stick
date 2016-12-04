@@ -4,9 +4,11 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -30,12 +32,13 @@ public class ActivityMain extends AppCompatActivity {
 
                     Thread.sleep(1000);
 
-                    Boolean deviceadmin = false, overlay = false;
+                    Boolean callphone = false, deviceadmin = false, overlay = false;
 
+                    if (hasCallPhonePermission()) callphone = true;
                     if (hasDeviceAdminPermission()) deviceadmin = true;
                     if (hasWindowOverlayPermission()) overlay = true;
 
-                    Log.i(PACKAGE_NAME, "ActivityMain : deviceadmin = " + deviceadmin + "    overlay = " + overlay);
+                    Log.i(PACKAGE_NAME, "ActivityMain : callphone = " + callphone + "    deviceadmin = " + deviceadmin + "    overlay = " + overlay);
 
                     if (deviceadmin&&overlay){
                         startActivity(new Intent(getApplicationContext(), ActivityLogin.class));
@@ -66,6 +69,32 @@ public class ActivityMain extends AppCompatActivity {
             if (!Settings.canDrawOverlays(getApplicationContext()))
                 return false;
         }
+
+        return true;
+    }
+    public boolean hasCallPhonePermission() {
+        Log.i(PACKAGE_NAME, "ActivityMain : hasCallPhonePermission : started");
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+
+            Log.i(PACKAGE_NAME, "ActivityMain : hasCallPhonePermission : error");
+
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // CALL_PHONE 권한을 Android OS에 요청한다.
+                requestPermissions(new String[]{android.Manifest.permission.CALL_PHONE}, 1000);
+            }
+
+            return false;
+        }
+
+        Log.i(PACKAGE_NAME, "ActivityMain : hasCallPhonePermission : good");
 
         return true;
     }

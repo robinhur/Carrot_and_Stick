@@ -4,12 +4,17 @@ import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.telephony.PhoneStateListener;
@@ -113,7 +118,7 @@ public class ServiceAlwaysOnTop extends Service {
         Resources.Theme theme = getApplicationContext().getTheme();
         theme.resolveAttribute(android.R.attr.textColorTertiary, typedValue, true);
         TypedArray arr = getApplicationContext().obtainStyledAttributes(typedValue.data, new int[]{android.R.attr.textColorTertiary});
-        AoT_MaintextColor = arr.getColor(0,-1);
+        AoT_MaintextColor = arr.getColor(0, -1);
         arr.recycle();
 
         ///홈버튼누르기///
@@ -126,7 +131,7 @@ public class ServiceAlwaysOnTop extends Service {
         aot_pager = (ViewPager) OnTop_view.findViewById(R.id.AOT_viewpager);
         aot_adapter = new AdapterAOT(getBaseContext());
         aot_pager.setClipToPadding(false);
-        aot_pager.setPadding(100,15,100,15);
+        aot_pager.setPadding(100, 15, 100, 15);
         aot_pager.setPageMargin(50);
         aot_pager.setAdapter(aot_adapter);
         aot_pager.setCurrentItem(1);
@@ -192,7 +197,32 @@ public class ServiceAlwaysOnTop extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return AoTMessenger.getBinder();
+    }
+
+    final Messenger AoTMessenger = new Messenger(new AoTIncomingHandler());
+
+    class AoTIncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(PACKAGE_NAME, "ServiceBackground : BackgroundIncomingHandler = " + msg.what);
+
+            ///////////////////////////////////
+            ///// AoT gogogogo       : 1  /////
+            ///// CreditTicker close : 2  /////
+            ///// Finally Close      : 3  /////
+            ///////////////////////////////////
+
+            switch (msg.what) {
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+            }
+
+        }
     }
 
     public class AdapterAOT extends PagerAdapter {
@@ -214,7 +244,7 @@ public class ServiceAlwaysOnTop extends Service {
         public View moveup_layout(View layout) {
 
             Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : moved up!!");
-            layout.setElevation((float)10.0);
+            layout.setElevation((float) 10.0);
             return layout;
 
         }
@@ -224,7 +254,7 @@ public class ServiceAlwaysOnTop extends Service {
 
             LayoutInflater inflater = LayoutInflater.from(mContext);
 
-            Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiating : "+ position);
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiating : " + position);
             View layout = (View) inflater.inflate(aot_screen[position], container, false);
             layout.setBackgroundResource(R.drawable.aot_corner);
 
@@ -232,7 +262,7 @@ public class ServiceAlwaysOnTop extends Service {
 
             container.addView(layout);
 
-            switch(position) {
+            switch (position) {
                 case 0:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 0(setting)");
                     aot_setting = (ListView) layout.findViewById(R.id.AoT_setting);
@@ -283,7 +313,7 @@ public class ServiceAlwaysOnTop extends Service {
     private PhoneStateListener phoneStateListener = new PhoneStateListener() {
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
-            switch(state){
+            switch (state) {
                 case TelephonyManager.CALL_STATE_IDLE:
                     image_phonestate.setImageResource(R.drawable.phone_state_idle);
                     text_phonestate.setTextColor(AoT_MaintextColor);
@@ -324,7 +354,7 @@ public class ServiceAlwaysOnTop extends Service {
             OnTop_view = null;
         }
 
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : A4oT 소멸");
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT 소멸");
     }
 
     @Override
@@ -359,5 +389,27 @@ public class ServiceAlwaysOnTop extends Service {
         };
 
         handler.post(updater);
+    }
+
+
+
+    public void aot_test_call(View v) {
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : aot_test_call : start");
+        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-1234-5678"));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+        }
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : aot_test_call : now outgoing calling");
+        startActivity(intent);
     }
 }

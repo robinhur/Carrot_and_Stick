@@ -238,22 +238,27 @@ public class LayoutSliding extends LinearLayout {
 
     public void now_CALL_STATE_OFFHOOK() {
 
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_OFFHOOK");
         //image_phonestate.setImageResource(R.drawable.phone_state_offhook);
         //text_phonestate.setText("전화 통화 중");
-        close_slide();
+        open_slide();
+        kill_timer();
 
     }
 
     public void now_CALL_STATE_RINGING() {
 
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_RINGING");
         //image_phonestate.setImageResource(R.drawable.phone_state_ringing);
         //text_phonestate.setText("전화 수신 중");
         open_slide();
+        kill_timer();
 
     }
 
     public void now_CALL_STATE_IDLE() {
 
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_IDLE");
         //image_phonestate.setImageResource(R.drawable.phone_state_ringing);
         //text_phonestate.setText("전화 수신 중");
         close_slide();
@@ -297,10 +302,15 @@ public class LayoutSliding extends LinearLayout {
         };
 
         handler.post(updater);
+
+        kill_timer();
+    }
+
+    public void kill_timer() {
         timertask = null;
         timer.cancel();
         timer.purge();
-        Log.d(PACKAGE_NAME, "timer_start : times_up : ended");
+        Log.d(PACKAGE_NAME, "timer_start : kill_timer");
     }
 
 }

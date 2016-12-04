@@ -106,6 +106,8 @@
                     android:gravity="center"
                     android:text="멀봐 띠부럴"/>
                 <Button
+                    android:id="@+id/aot_test_call"
+                    android:onClick="aot_test_call"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
