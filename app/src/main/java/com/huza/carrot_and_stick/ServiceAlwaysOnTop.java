@@ -358,7 +358,7 @@ public class ServiceAlwaysOnTop extends Service {
         @TargetApi(21)
         public View moveup_layout(View layout) {
 
-            Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : moved up!!");
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : elevation adopted!!");
             layout.setElevation((float) 10.0);
             return layout;
 

@@ -106,6 +106,7 @@ public class ReceiverStateListener extends BroadcastReceiver {
             ///// AoT gogogogo : 1 /////
             case Intent.ACTION_SCREEN_ON:
                 Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive : SCREEN_ON is now Under Construction");
+                break;
             case Intent.ACTION_USER_PRESENT:
                 if (!checkServiceRunning(AoT_SERVICE_NAME)) {
                     what = 1;

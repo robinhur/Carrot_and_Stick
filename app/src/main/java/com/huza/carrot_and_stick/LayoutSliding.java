@@ -107,7 +107,7 @@ public class LayoutSliding extends LinearLayout {
                         Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_DOWN");
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_MOVE");
+                            Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_MOVE");
                         break;
                     case MotionEvent.ACTION_UP:
                         Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_UP");
@@ -227,6 +227,7 @@ public class LayoutSliding extends LinearLayout {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        Log.d(PACKAGE_NAME, "SlidingLayout : onSizeChanged");
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
