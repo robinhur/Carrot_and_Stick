@@ -1,5 +1,8 @@
 package com.huza.carrot_and_stick;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.ComponentName;
@@ -29,6 +32,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -258,11 +264,55 @@ public class ServiceAlwaysOnTop extends Service {
                 OnTop_view.setSystemUiVisibility(ui_Options);
 
                 if (aot_custom_slidinglayout != null)
-                    aot_custom_slidinglayout.adjust_location();
+                    aot_custom_slidinglayout.calculate_location();
                 //Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_listen : " + OnTop_view.getWindowSystemUiVisibility());
             }
         });
         ////////////////////////////////
+    }
+
+    public void credit_updown_effect(final TextView textView, int mode) {
+        if (textView == null) return;
+
+        ObjectAnimator animator = null;
+
+        switch (mode) {
+            case 1: /// UP
+                iv_main_credit.setImageResource(R.drawable.up_image_1);
+                animator = ObjectAnimator.ofInt(textView, "textColor", Color.RED, AoT_MaintextColor);
+                break;
+            case -1: /// DONW
+                iv_main_credit.setImageResource(R.drawable.down_image_1);
+                animator = ObjectAnimator.ofInt(textView, "textColor", Color.BLUE, AoT_MaintextColor);
+                break;
+        }
+        iv_main_credit.setAlpha((float) 1.0);
+
+        Animation fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        fadeInAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                iv_main_credit.setAlpha((float) 0.0);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        animator.setDuration(500L);
+        animator.setEvaluator(new ArgbEvaluator());
+        animator.setInterpolator(new DecelerateInterpolator(2));
+        animator.setRepeatCount(3);
+        animator.setRepeatMode(ValueAnimator.RESTART);
+
+        iv_main_credit.startAnimation(fadeInAnimation);
+        animator.start();
     }
 
     public void close_AoT_service() {
@@ -309,7 +359,8 @@ public class ServiceAlwaysOnTop extends Service {
 
             /////////////////////////////////////
             ///// Connected with BG  : 100  /////
-            ///// Receive Credit     : 101  /////
+            ///// Receive Credit-init: 101  /////
+            ///// Receive Credit     : 102  /////
             ///// Finally Close      : 199  /////
             /////////////////////////////////////
 
@@ -326,6 +377,22 @@ public class ServiceAlwaysOnTop extends Service {
 
                     PB1.setVisibility(View.INVISIBLE);
                     PB2.setVisibility(View.INVISIBLE);
+                    break;
+                case 102:
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler = " + msg.getData().getString("extra_data"));
+
+                    if (user_credit == Integer.valueOf(msg.getData().getString("extra_data").toString()))
+                        break;
+
+                    tv_main_credit.setText(msg.getData().getString("extra_data").toString());
+
+                    if (user_credit > Integer.valueOf(msg.getData().getString("extra_data").toString()))
+                        credit_updown_effect(tv_main_credit, -1);
+                    else
+                        credit_updown_effect(tv_main_credit, 1);
+
+                    user_credit = Integer.valueOf(tv_main_credit.getText().toString());
+
                     break;
                 case 199:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");

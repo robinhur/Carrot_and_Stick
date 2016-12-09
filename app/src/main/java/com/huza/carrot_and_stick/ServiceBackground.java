@@ -81,11 +81,16 @@ public class ServiceBackground extends Service {
                     Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : user_credit init!!! : " + dataSnapshot.getValue().toString());
                     user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
 
+                    what = 101;
                     sendUserCredit();
 
                     //check_settle_up();
                 } else {
                     Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : user_credit changed!!: " + dataSnapshot.getValue().toString());
+                    user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
+
+                    what = 102;
+                    sendUserCredit();
                 }
             }
 
@@ -142,8 +147,10 @@ public class ServiceBackground extends Service {
             what = 100;
             sendMessage();
 
-            if (user_credit != -1)
+            if (user_credit != -1){
+                what = 102;
                 sendUserCredit();
+            }
         }
 
         @Override
@@ -176,8 +183,6 @@ public class ServiceBackground extends Service {
     public void sendUserCredit() {
 
         if (user_credit == -1) return;
-
-        what = 101;
         extra_data = String.valueOf(user_credit);
         sendMessage();
 

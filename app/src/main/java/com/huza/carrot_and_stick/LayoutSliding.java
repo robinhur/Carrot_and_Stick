@@ -43,9 +43,11 @@ public class LayoutSliding extends LinearLayout {
         init();
     }
 
-    public void adjust_location() {
+    public void calculate_location() {
         width = thisView.getMeasuredWidth();
         height = thisView.getMeasuredHeight();
+
+        thisView.getLocationOnScreen(location);
 
         Log.d(PACKAGE_NAME, "SlidingLayout : height : " + height);
         Log.d(PACKAGE_NAME, "SlidingLayout : width : " + width);
@@ -53,91 +55,6 @@ public class LayoutSliding extends LinearLayout {
         thisView.clearAnimation();
         thisView.setTranslationY(-height*1/2);
         thisView.setVisibility(VISIBLE);
-
-        if(btn_init != null)
-            adjust_listener();
-    }
-    public void adjust_listener() {
-
-        btn_init.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                //// Y pos : ((int)motionEvent.getRawY() - location[1])
-                //// start : height / 4
-                //// end : height
-
-                Log.d(PACKAGE_NAME, "SlidingLayout : onTouch : " + ((int)motionEvent.getRawY() - location[1]));
-
-
-
-                /*
-                release_y = ((int)motionEvent.getRawY() - location[1]);
-                Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : " + release_y);
-                Log.d(PACKAGE_NAME, "SlidingLayout : isOpened : " + isOpened);
-
-                Log.d(PACKAGE_NAME, "SlidingLayout : getRawY : " + (int)motionEvent.getRawY() + " = location : " + location[1]);
-
-                if (isOpened){
-                    if (reference_y == -1) {
-                        reference_y = release_y - (height/2);
-                    }
-
-                    release_y -= reference_y;
-
-                    if (release_y < 0)
-                        thisView.setTranslationY(-height*1/2);
-                    else if (release_y < height/2)
-                        thisView.setTranslationY((-height*1/2) + (release_y));
-                    else {
-                        thisView.setTranslationY(0);
-                    }
-                }
-                else{
-                    Log.d(PACKAGE_NAME, "SlidingLayout : release_y : " + release_y + " = height/2 : " + height/2 );
-                    if (release_y < height/2)
-                        thisView.setTranslationY(-height*1/2);
-                    else if (release_y > height)
-                        thisView.setTranslationY(0);
-                    else {
-                        thisView.setTranslationY((-height*1/2) + (release_y-height/2));
-                    }}
-
-                switch (motionEvent.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_DOWN");
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                            Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_MOVE");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_UP");
-                        //if (release_y > height) isOpened = true;
-                        //if (release_y < 0) isOpened = false;
-
-                        if (isOpened) {
-                            if (release_y < height*7/8)
-                                close_slide();
-                            else
-                                open_slide();
-                        } else {
-                            if (release_y < height/2 && release_y > 0)
-                                open_slide();
-                            else if (release_y < height*5/8)
-                                close_slide();
-                            else
-                                open_slide();
-                        }
-
-                        reference_y = -1;
-
-                        break;
-                }
-                */
-
-                return false;
-            }
-
-        });
     }
 
     public void init() {
@@ -149,11 +66,9 @@ public class LayoutSliding extends LinearLayout {
             public void run() {
                 Log.d(PACKAGE_NAME, "SlidingLayout : post called");
 
-                adjust_location();
 
-                thisView.getLocationOnScreen(location);
+                calculate_location();
 
-                Log.d(PACKAGE_NAME, "SlidingLayout : (x,y) : " + location[0] + " , " + location[1]);
 
                 Log.d(PACKAGE_NAME, "SlidingLayout : 접었음");
 
@@ -211,16 +126,63 @@ public class LayoutSliding extends LinearLayout {
                 Log.d(PACKAGE_NAME, "SlidingLayout : init 애니메이션 끝");
                 isOpened = false;
 
-                thisView.setOnTouchListener(new OnTouchListener() {
+                btn_init = (ImageView) thisView.findViewById(R.id.image_phonestate);
+                btn_init.setOnTouchListener(new OnTouchListener() {
                     @Override
                     public boolean onTouch(View view, MotionEvent motionEvent) {
-                        timer_start();
+                        //// Y pos : ((int)motionEvent.getRawY() - location[1])
+                        //// start : height / 4
+                        //// end : height
+
+                        Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : (" + (int)motionEvent.getRawX() + ", " + (int)motionEvent.getRawY() + ")  (" + location[0] + ", " + location[1] + ")");
+                        release_y = ((int)motionEvent.getRawY() - location[1]);
+
+                        switch (motionEvent.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_DOWN");
+                                kill_timer();
+                                if (reference_y == -1)
+                                    reference_y = ((int)motionEvent.getRawY() - location[1]);
+                                break;
+                            case MotionEvent.ACTION_MOVE:
+                                Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_MOVE");
+                                if (!isOpened) {
+                                    if (release_y-reference_y < 0)
+                                        thisView.setTranslationY(-height*1/2);
+                                    else if (release_y-reference_y > height/2)
+                                        thisView.setTranslationY(0);
+                                    else
+                                        thisView.setTranslationY((-height*1/2) + release_y-reference_y);
+                                } else {
+                                    if (release_y-reference_y > 0)
+                                        thisView.setTranslationY(0);
+                                    else if (release_y-reference_y < -height*1/2)
+                                        thisView.setTranslationY(-height*1/2);
+                                    else
+                                        thisView.setTranslationY(release_y-reference_y);
+                                }
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                Log.d(PACKAGE_NAME, "SlidingLayout : OnTouchListener : ACTION_UP");
+                                if (!isOpened) {
+                                    if (release_y-reference_y > height/4 || ((release_y-reference_y < height/8)&&(release_y-reference_y>=0)))
+                                        open_slide();
+                                    else
+                                        close_slide();
+                                } else {
+                                    if (release_y - reference_y < -height/4 || ((release_y-reference_y > -height/8)&&(release_y-reference_y<=0)))
+                                        close_slide();
+                                    else
+                                        open_slide();
+                                }
+                                reference_y = -1;
+                                break;
+                        }
+
                         return false;
                     }
-                });
 
-                btn_init = (ImageView) thisView.findViewById(R.id.image_phonestate);
-                adjust_listener();
+                });
             }
         });
     }

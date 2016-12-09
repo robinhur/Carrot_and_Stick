@@ -77,7 +77,7 @@ public class AdapterSetting extends BaseAdapter {
         public void onClick(View view) {
             switch (view.getId()-1){
                 case 6:
-                    send_final_close_msg();
+                    //send_final_close_msg();
                     Toast.makeText(mContext, "어플리케이션 완전 종료", Toast.LENGTH_SHORT).show();
                     break;
             }
