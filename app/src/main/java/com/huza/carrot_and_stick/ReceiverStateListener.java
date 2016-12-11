@@ -114,6 +114,13 @@ public class ReceiverStateListener extends BroadcastReceiver {
                 }
                 break;
 
+            ///// to AoT, NEW OUTGOING CALL : 2 /////
+            case Intent.ACTION_NEW_OUTGOING_CALL:
+                what = 2;
+                extra_data = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
+                sendMessage();
+                break;
+
             ///// CreditTicker close : 5 /////
             case Intent.ACTION_SCREEN_OFF:
                 checkServiceRunning(Background_SERVICE_NAME);
@@ -122,13 +129,6 @@ public class ReceiverStateListener extends BroadcastReceiver {
                     what = 5;
                     sendMessage();
                 }
-                break;
-
-            ///// to AoT, NEW OUTGOING CALL : 20 /////
-            case Intent.ACTION_NEW_OUTGOING_CALL:
-                what = 20;
-                extra_data = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
-                sendMessage();
                 break;
 
             ///// Finally Close : 99 /////

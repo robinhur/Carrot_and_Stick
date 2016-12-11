@@ -278,7 +278,7 @@ public class ServiceBackground extends Service {
             ////////////////////////////////////
             ///// AoT gogogogo       : 1   /////
             ///// AoT connected      : 10  /////
-            ///// NEW OUTGOING CALL  : 20  /////
+            ///// NEW OUTGOING CALL  : 2  /////
             ///// AoT end msg        : 199 /////
             ///// CreditTicker close : 5   /////
             ///// CT connected       : 50  /////
@@ -294,7 +294,7 @@ public class ServiceBackground extends Service {
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : AoT connected");
                     bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
                     break;
-                case 20:
+                case 2:
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : 3 : " + msg.getData().getString("extra_data"));
                     break;
                 case 199:
