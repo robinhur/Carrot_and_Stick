@@ -20,5 +20,5 @@
 
     <dimen name="AoT_page_padding">50px</dimen>
 
-    <dimen name="AoT_slide_radius">20dp</dimen>
+    <dimen name="AoT_slide_radius">40dp</dimen>
 </resources>

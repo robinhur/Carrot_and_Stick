@@ -42,6 +42,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.matthewtamlin.sliding_intro_screen_library.indicators.DotIndicator;
 
 import java.text.SimpleDateFormat;
@@ -198,6 +202,48 @@ public class ServiceAlwaysOnTop extends Service {
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         OnTop_view = inflater.inflate(R.layout.service_alwaysontop, null);
+
+        /// 배너 광고!! ///
+        MobileAds.initialize(OnTop_view.getContext(), "ca-app-pub-7701727044020114~2802773583");
+        AdView mAdView = (AdView) OnTop_view.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)  //ADD TEST DEVICE MODE
+                .build();
+        mAdView.loadAd(adRequest);
+        mAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdClosed");
+                OnTop_view.setVisibility(View.VISIBLE);
+                super.onAdClosed();
+            }
+
+            @Override
+            public void onAdFailedToLoad(int i) {
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdFailedToLoad : " + i);
+                super.onAdFailedToLoad(i);
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdLeftApplication");
+                OnTop_view.setVisibility(View.INVISIBLE);
+                super.onAdLeftApplication();
+            }
+
+            @Override
+            public void onAdOpened() {
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdOpened");
+                super.onAdOpened();
+            }
+
+            @Override
+            public void onAdLoaded() {
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdLoaded");
+                super.onAdLoaded();
+            }
+        });
+        ///////////////////
 
         aot_pager = (ViewPager) OnTop_view.findViewById(R.id.AOT_viewpager);
         aot_adapter = new AdapterAOT(getBaseContext());
@@ -369,7 +415,9 @@ public class ServiceAlwaysOnTop extends Service {
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler : Background connected");
                     break;
                 case 101:
+                case 102:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler = " + msg.getData().getString("extra_data"));
+
                     btn_close.setText("Credit\n사용하기");
                     btn_close.setEnabled(true);
                     tv_main_credit.setText(msg.getData().getString("extra_data").toString());
@@ -377,9 +425,6 @@ public class ServiceAlwaysOnTop extends Service {
 
                     PB1.setVisibility(View.INVISIBLE);
                     PB2.setVisibility(View.INVISIBLE);
-                    break;
-                case 102:
-                    Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler = " + msg.getData().getString("extra_data"));
 
                     if (user_credit == Integer.valueOf(msg.getData().getString("extra_data").toString()))
                         break;

@@ -41,6 +41,12 @@ public class ServiceBackground extends Service {
     }
 
     @Override
+    public void onDestroy() {
+        Log.d(PACKAGE_NAME, "ServiceBackground 소멸!!!");
+        super.onDestroy();
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 
