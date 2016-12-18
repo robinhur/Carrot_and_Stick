@@ -439,6 +439,12 @@ public class ServiceAlwaysOnTop extends Service {
                     user_credit = Integer.valueOf(tv_main_credit.getText().toString());
 
                     break;
+                case 152:
+                    image_phonestate.setImageResource(R.drawable.phone_state_ringing);
+                    text_phonestate.setTextColor(Color.YELLOW);
+                    text_phonestate.setText("전화 발신 중");
+                    aot_custom_slidinglayout.now_NEW_OUTGOING_CALL();
+                    break;
                 case 199:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");
                     OnTop_view.setOnSystemUiVisibilityChangeListener(null);

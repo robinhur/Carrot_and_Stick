@@ -129,13 +129,14 @@ public class ServiceBackground extends Service {
         startService(i);
     }
     public void Close_CreditTicker() {
-        what = 599;
-        sendMessage();
+
     }
 
     public void Request_Close_CreditTicker() {
+
         what = 598;
         sendMessage();
+
     }
 
     int what;
@@ -241,11 +242,11 @@ public class ServiceBackground extends Service {
                     e.printStackTrace();
                 }
 
-                if (what == 599) {
+                if (what == 598) {
                     unbindService(mConnection_Ticker);
                     mConnection_Ticker.onServiceDisconnected(null);
-                    Start_AoT();
                 }
+
             }
         } else {
             Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage : message error!!!! : " + what + " : " + extra_data);
@@ -283,30 +284,38 @@ public class ServiceBackground extends Service {
 
             ////////////////////////////////////
             ///// AoT gogogogo       : 1   /////
-            ///// AoT connected      : 10  /////
-            ///// NEW OUTGOING CALL  : 2  /////
-            ///// AoT end msg        : 199 /////
+            ///// NEW OUTGOING CALL  : 2   /////
             ///// CreditTicker close : 5   /////
-            ///// CT connected       : 50  /////
-            ///// CT end msg         : 599 /////
             ///// Finally Close      : 99  /////
+            ////////////////////////////////////
+            ///// AoT connected      : 101 /////
+            ///// AoT request dic    : 199 /////
+            ///// AoT end msg        : 199 /////
+            ///// CT connected       : 501 /////
+            ///// CT request dic     : 597 /////
+            ///// CT end msg         : 599 /////
             ////////////////////////////////////
 
             switch (msg.what) {
                 case 1:
                     Start_AoT();
                     break;
+                case 2:
+                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : " + msg.getData().getString("extra_data"));
+                    break;
+                case 5:
+                    Request_Close_CreditTicker();
+                    break;
+                case 99:
+                    break;
                 case 10:
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : AoT connected");
                     bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
                     break;
-                case 2:
-                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : 3 : " + msg.getData().getString("extra_data"));
-                    break;
                 case 199:
                     Close_AoT();
                     break;
-                case 5:
+                case 597:
                     Request_Close_CreditTicker();
                     break;
                 case 599:
@@ -315,8 +324,6 @@ public class ServiceBackground extends Service {
                 case 50:
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : Ticker connected");
                     bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
-                    break;
-                case 99:
                     break;
             }
 

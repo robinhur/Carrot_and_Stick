@@ -15,6 +15,9 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Created by HuZA on 2016-11-14.
  */
@@ -43,7 +46,23 @@ public class ServiceCreditTicker extends Service {
 
     }
 
-    public void letscloseticker() {
+    @Override
+    public void onDestroy() {
+
+        //// noti 지우기 ////
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(737);
+        ///////////////////////////////
+
+        super.onDestroy();
+
+    }
+
+    public void requestTOdisconnect() {
+        what = 597;
+        sendMessage();
+    }
+    public void disconnect() {
         what = 599;
         sendMessage();
     }
@@ -52,16 +71,16 @@ public class ServiceCreditTicker extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(PACKAGE_NAME, "ServiceCreditTicker : onStartCommand 생성");
 
-        if (intent == null) {
+        /*if (intent == null) {
             Log.d(PACKAGE_NAME, "ServiceCreditTicker : intent가 없으므로 gg");
             stopSelf();
-        }
+        }*/
 
         if (intent.getAction() != null) {
             Log.d(PACKAGE_NAME, "ServiceCreditTicker : " + intent.getAction());
             switch (intent.getAction()) {
                 case "CLICKtoCLOSE":
-                    letscloseticker();
+                    requestTOdisconnect();
                     break;
                 default:
                     break;
@@ -108,9 +127,56 @@ public class ServiceCreditTicker extends Service {
         nm.notify(737, noti);
 
         second = 0;
-        //count_credit();
+        count_credit();
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    Timer timer = new Timer();
+    TimerTask timerTask;
+
+    void count_credit() {
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                if (user_credit - second <= 0){
+                    Log.d(PACKAGE_NAME, "ServiceCreditTicker : TimerTask : 사용시간 초과!!!");
+                    //stopSelf();
+                    return;
+                }
+
+                second++;
+
+                /*SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt("second" , second);
+                editor.commit();*/
+
+                Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
+                mBuilder.setSmallIcon(R.drawable.carrot_noti);
+                mBuilder.setWhen(System.currentTimeMillis() + 500);
+                mBuilder.setContentIntent(pendingIntent);
+                mBuilder.setPriority(Notification.PRIORITY_HIGH);
+
+                Notification.BigTextStyle style = new Notification.BigTextStyle(mBuilder);
+                style.setSummaryText("내 Credit : " + user_credit);
+                style.bigText(
+                        "사용 시간 :\t"+(second/60)+"분 "+(second%60)+"초 (차감 Credit : " + second + ")"
+                );
+                mBuilder.setStyle(style);
+                //mBuilder.setTicker("안되지만 여기는 ticker!!!");
+
+                mBuilder.setContentTitle("현재 당근을 사용 중입니다");
+                mBuilder.setContentText("사용 시간 :\t"+(second/60)+"분 "+(second%60)+"초 (차감 Credit : " + second + ")");
+
+                Notification noti = mBuilder.build();
+                noti.flags = Notification.FLAG_NO_CLEAR;
+
+                nm.notify(737, noti);
+            }
+        };
+
+        timer.schedule(timerTask, 0 , 1000);
     }
 
     int what;
@@ -153,6 +219,7 @@ public class ServiceCreditTicker extends Service {
             if (what == 599) {
                 unbindService(mConnection_background);
                 mConnection_background.onServiceDisconnected(null);
+                stopSelf();
             }
         }
 
@@ -181,7 +248,7 @@ public class ServiceCreditTicker extends Service {
                 case 500:
                     break;
                 case 598:
-                    letscloseticker();
+                    disconnect();
                     break;
                 case 599:
                     stopSelf();

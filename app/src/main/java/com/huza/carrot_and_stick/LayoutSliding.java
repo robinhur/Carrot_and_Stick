@@ -243,6 +243,16 @@ public class LayoutSliding extends LinearLayout {
 
     }
 
+    public void now_NEW_OUTGOING_CALL() {
+
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_NEW_OUTGOING_CALL");
+        //image_phonestate.setImageResource(R.drawable.phone_state_ringing);
+        //text_phonestate.setText("전화 수신 중");
+        open_slide();
+        kill_timer();
+
+    }
+
 
     TimerTask timertask;
     Timer timer = new Timer();
