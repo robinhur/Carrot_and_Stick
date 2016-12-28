@@ -20,6 +20,11 @@ public class ActivityMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         first_checkPermission();
     }
@@ -40,7 +45,7 @@ public class ActivityMain extends AppCompatActivity {
 
                     Log.i(PACKAGE_NAME, "ActivityMain : callphone = " + callphone + "    deviceadmin = " + deviceadmin + "    overlay = " + overlay);
 
-                    if (deviceadmin&&overlay){
+                    if (deviceadmin&&overlay&&callphone){
                         startActivity(new Intent(getApplicationContext(), ActivityLogin.class));
                     } else {
                         startActivity(new Intent(getApplicationContext(), ActivityPermission.class));
@@ -73,28 +78,11 @@ public class ActivityMain extends AppCompatActivity {
         return true;
     }
     public boolean hasCallPhonePermission() {
-        Log.i(PACKAGE_NAME, "ActivityMain : hasCallPhonePermission : started");
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-
-            Log.i(PACKAGE_NAME, "ActivityMain : hasCallPhonePermission : error");
-
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // CALL_PHONE 권한을 Android OS에 요청한다.
-                requestPermissions(new String[]{android.Manifest.permission.CALL_PHONE}, 1000);
+                return false;
             }
-
-            return false;
         }
-
-        Log.i(PACKAGE_NAME, "ActivityMain : hasCallPhonePermission : good");
 
         return true;
     }

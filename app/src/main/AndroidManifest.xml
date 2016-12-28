@@ -16,7 +16,6 @@
         android:icon="@mipmap/alarm_clock_icon"
         android:label="MyAlarm"
         android:largeHeap="true"
-        android:supportsRtl="true"
         android:theme="@style/AppTheme_NoActionBar">
 
         <!--This meta-data tag is required to use Google Play Services.-->
@@ -24,7 +23,6 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:noHistory="true"
             android:name=".ActivityMain"
             android:icon="@mipmap/carrot_icon"
             android:label="@string/app_name"
@@ -36,13 +34,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:noHistory="true"
             android:name=".ActivityPermission"/>
         <activity
-            android:noHistory="true"
             android:name=".ActivityLogin"/>
         <activity
-            android:noHistory="true"
             android:name=".ActivitySignup"/>
 
         <!--Include the AdActivity configChanges and theme. -->

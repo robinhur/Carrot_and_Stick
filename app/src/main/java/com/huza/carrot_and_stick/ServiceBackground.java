@@ -25,6 +25,8 @@ import com.google.firebase.database.ValueEventListener;
 
 public class ServiceBackground extends Service {
 
+    boolean lets_stop_thisloop = false; // for stop loop
+
     final String PACKAGE_NAME = "Carrot_and_Stick";
     final String AoT_SERVICE_NAME = "com.huza.carrot_and_stick.ServiceAlwaysOnTop";
     final String CreditTicker_SERVICE_NAME = "com.huza.carrot_and_stick.ServiceCreditTicker";
@@ -36,6 +38,12 @@ public class ServiceBackground extends Service {
     DatabaseReference databaseReference;
     int user_credit;
 
+    int what;
+    String extra_data;
+
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
+
     public ServiceBackground() {
         Log.d(PACKAGE_NAME, "ServiceBackground 생성");
     }
@@ -45,7 +53,6 @@ public class ServiceBackground extends Service {
         Log.d(PACKAGE_NAME, "ServiceBackground 소멸!!!");
         super.onDestroy();
     }
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -70,6 +77,9 @@ public class ServiceBackground extends Service {
         extra_data = null;
         user_credit = -1;
 
+        pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        editor = pref.edit();
+
         Init_firebase();
         Start_AoT();
     }
@@ -85,19 +95,15 @@ public class ServiceBackground extends Service {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (user_credit == -1) {
                     Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : user_credit init!!! : " + dataSnapshot.getValue().toString());
-                    user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
-
-                    what = 101;
-                    sendUserCredit();
-
-                    //check_settle_up();
+                    check_settle_up();
                 } else {
                     Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : user_credit changed!!: " + dataSnapshot.getValue().toString());
-                    user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
-
-                    what = 102;
-                    sendUserCredit();
                 }
+
+                user_credit = Integer.valueOf(dataSnapshot.getValue().toString());
+
+                if (checkServiceRunning(AoT_SERVICE_NAME))
+                    sendUserCredit();
             }
 
             @Override
@@ -106,96 +112,96 @@ public class ServiceBackground extends Service {
             }
         });
     }
-    public void Start_AoT() {
-        if (checkServiceRunning(AoT_SERVICE_NAME)) return;
 
-        //// 혹시 몰라 noti 지우기 ////
-        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.cancel(737);
-        ///////////////////////////////
-
-        Log.d(PACKAGE_NAME, "ServiceBackground : Start_AoT : AoT 서비스를 시작합니다");
-        startService(new Intent(this, ServiceAlwaysOnTop.class));
+    public void check_settle_up() {
+        Log.d(PACKAGE_NAME, "ServiceBackground : check_settle_up");
     }
-    public void Close_AoT() {
-        what = 199;
-        sendMessage();
-    }
-    public void Start_CreditTicker() {
-        if (checkServiceRunning(CreditTicker_SERVICE_NAME)) return;
-
-        Intent i = new Intent(this, ServiceCreditTicker.class);
-        i.putExtra("user_credit", user_credit);
-        startService(i);
-    }
-    public void Close_CreditTicker() {
-
-    }
-
-    public void Request_Close_CreditTicker() {
-
-        what = 598;
-        sendMessage();
-
-    }
-
-    int what;
-    String extra_data;
-
-    Messenger mService_AoT = null;
-    boolean mBound_AoT;
-    private ServiceConnection mConnection_AoT = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mService_AoT = new Messenger(iBinder);
-            mBound_AoT = true;
-            mBound_Ticker = false;
-
-            what = 100;
-            sendMessage();
-
-            if (user_credit != -1){
-                what = 102;
-                sendUserCredit();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mService_AoT = null;
-            mBound_AoT = false;
-        }
-    };
-
-    Messenger mService_Ticker = null;
-    boolean mBound_Ticker;
-    private ServiceConnection mConnection_Ticker = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mService_Ticker = new Messenger(iBinder);
-            mBound_Ticker = true;
-            mBound_AoT = false;
-
-            what = 500;
-            sendMessage();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mService_Ticker = null;
-            mBound_Ticker = false;
-        }
-    };
-
     public void sendUserCredit() {
 
         if (user_credit == -1) return;
+
+        what = 102;
         extra_data = String.valueOf(user_credit);
         sendMessage();
 
     }
+    public void changeUserCredit(int delta) {
 
+        Log.d(PACKAGE_NAME, "ServiceBackground : changeUserCredit : " + user_credit + " : " + delta);
+
+        if (user_credit - delta < 0)
+            delta = user_credit;
+
+        databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(user_credit - delta);
+
+    }
+z
+    public void Start_AoT() {
+        if (checkServiceRunning(AoT_SERVICE_NAME)) return;
+
+        lets_stop_thisloop = false;
+
+        Log.d(PACKAGE_NAME, "ServiceBackground : Start_AoT : AoT 서비스를 시작합니다 : " + user_credit);
+        startService(new Intent(this, ServiceAlwaysOnTop.class));
+    }
+    public void Start_CreditTicker() {
+        if (checkServiceRunning(CreditTicker_SERVICE_NAME)) return;
+
+        lets_stop_thisloop = false;
+
+        Intent i = new Intent(this, ServiceCreditTicker.class);
+        i.putExtra("user_credit", user_credit);
+        startService(i);
+
+        what = 500;
+        sendMessage();
+    }
+
+    public void connect_with_AoT() {
+        bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
+        what=100;
+        sendMessage();
+
+        sendUserCredit();
+    }
+
+    public void Close_AoT() {
+        what = 198;
+        sendMessage();
+    }
+    public void Close_CreditTicker() {
+        what = 598;
+        sendMessage();
+    }
+
+    public void shutdown_AoT(){
+        stopService(new Intent(this, ServiceAlwaysOnTop.class));
+    }
+    public void shutdown_CT() {
+        stopService(new Intent(this, ServiceCreditTicker.class));
+        //// 혹시 몰라 noti 지우기 ////
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(737);
+        ///////////////////////////////
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////ver.161228//
+    /////        ////          ////   //////  ////       ///////////// Always On Top ///////////////
+    ///  ////////////  ////////////  /  ////  ////  ////  /////////// Connect w/AoT      : 100 /////
+    ////        /////          ////  ///  //  ////  /////  ////////// send Credit        : 102 /////
+    //////////   ////  ////////////  /////    ////  ////  /////////// send Setting       : 103 /////
+    ///        //////          ////  ///////  ////       //////////// alert OutgoingCall : 152 /////
+    ///////////////////////////////////////////////////////////////// Disconnect w/AoT   : 198 /////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////// Credit Ticker ///////////////
+    ///////////////////////////////////////////////////////////////// Connect w/CT       : 500 /////
+    ///////////////////////////////////////////////////////////////// send Credit        : 502 /////
+    ///////////////////////////////////////////////////////////////// alert OffHook      : 553 /////
+    ///////////////////////////////////////////////////////////////// Disconnect w/CT    : 598 /////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     public void sendMessage() {
+
         if (what == 0) return;
 
         Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage : message = " + what);
@@ -218,11 +224,18 @@ public class ServiceBackground extends Service {
                     e.printStackTrace();
                 }
 
-                if (what == 199) {
+                if (what == 198) {
                     unbindService(mConnection_AoT);
                     mConnection_AoT.onServiceDisconnected(null);
-                    Start_CreditTicker();
+
+                    if (!lets_stop_thisloop)
+                        Start_CreditTicker();
+
+                    lets_stop_thisloop = false;
                 }
+
+                what = 0;
+                extra_data = null;
             }
         } else if (what/500 == 1) {
             if (!mBound_Ticker)
@@ -245,16 +258,100 @@ public class ServiceBackground extends Service {
                 if (what == 598) {
                     unbindService(mConnection_Ticker);
                     mConnection_Ticker.onServiceDisconnected(null);
+
+                    if (!lets_stop_thisloop)
+                        Start_AoT();
+
+                    lets_stop_thisloop = false;
                 }
 
+                what = 0;
+                extra_data = null;
             }
         } else {
             Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage : message error!!!! : " + what + " : " + extra_data);
         }
-
-        what = 0;
-        extra_data = null;
     }
+
+
+    ////////////////////////ver.161228//
+    ///// AoT gogogogo       : 1   /////
+    ///// NEW OUTGOING CALL  : 2   /////
+    ///// CreditTicker close : 5   /////
+    ///// Finally Close      : 99  /////
+    ////////////////////////////////////
+    ///// AoT connected      : 101 /////
+    ///// AoT diconn req w/o : 196 /////
+    ///// AoT diconn req     : 197 /////
+    ///// AoT end msg        : 199 /////
+    ////////////////////////////////////
+    ///// CT connected       : 501 /////
+    ///// CT diconn req w/o  : 596 /////
+    ///// CT diconn req      : 597 /////
+    ///// CT end msg + time  : 599 /////
+    ////////////////////////////////////
+    @Override
+    public IBinder onBind(Intent intent) {
+        return BackgroundMessenger.getBinder();
+    }
+    final Messenger BackgroundMessenger = new Messenger(new BackgroundIncomingHandler());
+    class BackgroundIncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler = " + msg.what);
+
+            switch (msg.what) {
+                case 1:
+                    Start_AoT();
+                    break;
+                case 2:
+                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : " + msg.getData().getString("extra_data"));
+                    break;
+                case 5:
+                    if (checkServiceRunning(CreditTicker_SERVICE_NAME)) {
+                        lets_stop_thisloop = true;
+                        Close_CreditTicker();
+                    }
+                    break;
+                case 99:
+                    break;
+
+
+                case 101:
+                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : AoT connected");
+                    connect_with_AoT();
+                    break;
+                case 196:
+                    lets_stop_thisloop = true;
+                case 197:
+                    Close_AoT();
+                    break;
+                case 199:
+                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : AoT 죽여?");
+                    shutdown_AoT();
+                    break;
+
+
+                case 501:
+                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : Ticker connected");
+                    bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
+                    break;
+                case 596:
+                    lets_stop_thisloop = true;
+                case 597:
+                    Close_CreditTicker();
+                    break;
+                case 599:
+                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : CT 죽여? : second : " + msg.getData().getString("extra_data"));
+                    changeUserCredit(Integer.valueOf(msg.getData().getString("extra_data")));
+                    shutdown_CT();
+                    break;
+            }
+
+        }
+    }
+
+
 
     public boolean checkServiceRunning(String service_name) {
 
@@ -272,61 +369,51 @@ public class ServiceBackground extends Service {
 
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return BackgroundMessenger.getBinder();
-    }
-    final Messenger BackgroundMessenger = new Messenger(new BackgroundIncomingHandler());
-    class BackgroundIncomingHandler extends Handler {
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    Messenger mService_Ticker = null;
+    boolean mBound_Ticker;
+    private ServiceConnection mConnection_Ticker = new ServiceConnection() {
         @Override
-        public void handleMessage(Message msg) {
-            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler = " + msg.what);
-
-            ////////////////////////////////////
-            ///// AoT gogogogo       : 1   /////
-            ///// NEW OUTGOING CALL  : 2   /////
-            ///// CreditTicker close : 5   /////
-            ///// Finally Close      : 99  /////
-            ////////////////////////////////////
-            ///// AoT connected      : 101 /////
-            ///// AoT request dic    : 199 /////
-            ///// AoT end msg        : 199 /////
-            ///// CT connected       : 501 /////
-            ///// CT request dic     : 597 /////
-            ///// CT end msg         : 599 /////
-            ////////////////////////////////////
-
-            switch (msg.what) {
-                case 1:
-                    Start_AoT();
-                    break;
-                case 2:
-                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : " + msg.getData().getString("extra_data"));
-                    break;
-                case 5:
-                    Request_Close_CreditTicker();
-                    break;
-                case 99:
-                    break;
-                case 10:
-                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : AoT connected");
-                    bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
-                    break;
-                case 199:
-                    Close_AoT();
-                    break;
-                case 597:
-                    Request_Close_CreditTicker();
-                    break;
-                case 599:
-                    Close_CreditTicker();
-                    break;
-                case 50:
-                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : Ticker connected");
-                    bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
-                    break;
-            }
-
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mService_Ticker = new Messenger(iBinder);
+            mBound_Ticker = true;
+            mBound_AoT = false;
+            sendMessage();
         }
-    }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(PACKAGE_NAME, "ServiceBackground : mConnection_Ticker : disconnected");
+
+            mService_Ticker = null;
+            mBound_Ticker = false;
+        }
+    };
+
+    Messenger mService_AoT = null;
+    boolean mBound_AoT;
+    private ServiceConnection mConnection_AoT = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mService_AoT = new Messenger(iBinder);
+            mBound_AoT = true;
+            mBound_Ticker = false;
+            sendMessage();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(PACKAGE_NAME, "ServiceBackground : mConnection_AoT : disconnected");
+
+            mService_AoT = null;
+            mBound_AoT = false;
+        }
+    };
 }

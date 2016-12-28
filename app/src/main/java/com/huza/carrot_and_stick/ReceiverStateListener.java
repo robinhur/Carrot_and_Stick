@@ -35,23 +35,13 @@ public class ReceiverStateListener extends BroadcastReceiver {
         mContext = context;
     }
 
-    Messenger mService_background = null;
-    boolean mBound_background;
-    private ServiceConnection mConnection_background = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mService_background = new Messenger(iBinder);
-            mBound_background = true;
-            sendMessage();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mService_background = null;
-            mBound_background = false;
-        }
-    };
-
+    ////////////////////////////////////////////////////////////////////////////////////ver.161228//
+    /////        ////          ////   //////  ////       //////////// Background ///////////////////
+    ///  ////////////  ////////////  /  ////  ////  ////  ////////// AoT gogogogo       : 1   //////
+    ////        /////          ////  ///  //  ////  /////  ///////// NEW OUTGOING CALL  : 2   //////
+    //////////   ////  ////////////  /////    ////  ////  ////////// CreditTicker close : 5   //////
+    ///        //////          ////  ///////  ////       /////////// Finally Close      : 99  //////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     private void sendMessage() {
         Log.d(PACKAGE_NAME, "ReceiverStateListener : MESSAGE : sendMessage = " + mBound_background + " : " + what);
 
@@ -108,10 +98,8 @@ public class ReceiverStateListener extends BroadcastReceiver {
                 Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive : SCREEN_ON is now Under Construction");
                 break;
             case Intent.ACTION_USER_PRESENT:
-                if (!checkServiceRunning(AoT_SERVICE_NAME)) {
-                    what = 1;
-                    sendMessage();
-                }
+                what = 1;
+                sendMessage();
                 break;
 
             ///// to AoT, NEW OUTGOING CALL : 2 /////
@@ -123,12 +111,10 @@ public class ReceiverStateListener extends BroadcastReceiver {
 
             ///// CreditTicker close : 5 /////
             case Intent.ACTION_SCREEN_OFF:
-                checkServiceRunning(Background_SERVICE_NAME);
+                Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive : SCREEN_OFF is now Under Construction");
             case Intent.ACTION_SHUTDOWN:
-                if (checkServiceRunning(CreditTicker_SERVICE_NAME)) {
-                    what = 5;
-                    sendMessage();
-                }
+                what = 5;
+                sendMessage();
                 break;
 
             ///// Finally Close : 99 /////
@@ -164,4 +150,30 @@ public class ReceiverStateListener extends BroadcastReceiver {
         return false;
 
     }
+
+
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    //Service Connection//
+    Messenger mService_background = null;
+    boolean mBound_background;
+    private ServiceConnection mConnection_background = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            mService_background = new Messenger(iBinder);
+            mBound_background = true;
+            sendMessage();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mService_background = null;
+            mBound_background = false;
+        }
+    };
 }

@@ -145,6 +145,7 @@
                         android:id="@+id/text_phonestate"
                         android:background="@color/AoT_item_background"
                         android:text="대기 중"
+                        android:gravity="center"
                         android:textAlignment="center"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />

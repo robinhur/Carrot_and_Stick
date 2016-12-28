@@ -14,7 +14,8 @@ public class AdapterWelcome extends FragmentStatePagerAdapter {
             R.drawable.welcome_permission_1,
             R.drawable.welcome_permission_2,
             R.drawable.welcome_permission_3,
-            R.drawable.welcome_permission_4
+            R.drawable.welcome_permission_4,
+            R.drawable.welcome_permission_5
     };
 
     public AdapterWelcome(FragmentManager fm) {

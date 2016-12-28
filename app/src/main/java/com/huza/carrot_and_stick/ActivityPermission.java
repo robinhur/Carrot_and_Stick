@@ -4,11 +4,14 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.MotionEvent;
@@ -30,12 +33,14 @@ public class ActivityPermission extends FragmentActivity {
     DotIndicator indicator;
 
     Button btn_next;
+    int btn_next_default_color;
     int now_pos = 0;
 
     ComponentName adminComponent;
     DevicePolicyManager devicePolicyManager;
 
     public void btn_next_clicked(View v) {
+
         switch (now_pos) {
             case 0:   // 0 -> 1로
 
@@ -43,6 +48,7 @@ public class ActivityPermission extends FragmentActivity {
                     now_pos = 5;
                     pager.setCurrentItem(1);
                     btn_next.setText("활성화하기");
+                    btn_next.setTextColor(Color.RED);
                     break;
                 } else {
                     now_pos = 1;
@@ -54,17 +60,31 @@ public class ActivityPermission extends FragmentActivity {
                     now_pos = 6;
                     pager.setCurrentItem(2);
                     btn_next.setText("활성화하기");
+                    btn_next.setTextColor(Color.RED);
                     break;
                 } else {
                     now_pos = 2;
                 }
 
-            case 2:   // 2 -> 3로
-                now_pos = 3;
-                pager.setCurrentItem(3);
+            case 2:
+
+                if (!hasCallPhonePermission()) {
+                    now_pos = 7;
+                    pager.setCurrentItem(3);
+                    btn_next.setText("활성화하기");
+                    btn_next.setTextColor(Color.RED);
+                    break;
+                } else {
+                    now_pos = 3;
+                }
+
+            case 3:   // 3 -> 4로
+                now_pos = 4;
+                pager.setCurrentItem(4);
                 btn_next.setText("시작하기");
+                btn_next.setTextColor(btn_next_default_color);
                 break;
-            case 3:
+            case 4:
                 startActivity(new Intent(getApplicationContext(), ActivityLogin.class));
                 finish();
                 break;
@@ -91,7 +111,29 @@ public class ActivityPermission extends FragmentActivity {
                 startActivityForResult(i2 , 6);
 
                 break;
+            case 7:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(new String[]{android.Manifest.permission.CALL_PHONE}, 1000);
+                }
+                break;
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case 1000:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+
+                    now_pos = 4;
+                    pager.setCurrentItem(4);
+                    btn_next.setText("시작하기");
+                    btn_next.setTextColor(btn_next_default_color);
+
+                }
+        }
+
     }
 
     @Override
@@ -120,6 +162,7 @@ public class ActivityPermission extends FragmentActivity {
         setContentView(R.layout.activity_permission);
 
         btn_next = (Button) findViewById(R.id.btn_next);
+        btn_next_default_color = btn_next.getTextColors().getDefaultColor();
 
         pager = (ViewPager) findViewById(R.id.view_pager);
         adapter = new AdapterWelcome(getSupportFragmentManager());
@@ -167,6 +210,16 @@ public class ActivityPermission extends FragmentActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (!Settings.canDrawOverlays(getApplicationContext()))
                 return false;
+        }
+
+        return true;
+    }
+    public boolean hasCallPhonePermission() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                return true;
+            }
+            return false;
         }
 
         return true;
