@@ -38,7 +38,7 @@
         <activity
             android:name=".ActivityLogin"/>
         <activity
-            android:name=".ActivitySignup"/>
+            android:name=".ActivitySignUp"/>
 
         <!--Include the AdActivity configChanges and theme. -->
         <activity android:name="com.google.android.gms.ads.AdActivity"

@@ -141,14 +141,29 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1">
 
-                    <TextView
-                        android:id="@+id/text_phonestate"
-                        android:background="@color/AoT_item_background"
-                        android:text="대기 중"
-                        android:gravity="center"
-                        android:textAlignment="center"
+                    <LinearLayout
+                        android:orientation="horizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/text_phonestate1"
+                            android:background="@color/AoT_item_background"
+                            android:text="전화 "
+                            android:gravity="right"
+                            android:layout_width="0dp"
+                            android:layout_weight="3"
+                            android:layout_height="match_parent" />
+                        <TextView
+                            android:id="@+id/text_phonestate2"
+                            android:background="@color/AoT_item_background"
+                            android:text="대기 중"
+                            android:gravity="left"
+                            android:layout_width="0dp"
+                            android:layout_weight="4"
+                            android:layout_height="match_parent" />
+
+                    </LinearLayout>
 
                     <ImageView
                         android:padding="5dp"

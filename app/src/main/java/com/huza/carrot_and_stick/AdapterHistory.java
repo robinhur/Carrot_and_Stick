@@ -125,7 +125,14 @@ public class AdapterHistory extends BaseAdapter {
 
     }
 
-    public void reset_history() {
+    public void setHistory(ArrayList<ArrayList<String>> history) {
+        this.history.clear();
+        this.history.addAll(history);
+
+        this.notifyDataSetChanged();
+    }
+
+/*    public void reset_history() {
         history.clear();
     }
 
@@ -163,5 +170,5 @@ public class AdapterHistory extends BaseAdapter {
             Log.d(PACKAGE_NAME, "HistoryAdapter : item : " + history.get(i).toString());
         }
         Log.d(PACKAGE_NAME, "HistoryAdapter : ----------------------------");
-    }
+    }*/
 }

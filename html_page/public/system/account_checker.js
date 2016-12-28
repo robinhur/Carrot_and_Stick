@@ -42,19 +42,24 @@ function add_credit() {
 		
 		var now_time = Math.floor(Date.now()/1000);
 		var delta = Math.abs(add_value);
-		var updown;
-		if ((add_value) > 0)
+		var updown, content;
+		if ((add_value) > 0){
 			updown = '+';
-		else
+			content = 'Web 적립';
+		}
+		else{
 			updown = '-';
+			content = 'Web 차감';
+		}
 		
-		console.log("log!! : " + now_time + " : " + updown + ":" + delta);
+		console.log("log!! : " + now_time + " : " + updown + ":" + delta + ":" + content);
 		
 		firebase.database().ref('/logs/'+ firebase.auth().currentUser.uid).child(now_time).update({
 			
 			timestamp: now_time,
 			updown: updown,
-			delta: delta
+			delta: delta,
+			content: content
 			
 		});
 		

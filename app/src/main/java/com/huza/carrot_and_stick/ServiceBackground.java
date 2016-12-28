@@ -17,11 +17,15 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class ServiceBackground extends Service {
 
@@ -37,9 +41,11 @@ public class ServiceBackground extends Service {
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     int user_credit;
+    ArrayList<ArrayList<String>> history;
+    boolean history_initialized;
 
-    int what;
-    String extra_data;
+    int WHAT;
+    String EXTRA_DATA;
 
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -73,9 +79,10 @@ public class ServiceBackground extends Service {
             Log.d(PACKAGE_NAME, "ServiceBackground : init : ReceiverStateListener 등록");
         }
 
-        what = 0;
-        extra_data = null;
+        WHAT = 0;
+        EXTRA_DATA = null;
         user_credit = -1;
+        history = null;
 
         pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
         editor = pref.edit();
@@ -90,6 +97,8 @@ public class ServiceBackground extends Service {
         databaseReference = firebaseDatabase.getReference();
 
         SharedPreferences pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+
+        ////////user credit////////
         databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -111,6 +120,96 @@ public class ServiceBackground extends Service {
 
             }
         });
+        ///////////////////////////
+
+        ////////log history////////
+        history = new ArrayList<>();
+        history_initialized = false;
+        databaseReference.child("logs").child(pref.getString("user_uid", null)).orderByKey().endAt("9999999999").limitToLast(100).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+
+                        Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_init : size = " + dataSnapshot.getChildrenCount());
+
+                        Iterator<DataSnapshot> it = dataSnapshot.getChildren().iterator();
+
+                        while (it.hasNext()) {
+                            DataSnapshot now_temp = it.next();
+
+                            ArrayList<String> item_history = new ArrayList<String>();
+
+                            item_history.add(now_temp.getKey());
+                            item_history.add(now_temp.child("updown").getValue().toString());
+                            item_history.add(now_temp.child("delta").getValue().toString());
+                            item_history.add(now_temp.child("content").getValue().toString());
+
+                            history.add(0, item_history);
+                        }
+
+                        Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_init : HistoryAdapter : ----------------------------");
+                        Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_init : HistoryAdapter : " + String.valueOf(history.size()));
+                        for (int i = 0; i < history.size(); i++) {
+                            Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_init : HistoryAdapter : item : " + i + " : " + history.get(i).toString());
+
+                        }
+                        Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_init : HistoryAdapter : ----------------------------");
+
+                    }
+
+                    send_History();
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        databaseReference.child("logs").child(pref.getString("user_uid", null)).limitToLast(1).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                if (history_initialized) {
+                    Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_added : HistoryAdapter : ----------------------------");
+                    Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_added : " + dataSnapshot.getKey() + "|" + dataSnapshot.child("updown").getValue().toString() + "|" +
+                            dataSnapshot.child("delta").getValue().toString() + "|" + dataSnapshot.child("content").getValue().toString());
+                    Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_added : HistoryAdapter : ----------------------------");
+
+                    ArrayList<String> item_history = new ArrayList<String>();
+
+                    item_history.add(dataSnapshot.getKey());
+                    item_history.add(dataSnapshot.child("updown").getValue().toString());
+                    item_history.add(dataSnapshot.child("delta").getValue().toString());
+                    item_history.add(dataSnapshot.child("content").getValue().toString());
+
+                    history.add(0, item_history);
+                    history.remove(history.size()-1);
+
+                    send_History();
+                }
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        ///////////////////////////
     }
 
     public void check_settle_up() {
@@ -120,9 +219,8 @@ public class ServiceBackground extends Service {
 
         if (user_credit == -1) return;
 
-        what = 102;
-        extra_data = String.valueOf(user_credit);
-        sendMessage();
+        sendMessage(102, String.valueOf(user_credit));
+
 
     }
     public void changeUserCredit(int delta) {
@@ -134,8 +232,26 @@ public class ServiceBackground extends Service {
 
         databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(user_credit - delta);
 
+        /////////////// Log ///////////////
+        DataLog log = new DataLog(System.currentTimeMillis()/1000, "-", delta, "정산");
+        databaseReference.child("logs").child(pref.getString("user_uid", null)).child(String.valueOf(log.getTimestamp())).setValue(log);
+        //////////////////////////////////
+
     }
-z
+
+    private void send_OUTGOINGCALL(String outgoing_number) {
+        if (checkServiceRunning(AoT_SERVICE_NAME)){
+            sendMessage(152, outgoing_number);
+        } else if (checkServiceRunning(CreditTicker_SERVICE_NAME)) {
+            sendMessage(553, outgoing_number);
+        }
+    }
+    public void send_History() {
+
+        sendMessage(104, "!");
+
+    }
+
     public void Start_AoT() {
         if (checkServiceRunning(AoT_SERVICE_NAME)) return;
 
@@ -153,25 +269,22 @@ z
         i.putExtra("user_credit", user_credit);
         startService(i);
 
-        what = 500;
-        sendMessage();
+        sendMessage(500, null);
     }
 
     public void connect_with_AoT() {
         bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
-        what=100;
-        sendMessage();
 
+        sendMessage(100, null);
+        if (history_initialized) send_History();
         sendUserCredit();
     }
 
     public void Close_AoT() {
-        what = 198;
-        sendMessage();
+        sendMessage(198, null);
     }
     public void Close_CreditTicker() {
-        what = 598;
-        sendMessage();
+        sendMessage(598, null);
     }
 
     public void shutdown_AoT(){
@@ -186,12 +299,15 @@ z
     }
 
 
+
+
     ////////////////////////////////////////////////////////////////////////////////////ver.161228//
     /////        ////          ////   //////  ////       ///////////// Always On Top ///////////////
     ///  ////////////  ////////////  /  ////  ////  ////  /////////// Connect w/AoT      : 100 /////
     ////        /////          ////  ///  //  ////  /////  ////////// send Credit        : 102 /////
     //////////   ////  ////////////  /////    ////  ////  /////////// send Setting       : 103 /////
-    ///        //////          ////  ///////  ////       //////////// alert OutgoingCall : 152 /////
+    ///        //////          ////  ///////  ////       //////////// send History       : 104 /////
+    ///////////////////////////////////////////////////////////////// alert OutgoingCall : 152 /////
     ///////////////////////////////////////////////////////////////// Disconnect w/AoT   : 198 /////
     ////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////// Credit Ticker ///////////////
@@ -200,21 +316,29 @@ z
     ///////////////////////////////////////////////////////////////// alert OffHook      : 553 /////
     ///////////////////////////////////////////////////////////////// Disconnect w/CT    : 598 /////
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    public void sendMessage() {
+    public void sendMessage(int what, String extra_data) {
 
         if (what == 0) return;
 
-        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage : message = " + what);
-
         if (what/500 == 0) {
-            if (!mBound_AoT)
+
+            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage = " + mBound_AoT + " : " + what);
+            if (!mBound_AoT){
+                WHAT = what;
+                EXTRA_DATA = extra_data;
                 bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
+            }
             else {
                 Message msg = Message.obtain(null, what, 0, 0);
 
                 if (extra_data != null) {
                     Bundle data = new Bundle();
-                    data.putString("extra_data" , extra_data);
+
+                    if (what == 104)
+                        data.putSerializable("log_init", history);
+                    else
+                        data.putString("extra_data" , extra_data);
+
                     msg.setData(data);
                 }
 
@@ -232,14 +356,21 @@ z
                         Start_CreditTicker();
 
                     lets_stop_thisloop = false;
+                } else if (what == 104) {
+                    history_initialized = true;
                 }
 
                 what = 0;
                 extra_data = null;
             }
         } else if (what/500 == 1) {
-            if (!mBound_Ticker)
+
+            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage = " + mBound_Ticker + " : " + what);
+            if (!mBound_Ticker){
+                WHAT = what;
+                EXTRA_DATA = extra_data;
                 bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
+            }
             else {
                 Message msg = Message.obtain(null, what, 0, 0);
 
@@ -306,6 +437,7 @@ z
                     break;
                 case 2:
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : " + msg.getData().getString("extra_data"));
+                    send_OUTGOINGCALL(msg.getData().getString("extra_data"));
                     break;
                 case 5:
                     if (checkServiceRunning(CreditTicker_SERVICE_NAME)) {
@@ -351,8 +483,6 @@ z
         }
     }
 
-
-
     public boolean checkServiceRunning(String service_name) {
 
         ActivityManager serviceChecker = (ActivityManager) getBaseContext().getSystemService(Context.ACTIVITY_SERVICE);
@@ -385,7 +515,7 @@ z
             mService_Ticker = new Messenger(iBinder);
             mBound_Ticker = true;
             mBound_AoT = false;
-            sendMessage();
+            sendMessage(WHAT, EXTRA_DATA);
         }
 
         @Override
@@ -405,7 +535,7 @@ z
             mService_AoT = new Messenger(iBinder);
             mBound_AoT = true;
             mBound_Ticker = false;
-            sendMessage();
+            sendMessage(WHAT, EXTRA_DATA);
         }
 
         @Override

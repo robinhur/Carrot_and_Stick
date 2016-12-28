@@ -23,7 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
  * Created by HuZA on 2016-11-11.
  */
 
-public class ActivitySignup extends AppCompatActivity {
+public class ActivitySignUp extends AppCompatActivity {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
 
@@ -81,7 +81,7 @@ public class ActivitySignup extends AppCompatActivity {
     public void register_clicked(View v) {
 
         if (!signup_check_inputdata()){
-            Toast.makeText(ActivitySignup.this, "항목을 모두 입력해주세요.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ActivitySignUp.this, "항목을 모두 입력해주세요.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -95,14 +95,14 @@ public class ActivitySignup extends AppCompatActivity {
                     public void onComplete(Task<AuthResult> task) {
                         Log.d(PACKAGE_NAME, et_signup_email.getText().toString() +" - " + et_signup_password.getText().toString());
                         if (!task.isSuccessful()){
-                            Toast.makeText(ActivitySignup.this, "계정 생성 실패!!!!!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ActivitySignUp.this, "계정 생성 실패!!!!!", Toast.LENGTH_SHORT).show();
 
                             btn_signup.setText("회원 가입");
                             btn_signup.setEnabled(true);
                             progressBar.setVisibility(View.INVISIBLE);
                         } else {
                             saveUser();
-                            Toast.makeText(ActivitySignup.this, "계정 생성 완료\n로그인 해주세요", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ActivitySignUp.this, "계정 생성 완료\n로그인 해주세요", Toast.LENGTH_SHORT).show();
 
                             finish();
                         }

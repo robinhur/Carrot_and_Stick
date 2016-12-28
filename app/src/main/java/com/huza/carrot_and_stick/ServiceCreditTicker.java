@@ -272,7 +272,8 @@ public class ServiceCreditTicker extends Service {
                     Log.d(PACKAGE_NAME, "ServiceCreditTicker : MESSAGE : BackgroundIncomingHandler : Credit received");
                     break;
                 case 553:
-                    Log.d(PACKAGE_NAME, "ServiceCreditTicker : MESSAGE : BackgroundIncomingHandler : OFFHOOK!!");
+                    Log.d(PACKAGE_NAME, "ServiceCreditTicker : MESSAGE : BackgroundIncomingHandler : OUTGOING!!");
+                    //requestTOdisconnect();
                     break;
                 case 598:
                     close_CT_service();

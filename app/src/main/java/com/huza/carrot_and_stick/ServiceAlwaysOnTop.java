@@ -50,6 +50,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.matthewtamlin.sliding_intro_screen_library.indicators.DotIndicator;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Timer;
@@ -73,13 +74,15 @@ public class ServiceAlwaysOnTop extends Service {
     DotIndicator aot_indicator;
 
     Button btn_close;
-    ProgressBar PB1;
-    ProgressBar PB2;
+    ProgressBar PB1; // on aot
+    ProgressBar PB2; // on aot
+    ProgressBar PB3; // on history
 
     LayoutSliding aot_custom_slidinglayout;
     TelephonyManager manager;
     ImageView image_phonestate;
-    TextView text_phonestate;
+    TextView text_phonestate1;
+    TextView text_phonestate2;
 
     ListView aot_history;
     String last_forlistview;
@@ -117,6 +120,8 @@ public class ServiceAlwaysOnTop extends Service {
     Handler handler = new Handler();
 
     int user_credit = -1;
+
+    PhoneStateListener phoneStateListener;
 
     public ServiceAlwaysOnTop() {
         Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop 생성");
@@ -270,6 +275,59 @@ public class ServiceAlwaysOnTop extends Service {
             }
         });
         ////////////////////////////////
+
+        phoneStateListener = new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | state:" + state
+                        + "(ringing:" + TelephonyManager.CALL_STATE_RINGING
+                        + ", offhook:" + TelephonyManager.CALL_STATE_OFFHOOK
+                        + ", idle:" + TelephonyManager.CALL_STATE_IDLE + ")"
+                        + "|number:" + incomingNumber + "|");
+
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        image_phonestate.setImageResource(R.drawable.phone_state_idle);
+                        text_phonestate1.setTextColor(AoT_MaintextColor);
+                        text_phonestate1.setText("전화 ");
+                        text_phonestate2.setTextColor(AoT_MaintextColor);
+                        text_phonestate2.setText("대기 중");
+                        aot_custom_slidinglayout.now_CALL_STATE_IDLE();
+                        isNowOutgoing = false;
+                        //평상시
+                        break;
+                    case TelephonyManager.CALL_STATE_RINGING:
+                        image_phonestate.setImageResource(R.drawable.phone_state_ringing);
+                        text_phonestate1.setTextColor(Color.YELLOW);
+                        text_phonestate1.setText("전화 ");
+                        text_phonestate2.setTextColor(Color.YELLOW);
+                        text_phonestate2.setText("수신 중");
+                        aot_custom_slidinglayout.now_CALL_STATE_RINGING();
+                        //울리는중
+                        break;
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                        if (!isNowOutgoing) {
+                            image_phonestate.setImageResource(R.drawable.phone_state_offhook);
+                            text_phonestate1.setTextColor(Color.GREEN);
+                            text_phonestate1.setText("수신 ");
+                            text_phonestate2.setTextColor(Color.GREEN);
+                            text_phonestate2.setText("통화 중");
+                            aot_custom_slidinglayout.now_CALL_STATE_OFFHOOK();
+                            //수신중
+                        } else {
+                            image_phonestate.setImageResource(R.drawable.phone_state_offhook);
+                            text_phonestate1.setTextColor(Color.rgb(255, 153, 0));
+                            text_phonestate1.setText("발신 ");
+                            text_phonestate2.setTextColor(Color.GREEN);
+                            text_phonestate2.setText("통화 중");
+                            aot_custom_slidinglayout.now_NEW_OUTGOING_CALL();
+                            //발신중
+                        }
+                        break;
+                }
+            }
+        };
     }
     @Override
     public void onDestroy() {
@@ -279,6 +337,9 @@ public class ServiceAlwaysOnTop extends Service {
             w_manager.removeView(OnTop_view);
             OnTop_view = null;
         }
+
+        manager = null;
+        phoneStateListener = null;
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT 소멸");
     }
@@ -339,6 +400,10 @@ public class ServiceAlwaysOnTop extends Service {
         sendMessage();
     }
 
+    public void send_history(ArrayList<ArrayList<String>> history) {
+        history_adapter.setHistory(history);
+        //history_adapter.notifyDataSetChanged();
+    }
 
     public class AdapterAOT extends PagerAdapter {
 
@@ -389,18 +454,18 @@ public class ServiceAlwaysOnTop extends Service {
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 1(main)");
                     aot_custom_slidinglayout = (LayoutSliding) layout.findViewById(R.id.aot_custom_slidinglayout);
                     image_phonestate = (ImageView) layout.findViewById(R.id.image_phonestate);
-                    text_phonestate = (TextView) layout.findViewById(R.id.text_phonestate);
+                    text_phonestate1 = (TextView) layout.findViewById(R.id.text_phonestate1);
+                    text_phonestate2 = (TextView) layout.findViewById(R.id.text_phonestate2);
                     manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     manager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
                     break;
                 case 2:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 2(history)");
+                    PB3 = (ProgressBar) layout.findViewById(R.id.progress_bar3);
                     aot_history = (ListView) layout.findViewById(R.id.AoT_history);
                     history_adapter = new AdapterHistory(getBaseContext());
                     aot_history.setAdapter(history_adapter);
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : history initialized");
-                    /// add listener in listview from firebase
-                    //initLOGListener();
                     break;
             }
 
@@ -425,40 +490,8 @@ public class ServiceAlwaysOnTop extends Service {
 
     }
 
-    private PhoneStateListener phoneStateListener = new PhoneStateListener() {
-        @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
-            switch (state) {
-                case TelephonyManager.CALL_STATE_IDLE:
-                    image_phonestate.setImageResource(R.drawable.phone_state_idle);
-                    text_phonestate.setTextColor(AoT_MaintextColor);
-                    text_phonestate.setText("전화 대기 중");
-                    aot_custom_slidinglayout.now_CALL_STATE_IDLE();
-                    //평상시
-                    break;
-                case TelephonyManager.CALL_STATE_OFFHOOK:
-                    image_phonestate.setImageResource(R.drawable.phone_state_offhook);
-                    text_phonestate.setTextColor(Color.GREEN);
-                    text_phonestate.setText("전화 통화 중");
-                    aot_custom_slidinglayout.now_CALL_STATE_OFFHOOK();
-                    //전화중
-                    break;
-                case TelephonyManager.CALL_STATE_RINGING:
-                    image_phonestate.setImageResource(R.drawable.phone_state_ringing);
-                    text_phonestate.setTextColor(Color.YELLOW);
-                    text_phonestate.setText("전화 수신 중");
-                    aot_custom_slidinglayout.now_CALL_STATE_RINGING();
-                    //울리는중
-                    break;
-            }
+    boolean isNowOutgoing = false;
 
-            Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | state:" + state
-                    + "(ringing:" + TelephonyManager.CALL_STATE_RINGING
-                    + ", offhook:" + TelephonyManager.CALL_STATE_OFFHOOK
-                    + ", idle:" + TelephonyManager.CALL_STATE_IDLE + ")"
-                    + "|number:" + incomingNumber + "|");
-        }
-    };
 
     private void timer_start() {
 
@@ -625,6 +658,7 @@ public class ServiceAlwaysOnTop extends Service {
     ///// Connect w/AoT      : 100 /////
     ///// send Credit        : 102 /////
     ///// send Setting       : 103 /////
+    ///// send History       : 104 /////
     ///// alert OutgoingCall : 152 /////
     ///// Disconnect w/AoT   : 198 /////
     ////////////////////////////////////
@@ -670,11 +704,19 @@ public class ServiceAlwaysOnTop extends Service {
                 case 103:
                     //unser constuction
                     break;
+                case 104:
+                    ArrayList received_history = (ArrayList) msg.getData().getSerializable("log_init");
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : received_history_size : " + received_history.size());
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : received_history_latest : " + received_history.get(0));
+
+                    send_history(received_history);
+
+                    PB3.setVisibility(View.GONE);
+                    aot_history.setVisibility(View.VISIBLE);
+                    break;
                 case 152:
-                    image_phonestate.setImageResource(R.drawable.phone_state_ringing);
-                    text_phonestate.setTextColor(Color.YELLOW);
-                    text_phonestate.setText("전화 발신 중");
-                    aot_custom_slidinglayout.now_NEW_OUTGOING_CALL();
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | incomming :" + msg.getData().getString("extra_data").toString());
+                    isNowOutgoing = true;
                     break;
                 case 198:
                     close_AoT_service();
