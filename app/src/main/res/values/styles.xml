@@ -10,4 +10,10 @@
     <style name="AppTheme_NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="permission_button" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/Permission_button_highlited</item>
+        <item name="colorButtonNormal">@color/Permission_button</item>
+    </style>
+
 </resources>

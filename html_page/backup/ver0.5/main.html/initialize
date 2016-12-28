@@ -1,0 +1,55 @@
+console.log("open main.html/initialize");
+
+div2Resize();
+window.addEventListener('resize', div2Resize);
+
+console.log(get_destination());
+load_top("top_html");
+load_left("menu_html");
+load_main("content_html");
+load_footer("footer_html");
+
+//loadANDclear();
+	
+function div2Resize() {
+	var div2 = document.getElementById('left_menu');
+	div2.style.height = window.innerHeight - 150 + 'px';
+	var div2 = document.getElementById('main_content');
+	div2.style.height = window.innerHeight - 150 + 'px';
+}
+
+function load_code(code) {
+	document.getElementById('code').innerHTML = code;
+}
+
+function load_top(dest) {
+	$('#top_header').load(dest, function(){loadANDclear();});
+}
+
+function load_left(dest) {
+	$('#left_menu').load(dest, function(){loadANDclear();});
+}
+
+function load_main(dest) {
+	$('#main_content').load(dest, function(){loadANDclear();});
+}
+function load_main(type, code) {
+	switch(type) {
+		case 'typing':
+			$('#main_content').load('main.html/typing', function(){loadANDclear();load_code(code);});
+			break;
+		case 'game':
+			break;
+		case 'game':
+			break;
+	}
+}
+
+function load_footer(dest) {
+	$('#footer').load(dest, function(){loadANDclear();});
+}
+
+function loadANDclear() {
+	load_stylesheet();
+	load_javascript();
+}

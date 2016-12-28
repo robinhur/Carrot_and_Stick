@@ -3,20 +3,27 @@
     package="com.huza.carrot_and_stick">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/alarm_clock_icon"
         android:label="MyAlarm"
-        android:supportsRtl="true"
         android:largeHeap="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme_NoActionBar">
+
+        <!--This meta-data tag is required to use Google Play Services.-->
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <activity
-            android:name=".SplashActivity"
+            android:name=".ActivityMain"
             android:icon="@mipmap/carrot_icon"
             android:label="@string/app_name"
             android:theme="@style/AppTheme_NoActionBar">
@@ -26,41 +33,45 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PermissionActivity"
-            android:theme="@style/AppTheme_NoActionBar" />
         <activity
-            android:name=".LoginActivity"
-            android:theme="@style/AppTheme_NoActionBar"/>
+            android:name=".ActivityPermission"/>
         <activity
-            android:name=".SignupActivity"
-            android:theme="@style/AppTheme_NoActionBar"/>
-        <activity android:name=".MainActivity" />
+            android:name=".ActivityLogin"/>
+        <activity
+            android:name=".ActivitySignup"/>
+
+        <!--Include the AdActivity configChanges and theme. -->
+        <activity android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:theme="@android:style/Theme.Translucent" />
 
         <service
-            android:name=".BackgroundService"
+            android:name=".ServiceBackground"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"></service>
         <service
-            android:name=".CreditTickerService"
+            android:name=".ServiceAlwaysOnTop"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"></service>
         <service
-            android:name=".AlwaysOnTop"
+            android:name=".ServiceCreditTicker"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"></service>
+
 
         <receiver
-            android:name=".StateListenerReceiver"
+            android:name=".ReceiverStateListener"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="com.huza.carrot_and_stick.restartBACKGROUNDSERVICE" />
                 <action android:name="com.huza.carrot_and_stick.restartAoTSERVICE" />
+                <action android:name="com.huza.carrot_and_stick.finally_close" />
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".DeviceAdmin_Receiver"
+            android:name=".ReceiverDeviceAdmin"
             android:enabled="true"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data

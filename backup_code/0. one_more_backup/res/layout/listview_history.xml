@@ -1,0 +1,65 @@
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- 새 아이템 시작 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:background="@drawable/aot_item_corner"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/pref_MAINpadding_left"
+        android:paddingBottom="@dimen/pref_MAINpadding_left"
+        android:paddingLeft="@dimen/pref_MAINpadding"
+        android:paddingRight="@dimen/pref_MAINpadding">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:id="@+id/hist_item_ymd"
+                android:textSize="@dimen/hist_smallTEXT"
+                android:text="16년10월30일"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="@dimen/pref_smallTOPpadding"
+                android:gravity="center"
+                android:id="@+id/hist_item_hms"
+                android:textStyle="bold"
+                android:textSize="@dimen/hist_middleTEXT"
+                android:text="오전 11:06"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="1dp"
+            android:id="@+id/hist_item_content"
+            android:text="비정상 정산"
+            android:gravity="center"
+            android:textSize="@dimen/hist_middleTEXT"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+        </TextView>
+
+        <TextView
+            android:layout_width="95dp"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/hist_largeTEXT"
+            android:id="@+id/hist_item_updown"
+            android:gravity="end|center_vertical"
+            android:textStyle="bold"
+            android:text="+9999999"/>
+
+    </LinearLayout>
+
+</LinearLayout>

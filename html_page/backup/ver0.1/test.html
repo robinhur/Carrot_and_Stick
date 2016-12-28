@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>W2UI Demo: layout-1</title>
+    <link rel="stylesheet" type="text/css" href="http://w2ui.com/src/w2ui-1.4.2.min.css" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+    <script type="text/javascript" src="http://w2ui.com/src/w2ui-1.4.2.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/okayNav/2.0.4/js/jquery.okayNav-min.js"></script>
+</head>
+<body>
+
+<div id="layout" style="position: absolute; top: 10px; left: 10px; bottom: 10px; right: 10px;"></div>
+
+<script type="text/javascript">
+$(function () {
+    var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
+    $('#layout').w2layout({
+        name: 'layout',
+        panels: [
+            { type: 'top', size: 70, style: pstyle, content: 'top' },
+            { type: 'left', size: 200, style: pstyle, content: 'left' },
+            { type: 'main', style: pstyle, content: 'main' }
+        ]
+    });
+	
+    w2ui.layout.content('main', "w2ui.layout2");
+});
+
+console.log("load done");
+
+
+function onClick() {
+$(function () {
+	var source = "<h1>???</h1>";
+    w2ui.layout.content('left', source);
+});
+}
+
+$(function () {
+
+	var menu = "<nav id='mynav' class='okayNav'><ul><li><a href='#'>Home</a></li><li><a href='#'>Menu1</a></li><li><a href='#'>Menu2</a></li><li><a href='#'>Home</a></li><li><a href='#'>Menu1</a></li><li><a href='#'>Menu2</a></li><li><a href='#'>Home</a></li><li><a href='#'>Menu1</a></li><li><a href='#'>Menu2</a></li><li><a href='#'>Home</a></li><li><a href='#'>Menu1</a></li><li><a href='#'>Menu2</a></li><li><a href='#'>Home</a></li><li><a href='#'>Menu1</a></li><li><a href='#'>Menu2</a></li></ul></nav>";
+	w2ui.layout.content('top', menu);
+	
+
+});
+
+var navigation = $('#mynav').okayNav({
+    parent : '', // will call nav's parent() by default
+    toggle_icon_class : 'okayNav__menu-toggle',
+    toggle_icon_content: '<span /><span /><span />',
+    align_right: true, // If false, the menu and the kebab icon will be on the left
+    swipe_enabled: true, // If true, you'll be able to swipe left/right to open the navigation
+    threshold: 50, // Nav will auto open/close if swiped >= this many percent
+    beforeOpen : function() {}, // Will trigger before the nav gets opened
+    afterOpen : function() {}, // Will trigger after the nav gets opened
+    beforeClose : function() {}, // Will trigger before the nav gets closed
+    afterClose : function() {}, // Will trigger after the nav gets closed
+    itemHidden: function() {}, // Will trigger after an item moves to the hidden navigation
+    itemDisplayed: function() {} // Will trigger after an item moves to the visible navigation
+});
+
+<!--Open the off-screen part: navigation.okayNav('openInvisibleNav');--!>
+<!--Close the off-screen partnavigation.okayNav('closeInvisibleNav');--!>
+<!--Toggle the off-screen partnavigation.okayNav('toggleInvisibleNav');--!>
+<!--Recalculate what should be visible and what shouldn't: navigation.okayNav('recalcNav');--!>
+<!--Get the nav's parent element: navigation.okayNav('getParent');--!>
+<!--Get the nav's visible part: navigation.okayNav('getVisibleNav');--!>
+<!--Get the nav's off-screen part: navigation.okayNav('getInvisibleNav');--!>
+<!--Get the nav's toggle icon: navigation.okayNav('getNavToggleIcon');--!>
+<!--Get the nav children's total width: navigation.okayNav('getChildrenWidth');--!>
+<!--Destroy the nav, make everything visible, disable all events: navigation.okayNav('destroy');--!>
+</script>
+
+<style>
+#mynav ul{
+	margin:0px auto;
+	padding:0px;
+	border:0px;
+	display:block;
+}
+
+#mynav ul li{
+	display:inline-block;
+	margin:0px;
+	clear:both;
+}
+
+#mynav ul li a{
+	padding:10px;
+	display:block;
+}
+</style>
+
+</body>
+</html>

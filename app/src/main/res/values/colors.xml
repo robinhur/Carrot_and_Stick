@@ -2,9 +2,12 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#ff4081</color>
 
     <color name="AoT_background">#bbbbbb</color>
     <color name="AoT_item_background">#999999</color>
     <color name="AoT_background_ripple">#646464</color>
+
+    <color name="Permission_button">#ffff00</color>
+    <color name="Permission_button_highlited">#55ffff00</color>
 </resources>

@@ -1,0 +1,81 @@
+<div class="script_container" style="visibility:hidden;">
+	<ul id="script">
+		<li>typing_script</li>
+	</ul>
+</div>
+<div class="style_container" style="visibility:hidden;">
+	<ul id="style">
+		<li>typing.css</li>
+	</ul>
+</div>
+
+<div class="html_container">
+
+	<h3><div id="code">code</div></h3>
+	<div id="httpBox">
+
+		<div id="exString" class="smallBox"></div>
+		<div id="exString2" class="waitingBox"></div>
+		<div id="exString3" class="waitingBox"></div>
+		
+		<div class="ph"></div>
+
+		<div class="smallBox">
+			<input type="text" class="textbox" id="httpInputString" onkeypress="return http.keyUp()" onkeyup="http.chkMiss()" onkeydown="http.chkTime()">
+		</div>
+
+		<div class="ph"></div>
+		
+		<div id="status" class="smallBox">
+			<table width="100%">
+				<col width="80">
+				<col width="">
+				<col width="80">
+				<tr>
+					<th>정확도</th>
+					<td>
+						<div class="barBgcolor">
+							<div id="barAccuracyCur" class="bar" style="background-color:#33ccff"></div>
+						</div>
+					</td>
+					<td class="nums">
+						<span id="prnAccuracyCur">0</span>%
+					</td>
+				</tr>
+				<tr>
+					<th>평균 정확도</th>
+					<td>
+						<div class="barBgcolor">
+							<div id="barAccuracyTotal" class="bar" style="background-color:#3399cc"></div>
+						</div>
+					</td>
+					<td class="nums">
+						<span id="prnAccuracyTotal">0</span>%
+					</td>
+				</tr>
+				<tr>
+					<th>현재 속도</th>
+					<td>
+						<div class="barBgcolor">
+							<div id="barSpeedCur" class="bar" style="background-color:#ffcc33"></div>
+						</div>
+					</td>
+					<td class="nums">
+						<span id="prnSpeedCur">0</span>타/분
+					</td>
+				</tr>
+				<tr>
+					<th>최고 속도</th>
+					<td>
+						<div class="barBgcolor">
+							<div id="barSpeedMax" class="bar" style="background-color:#cc9933"></div>
+						</div>
+					</td>
+					<td class="nums">
+						<span id="prnSpeedMax">0</span>타/분
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>

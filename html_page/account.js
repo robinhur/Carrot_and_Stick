@@ -19,7 +19,7 @@ firebase.auth().onAuthStateChanged(function(user) {
 		console.log("onAuthStateChanged : signed in");
 		firebase_user = user;
 		if (get_destination() == "login.html")
-			location.replace("?destination=main.html");
+			location.href="?destination=main.html";
 		else
 			get_user_info();
 	} else {
@@ -76,7 +76,9 @@ function get_user_info() {
 	  document.getElementById("user_email").innerText = snapshot.val().email;
 	  document.getElementById("user_name").innerText = snapshot.val().name;
 	  document.getElementById("user_credit").innerText = snapshot.val().credit;
-	  // ...
+	  // Windows APP 가동!!!
+	  eval("window.external.getUserInfo(snapshot.val().email, snapshot.val().name, snapshot.val().credit);");
+	  console.log("getUserInfo called");
 	});
 			
 	var creditRef = firebase.database().ref('/users/' + firebase.auth().currentUser.uid);
@@ -107,7 +109,6 @@ function login_user() {
 }
 
 function logout_user() {
-
 	console.log("logout_user() called");
 
 	firebase.auth().signOut().then(function() {

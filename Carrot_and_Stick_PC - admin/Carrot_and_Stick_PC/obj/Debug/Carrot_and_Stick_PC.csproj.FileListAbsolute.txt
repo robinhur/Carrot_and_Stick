@@ -1,0 +1,52 @@
+c:\Users\sgrob\Documents\Visual Studio 2015\Projects\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\Carrot_and_Stick_PC.exe.config
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.exe.config
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.exe
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.pdb
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.csprojResolveAssemblyReference.cache
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.Form1.resources
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.Properties.Resources.resources
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.csproj.GenerateResource.Cache
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.exe
+C:\Users\sgrob\Documents\Visual Studio 2015\Projects\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.pdb
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.exe.config
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.exe
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.pdb
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.exe
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.pdb
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.csprojResolveAssemblyReference.cache
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.Properties.Resources.resources
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.csproj.GenerateResource.Cache
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Firebase.Auth.dll
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Firebase.Database.dll
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Newtonsoft.Json.dll
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Core.dll
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Interfaces.dll
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Linq.dll
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\System.Reactive.PlatformServices.dll
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\Newtonsoft.Json.xml
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Core.xml
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Interfaces.xml
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Linq.xml
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\bin\Debug\System.Reactive.PlatformServices.xml
+C:\Users\HuZA\Desktop\Carrot_and_Stick\Carrot_and_Stick_PC\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.Carrot1.resources
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.exe.config
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.exe
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.pdb
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.exe
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\Carrot_and_Stick_PC.pdb
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\Firebase.Auth.dll
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\Firebase.Database.dll
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\Newtonsoft.Json.dll
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Core.dll
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Interfaces.dll
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Linq.dll
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\System.Reactive.PlatformServices.dll
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\Newtonsoft.Json.xml
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Core.xml
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Interfaces.xml
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\System.Reactive.Linq.xml
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\bin\Debug\System.Reactive.PlatformServices.xml
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.csprojResolveAssemblyReference.cache
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.Carrot1.resources
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.Properties.Resources.resources
+C:\Users\sgrob\Desktop\New folder\Carrot_and_Stick\Carrot_and_Stick_PC - admin\Carrot_and_Stick_PC\obj\Debug\Carrot_and_Stick_PC.csproj.GenerateResource.Cache

@@ -1,0 +1,26 @@
+﻿<div class="script_container" style="display:none;">
+	<ul id="script">
+		<li>initialize</li>
+	</ul>
+</div>
+<div class="style_container" style="display:none;">
+	<ul id="style">
+		<li>main.css</li>
+		<!--<li>load</li>-->
+	</ul>
+</div>
+
+<div class="html_container">
+	<div id="top_header">
+		top
+	</div> 
+	<div id="left_menu">
+		left
+	</div> 
+	<div id="main_content">
+		main
+	</div> 
+	<div id="footer">
+		footer
+	</div>
+</div>

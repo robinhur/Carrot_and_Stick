@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="activity_login_radius">40dp</dimen>
 
     <dimen name="pref_MAINpadding">10dp</dimen>
@@ -21,4 +19,6 @@
     <dimen name="hist_smallTEXT">10dp</dimen>
 
     <dimen name="AoT_page_padding">50px</dimen>
+
+    <dimen name="AoT_slide_radius">40dp</dimen>
 </resources>

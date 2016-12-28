@@ -1,0 +1,43 @@
+header + footer
+
+destination??? -> page_config.js   layout , menu , main
+
+
+system
+	core_service.js
+	account_checker.js
+	url_checker.js
+	page_config.js (layout, menu)
+	html_loader.js
+	page_loader.js
+
+application
+	model(data)
+		content_typing.js
+		content_game.js
+		content_learn.js
+	view
+		login.html
+		main.html
+		typing.html
+		game_typo.html
+		game_typing.html
+	controller
+		login.js
+		main.js
+		typing.js
+		game_typo.js
+		game_typing.js
+	layout
+		layout0.html
+		lyaout4.html
+	menu
+		menu_main.html
+		menu_setting.html
+
+asset
+	js
+		firebase.js
+		jquery.js
+	css
+		init.css
