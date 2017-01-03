@@ -141,7 +141,13 @@ public class ServiceAlwaysOnTop extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop : onCreate");
         super.onCreate();
+
+        pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        editor = pref.edit();
+
+        user_credit = pref.getInt("user_credit", -1);
 
         what = 0;
         extra_data = null;
@@ -173,33 +179,33 @@ public class ServiceAlwaysOnTop extends Service {
         mAdView.setAdListener(new AdListener() {
             @Override
             public void onAdClosed() {
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdClosed");
+                Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop : AoT Banner : onAdClosed");
                 OnTop_view.setVisibility(View.VISIBLE);
                 super.onAdClosed();
             }
 
             @Override
             public void onAdFailedToLoad(int i) {
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdFailedToLoad : " + i);
+                Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop : AoT Banner : onAdFailedToLoad : " + i);
                 super.onAdFailedToLoad(i);
             }
 
             @Override
             public void onAdLeftApplication() {
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdLeftApplication");
+                Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop : AoT Banner : onAdLeftApplication");
                 OnTop_view.setVisibility(View.INVISIBLE);
                 super.onAdLeftApplication();
             }
 
             @Override
             public void onAdOpened() {
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdOpened");
+                Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop : AoT Banner : onAdOpened");
                 super.onAdOpened();
             }
 
             @Override
             public void onAdLoaded() {
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT Banner : onAdLoaded");
+                Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop : AoT Banner : onAdLoaded");
                 super.onAdLoaded();
             }
         });
@@ -247,6 +253,7 @@ public class ServiceAlwaysOnTop extends Service {
         aot_pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                OnTop_view.setSystemUiVisibility(ui_Options);
             }
 
             @Override
@@ -281,10 +288,10 @@ public class ServiceAlwaysOnTop extends Service {
             public void onCallStateChanged(int state, String incomingNumber) {
 
                 Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | state:" + state
-                        + "(ringing:" + TelephonyManager.CALL_STATE_RINGING
+                        + "    (ringing:" + TelephonyManager.CALL_STATE_RINGING
                         + ", offhook:" + TelephonyManager.CALL_STATE_OFFHOOK
                         + ", idle:" + TelephonyManager.CALL_STATE_IDLE + ")"
-                        + "|number:" + incomingNumber + "|");
+                        + "|number:" + incomingNumber + " | " + isNowOutgoing + " | " + pref.getString("outgoing_NUMBER", ""));
 
                 switch (state) {
                     case TelephonyManager.CALL_STATE_IDLE:
@@ -307,7 +314,7 @@ public class ServiceAlwaysOnTop extends Service {
                         //울리는중
                         break;
                     case TelephonyManager.CALL_STATE_OFFHOOK:
-                        if (!isNowOutgoing) {
+                        if (!isNowOutgoing && pref.getString("outgoing_NUMBER", "") == "") {
                             image_phonestate.setImageResource(R.drawable.phone_state_offhook);
                             text_phonestate1.setTextColor(Color.GREEN);
                             text_phonestate1.setText("수신 ");
@@ -321,7 +328,11 @@ public class ServiceAlwaysOnTop extends Service {
                             text_phonestate1.setText("발신 ");
                             text_phonestate2.setTextColor(Color.GREEN);
                             text_phonestate2.setText("통화 중");
-                            aot_custom_slidinglayout.now_NEW_OUTGOING_CALL();
+                            aot_custom_slidinglayout.now_NEW_OUTGOING_CALL(pref.getString("outgoing_NUMBER", ""));
+                            isNowOutgoing = true;
+
+                            editor.remove("outgoing_NUMBER");
+                            editor.commit();
                             //발신중
                         }
                         break;
@@ -349,11 +360,6 @@ public class ServiceAlwaysOnTop extends Service {
         Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand");
         OnTop_view.setSystemUiVisibility(ui_Options);
         timer_start();
-
-        pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
-        editor = pref.edit();
-
-        user_credit = pref.getInt("user_credit", -1);
 
         return super.onStartCommand(intent, flags, startId);
 
@@ -685,8 +691,8 @@ public class ServiceAlwaysOnTop extends Service {
                     PB2.setVisibility(View.INVISIBLE);
 
                     if (user_credit != Integer.valueOf(msg.getData().getString("extra_data"))) {
-
-                        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : 102 : 뙇!! : " + (user_credit > Integer.valueOf(msg.getData().getString("extra_data").toString())));
+                        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : 102 : 뙇1 : " + msg.getData().getString("extra_data").toString());
+                        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : 102 : 뙇2 : " + (user_credit > Integer.valueOf(msg.getData().getString("extra_data").toString())));
 
                         if (user_credit > Integer.valueOf(msg.getData().getString("extra_data").toString()))
                             credit_updown_effect(tv_main_credit, -1);

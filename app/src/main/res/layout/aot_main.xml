@@ -97,24 +97,66 @@
             <LinearLayout
                 android:elevation="4dp"
                 android:background="@color/AoT_item_background"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1">
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                <LinearLayout
+                    android:orientation="vertical"
                     android:gravity="center"
-                    android:text="멀봐 띠부럴"/>
-                <Button
-                    android:id="@+id/aot_test_call"
-                    android:onClick="aot_test_call"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="test" />
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2">
+
+                    <TextView
+                        android:id="@+id/aot_sliding_call_state"
+                        android:layout_gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="15dp"
+                        android:text="기본 전화번호"/>
+                    <TextView
+                        android:id="@+id/aot_sliding_call_number"
+                        android:layout_gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="20dp"
+                        android:text="010-1234-1234"/>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <Button
+                        android:id="@+id/aot_sliding_call_end"
+                        android:textSize="11dp"
+                        android:padding="0dp"
+                        android:onClick="aot_test_call"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="끊기" />
+
+                    <Button
+                        android:id="@+id/aot_sliding_call_start"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:text="받기" />
+
+                    <Space
+                        android:id="@+id/aot_sliding_call_space"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp" />
+
+                </LinearLayout>
 
 
             </LinearLayout>

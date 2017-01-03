@@ -249,7 +249,7 @@ public class ServiceCreditTicker extends Service {
     ////////////////////////ver.161228//
     ///// Connect w/CT       : 500 /////
     ///// send Credit        : 502 /////
-    ///// alert OffHook      : 553 /////
+    ///// alert OutgoingCall : 552 /////
     ///// Disconnect w/CT    : 598 /////
     ////////////////////////////////////
     @Override
@@ -271,9 +271,9 @@ public class ServiceCreditTicker extends Service {
                 case 502:
                     Log.d(PACKAGE_NAME, "ServiceCreditTicker : MESSAGE : BackgroundIncomingHandler : Credit received");
                     break;
-                case 553:
+                case 552:
                     Log.d(PACKAGE_NAME, "ServiceCreditTicker : MESSAGE : BackgroundIncomingHandler : OUTGOING!!");
-                    //requestTOdisconnect();
+                    requestTOdisconnect();
                     break;
                 case 598:
                     close_CT_service();

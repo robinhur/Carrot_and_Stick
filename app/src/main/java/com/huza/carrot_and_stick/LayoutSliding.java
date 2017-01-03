@@ -2,16 +2,29 @@ package com.huza.carrot_and_stick;
 
 import android.animation.Animator;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Space;
 
+import com.android.internal.telephony.ITelephony;
+
+import java.lang.reflect.Method;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by HuZA on 2016-11-09.
@@ -20,6 +33,9 @@ import java.util.TimerTask;
 public class LayoutSliding extends LinearLayout {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
+
+    SharedPreferences pref;
+    SharedPreferences.Editor editor;
 
     Context mContext;
     View thisView;
@@ -31,6 +47,10 @@ public class LayoutSliding extends LinearLayout {
     boolean isOpened;
 
     ImageView btn_init;
+
+    Button call_start;
+    Button call_end;
+    Space call_space;
 
     public LayoutSliding(Context context) {
         super(context);
@@ -58,72 +78,136 @@ public class LayoutSliding extends LinearLayout {
     }
 
     public void init() {
+
         Log.d(PACKAGE_NAME, "SlidingLayout : init called");
+
+        pref = getContext().getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        editor = pref.edit();
 
         thisView = this;
         thisView.post(new Runnable() {
             @Override
             public void run() {
-                Log.d(PACKAGE_NAME, "SlidingLayout : post called");
+                Log.d(PACKAGE_NAME, "SlidingLayout : post called | outgoing_NUMBER = " + pref.getString("outgoing_NUMBER", "!"));
 
+                call_start = (Button) thisView.findViewById(R.id.aot_sliding_call_start);
+                call_start.setText("전화 걸기");
+                call_end = (Button) thisView.findViewById(R.id.aot_sliding_call_end);
+                call_end.setHeight(0);
+                call_end.setVisibility(GONE);
+                call_space = (Space) thisView.findViewById(R.id.aot_sliding_call_space);
+
+                call_start.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        Log.d(PACKAGE_NAME, "SlidingLayout : call_start : onClick | " + ((Button)view).getText().toString());
+
+                        switch (((Button)view).getText().toString()) {
+                            case "전화 걸기" :
+
+                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-1234-1234"));
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                                if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                                    return;
+                                }
+
+                                mContext.startActivity(intent);
+                                break;
+
+                            case "전화 받기" :
+
+                                try {
+                                    TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+                                    Class c = Class.forName(telephonyManager.getClass().getName());
+                                    Method m = c.getDeclaredMethod("getITelephony");
+                                    m.setAccessible(true);
+                                    com.android.internal.telephony.ITelephony telephonyService = (ITelephony) m.invoke(telephonyManager);
+
+                                    telephonyService.answerRingingCall();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                break;
+
+                        }
+                    }
+                });
+                call_end.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        try {
+                            TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+                            Class c = Class.forName(telephonyManager.getClass().getName());
+                            Method m = c.getDeclaredMethod("getITelephony");
+                            m.setAccessible(true);
+                            com.android.internal.telephony.ITelephony telephonyService = (ITelephony) m.invoke(telephonyManager);
+
+                            telephonyService.endCall();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
 
                 calculate_location();
 
+                if (pref.getString("outgoing_NUMBER", "") == "") {
+                    thisView.animate()
+                            .translationY(0)
+                            .setDuration(250)
+                            .setStartDelay(250)
+                            .setListener(new Animator.AnimatorListener() {
+                                @Override
+                                public void onAnimationStart(Animator animator) {
 
-                Log.d(PACKAGE_NAME, "SlidingLayout : 접었음");
+                                }
 
-                thisView.animate()
-                        .translationYBy(height*1/2)
-                        .setDuration(250)
-                        .setStartDelay(250)
-                        .setListener(new Animator.AnimatorListener() {
-                            @Override
-                            public void onAnimationStart(Animator animator) {
+                                @Override
+                                public void onAnimationEnd(Animator animator) {
+                                    thisView.animate()
+                                            .translationY(-height*1/2)
+                                            .setDuration(250)
+                                            .setListener(new Animator.AnimatorListener() {
+                                                @Override
+                                                public void onAnimationStart(Animator animator) {
 
-                            }
+                                                }
 
-                            @Override
-                            public void onAnimationEnd(Animator animator) {
-                                thisView.animate()
-                                        .translationYBy(-height*1/2)
-                                        .setDuration(250)
-                                        .setListener(new Animator.AnimatorListener() {
-                                            @Override
-                                            public void onAnimationStart(Animator animator) {
+                                                @Override
+                                                public void onAnimationEnd(Animator animator) {
+                                                    thisView.setVisibility(VISIBLE);
+                                                }
 
-                                            }
+                                                @Override
+                                                public void onAnimationCancel(Animator animator) {
 
-                                            @Override
-                                            public void onAnimationEnd(Animator animator) {
-                                                thisView.setVisibility(VISIBLE);
-                                            }
+                                                }
 
-                                            @Override
-                                            public void onAnimationCancel(Animator animator) {
+                                                @Override
+                                                public void onAnimationRepeat(Animator animator) {
 
-                                            }
+                                                }
+                                            })
+                                            .start();
+                                }
 
-                                            @Override
-                                            public void onAnimationRepeat(Animator animator) {
+                                @Override
+                                public void onAnimationCancel(Animator animator) {
 
-                                            }
-                                        })
-                                        .start();
-                            }
+                                }
 
-                            @Override
-                            public void onAnimationCancel(Animator animator) {
+                                @Override
+                                public void onAnimationRepeat(Animator animator) {
 
-                            }
+                                }
+                            })
+                            .start();
 
-                            @Override
-                            public void onAnimationRepeat(Animator animator) {
+                    Log.d(PACKAGE_NAME, "SlidingLayout : init 애니메이션 끝");
+                }
 
-                            }
-                        })
-                        .start();
-
-                Log.d(PACKAGE_NAME, "SlidingLayout : init 애니메이션 끝");
                 isOpened = false;
 
                 btn_init = (ImageView) thisView.findViewById(R.id.image_phonestate);
@@ -183,6 +267,10 @@ public class LayoutSliding extends LinearLayout {
                     }
 
                 });
+
+                //if (pref.getString("outgoing_NUMBER", "") != "") {
+                //    now_NEW_OUTGOING_CALL(pref.getString("outgoing_NUMBER", ""));
+                //}
             }
         });
     }
@@ -202,7 +290,6 @@ public class LayoutSliding extends LinearLayout {
                 .start();
         isOpened = false;
     }
-
     public void open_slide(){
         Log.d(PACKAGE_NAME, "SlidingLayout : open_slide");
         //thisView.setTranslationY(-height*3/4);
@@ -217,8 +304,6 @@ public class LayoutSliding extends LinearLayout {
     public void now_CALL_STATE_OFFHOOK() {
 
         Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_OFFHOOK");
-        //image_phonestate.setImageResource(R.drawable.phone_state_offhook);
-        //text_phonestate.setText("전화 통화 중");
         open_slide();
         kill_timer();
 
@@ -227,8 +312,16 @@ public class LayoutSliding extends LinearLayout {
     public void now_CALL_STATE_RINGING() {
 
         Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_RINGING");
-        //image_phonestate.setImageResource(R.drawable.phone_state_ringing);
-        //text_phonestate.setText("전화 수신 중");
+        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
+
+
+        if (call_end != null) {
+            call_end.setHeight(40);
+            call_end.setVisibility(VISIBLE);
+        }
+        if (call_start != null) {
+            call_start.setText("전화 받기");
+        }
         open_slide();
         kill_timer();
 
@@ -237,17 +330,31 @@ public class LayoutSliding extends LinearLayout {
     public void now_CALL_STATE_IDLE() {
 
         Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_IDLE");
-        //image_phonestate.setImageResource(R.drawable.phone_state_ringing);
-        //text_phonestate.setText("전화 수신 중");
+        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
+
+        if (call_end != null) {
+            call_end.setHeight(0);
+            call_end.setVisibility(GONE);
+        }
+        if (call_start != null) {
+            call_start.setText("전화 걸기");
+        }
         close_slide();
 
     }
 
-    public void now_NEW_OUTGOING_CALL() {
+    public void now_NEW_OUTGOING_CALL(String outgoing_NUMBER) {
 
-        Log.d(PACKAGE_NAME, "SlidingLayout : now_NEW_OUTGOING_CALL");
-        //image_phonestate.setImageResource(R.drawable.phone_state_ringing);
-        //text_phonestate.setText("전화 수신 중");
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_NEW_OUTGOING_CALL | " + outgoing_NUMBER);
+        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
+
+        if (call_end != null) {
+            call_end.setHeight(40);
+            call_end.setVisibility(VISIBLE);
+        }
+        if (call_start != null) {
+            call_start.setText("전화 받기");
+        }
         open_slide();
         kill_timer();
 
@@ -260,7 +367,7 @@ public class LayoutSliding extends LinearLayout {
 
     private void timer_start() {
 
-        Log.d(PACKAGE_NAME, "timer_start : start");
+        Log.d(PACKAGE_NAME, "SlidingLayout : timer_start : start");
 
         if (timer != null) {
             timer.cancel();
@@ -280,7 +387,7 @@ public class LayoutSliding extends LinearLayout {
     }
 
     private void times_up() {
-        Log.d(PACKAGE_NAME, "timer_start : times_up");
+        Log.d(PACKAGE_NAME, "SlidingLayout : timer_start : times_up");
         Runnable updater = new Runnable() {
             @Override
             public void run() {
@@ -298,7 +405,7 @@ public class LayoutSliding extends LinearLayout {
         timertask = null;
         timer.cancel();
         timer.purge();
-        Log.d(PACKAGE_NAME, "timer_start : kill_timer");
+        Log.d(PACKAGE_NAME, "SlidingLayout : timer_start : kill_timer");
     }
 
 }

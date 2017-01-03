@@ -44,11 +44,10 @@ public class ServiceBackground extends Service {
     ArrayList<ArrayList<String>> history;
     boolean history_initialized;
 
-    int WHAT;
-    String EXTRA_DATA;
-
     SharedPreferences pref;
     SharedPreferences.Editor editor;
+
+    ArrayList<ArrayList<String>> message_list;
 
     public ServiceBackground() {
         Log.d(PACKAGE_NAME, "ServiceBackground 생성");
@@ -79,10 +78,9 @@ public class ServiceBackground extends Service {
             Log.d(PACKAGE_NAME, "ServiceBackground : init : ReceiverStateListener 등록");
         }
 
-        WHAT = 0;
-        EXTRA_DATA = null;
         user_credit = -1;
         history = null;
+        message_list = new ArrayList<>();
 
         pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
         editor = pref.edit();
@@ -184,7 +182,8 @@ public class ServiceBackground extends Service {
                     history.add(0, item_history);
                     history.remove(history.size()-1);
 
-                    send_History();
+                    if (checkServiceRunning(AoT_SERVICE_NAME))
+                        send_History();
                 }
 
             }
@@ -240,10 +239,15 @@ public class ServiceBackground extends Service {
     }
 
     private void send_OUTGOINGCALL(String outgoing_number) {
+        editor.putString("outgoing_NUMBER", outgoing_number);
+        editor.commit();
+
+        Log.d(PACKAGE_NAME, "ServiceBackground : send_OUTGOINGCALL | outgoing_NUMBER = " + outgoing_number);
+
         if (checkServiceRunning(AoT_SERVICE_NAME)){
             sendMessage(152, outgoing_number);
         } else if (checkServiceRunning(CreditTicker_SERVICE_NAME)) {
-            sendMessage(553, outgoing_number);
+            sendMessage(552, outgoing_number);
         }
     }
     public void send_History() {
@@ -288,9 +292,11 @@ public class ServiceBackground extends Service {
     }
 
     public void shutdown_AoT(){
+        Log.d(PACKAGE_NAME, "ServiceBackground : shutdown_AoT : AoT 서비스를 종료 합니다");
         stopService(new Intent(this, ServiceAlwaysOnTop.class));
     }
     public void shutdown_CT() {
+        Log.d(PACKAGE_NAME, "ServiceBackground : shutdown_CT : CT 서비스를 종료 합니다");
         stopService(new Intent(this, ServiceCreditTicker.class));
         //// 혹시 몰라 noti 지우기 ////
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -299,6 +305,15 @@ public class ServiceBackground extends Service {
     }
 
 
+    public void add_to_message_queue(int what, String extra_data) {
+        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : add_to_message_queue!! : " + what + " : " + extra_data);
+
+        ArrayList<String> message = new ArrayList<>();
+        message.add(String.valueOf(what));
+        message.add(extra_data);
+
+        message_list.add(message);
+    }
 
 
     ////////////////////////////////////////////////////////////////////////////////////ver.161228//
@@ -313,22 +328,73 @@ public class ServiceBackground extends Service {
     ////////////////////////////////////////////////////////////////// Credit Ticker ///////////////
     ///////////////////////////////////////////////////////////////// Connect w/CT       : 500 /////
     ///////////////////////////////////////////////////////////////// send Credit        : 502 /////
-    ///////////////////////////////////////////////////////////////// alert OffHook      : 553 /////
+    ///////////////////////////////////////////////////////////////// alert OutgoingCall : 552 /////
     ///////////////////////////////////////////////////////////////// Disconnect w/CT    : 598 /////
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    public synchronized void sender_unit(int mode, Message msg) {
+        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sender_unit started" + mode + " : " + msg.what + " | " + msg.getData());
+
+
+        switch(mode) {
+            case 0:
+
+                try {
+                    mService_AoT.send(msg);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            case 1:
+
+                try {
+                    mService_Ticker.send(msg);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+        }
+    }
     public void sendMessage(int what, String extra_data) {
 
         if (what == 0) return;
 
-        if (what/500 == 0) {
+        if (what/499 == 0) {
 
-            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage = " + mBound_AoT + " : " + what);
+            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage0 = " + mBound_AoT + " : " + what + " | " + extra_data + " : lets_stop_thisloop = " + lets_stop_thisloop);
             if (!mBound_AoT){
-                WHAT = what;
-                EXTRA_DATA = extra_data;
+                if (what != -1)
+                    add_to_message_queue(what, extra_data);
                 bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
             }
             else {
+                Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : true0 : " + message_list.size());
+                while(message_list.size() != 0) {
+                    Message msg = Message.obtain(null, Integer.valueOf(message_list.get(0).get(0)) , 0, 0);
+
+                    if (message_list.get(0).get(1) != null) {
+                        Bundle data = new Bundle();
+
+                        if (Integer.valueOf(message_list.get(0).get(0)) == 104){
+                            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : add history : " + history.size() + " | " + history.get(0));
+                            data.putSerializable("log_init", history);
+                        }
+                        else
+                            data.putString("extra_data" , message_list.get(0).get(1));
+
+                        msg.setData(data);
+                    }
+
+                    if (Integer.valueOf(message_list.get(0).get(0))/499 ==0)
+                        sender_unit(0, msg);
+                    else
+                        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : MessageQueue Error!!!! what = " + Integer.valueOf(message_list.get(0).get(0)));
+
+
+                    message_list.remove(0);
+                }
+
                 Message msg = Message.obtain(null, what, 0, 0);
 
                 if (extra_data != null) {
@@ -342,11 +408,7 @@ public class ServiceBackground extends Service {
                     msg.setData(data);
                 }
 
-                try {
-                    mService_AoT.send(msg);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+                sender_unit(0, msg);
 
                 if (what == 198) {
                     unbindService(mConnection_AoT);
@@ -359,19 +421,35 @@ public class ServiceBackground extends Service {
                 } else if (what == 104) {
                     history_initialized = true;
                 }
-
-                what = 0;
-                extra_data = null;
             }
-        } else if (what/500 == 1) {
 
-            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage = " + mBound_Ticker + " : " + what);
+        } else if (what/499 == 1) {
+
+            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage1 = " + mBound_Ticker + " : " + what + " : lets_stop_thisloop = " + lets_stop_thisloop);
             if (!mBound_Ticker){
-                WHAT = what;
-                EXTRA_DATA = extra_data;
+                if ((what-500) != -1)
+                    add_to_message_queue(what, extra_data);
                 bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
             }
             else {
+                Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : true1 : " + message_list.size());
+                while (message_list.size() != 0) {
+                    Message msg = Message.obtain(null, Integer.valueOf(message_list.get(0).get(0)) , 0, 0);
+
+                    if (message_list.get(0).get(1) != null) {
+                        Bundle data = new Bundle();
+                        data.putString("extra_data" , extra_data);
+                        msg.setData(data);
+                    }
+
+                    if (Integer.valueOf(message_list.get(0).get(0))/499 ==1)
+                        sender_unit(1, msg);
+                    else
+                        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : MessageQueue Error!!!! what = " + Integer.valueOf(message_list.get(0).get(0)));
+
+                    message_list.remove(0);
+                }
+
                 Message msg = Message.obtain(null, what, 0, 0);
 
                 if (extra_data != null) {
@@ -380,13 +458,10 @@ public class ServiceBackground extends Service {
                     msg.setData(data);
                 }
 
-                try {
-                    mService_Ticker.send(msg);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+                sender_unit(1, msg);
 
                 if (what == 598) {
+
                     unbindService(mConnection_Ticker);
                     mConnection_Ticker.onServiceDisconnected(null);
 
@@ -396,8 +471,6 @@ public class ServiceBackground extends Service {
                     lets_stop_thisloop = false;
                 }
 
-                what = 0;
-                extra_data = null;
             }
         } else {
             Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage : message error!!!! : " + what + " : " + extra_data);
@@ -515,7 +588,7 @@ public class ServiceBackground extends Service {
             mService_Ticker = new Messenger(iBinder);
             mBound_Ticker = true;
             mBound_AoT = false;
-            sendMessage(WHAT, EXTRA_DATA);
+            sendMessage(499, null);
         }
 
         @Override
@@ -535,7 +608,7 @@ public class ServiceBackground extends Service {
             mService_AoT = new Messenger(iBinder);
             mBound_AoT = true;
             mBound_Ticker = false;
-            sendMessage(WHAT, EXTRA_DATA);
+            sendMessage(-1, null);
         }
 
         @Override
