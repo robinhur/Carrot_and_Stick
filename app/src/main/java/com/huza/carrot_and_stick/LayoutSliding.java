@@ -6,21 +6,26 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Space;
+import android.widget.TextView;
 
 import com.android.internal.telephony.ITelephony;
 
 import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -51,6 +56,8 @@ public class LayoutSliding extends LinearLayout {
     Button call_start;
     Button call_end;
     Space call_space;
+    TextView call_number;
+    TextView call_state;
 
     public LayoutSliding(Context context) {
         super(context);
@@ -90,6 +97,9 @@ public class LayoutSliding extends LinearLayout {
             public void run() {
                 Log.d(PACKAGE_NAME, "SlidingLayout : post called | outgoing_NUMBER = " + pref.getString("outgoing_NUMBER", "!"));
 
+                call_number = (TextView) thisView.findViewById(R.id.aot_sliding_call_number);
+                call_state = (TextView) thisView.findViewById(R.id.aot_sliding_call_state);
+
                 call_start = (Button) thisView.findViewById(R.id.aot_sliding_call_start);
                 call_start.setText("전화 걸기");
                 call_end = (Button) thisView.findViewById(R.id.aot_sliding_call_end);
@@ -106,7 +116,7 @@ public class LayoutSliding extends LinearLayout {
                         switch (((Button)view).getText().toString()) {
                             case "전화 걸기" :
 
-                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-1234-1234"));
+                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-3315-8130"));
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                                 if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -118,17 +128,53 @@ public class LayoutSliding extends LinearLayout {
 
                             case "전화 받기" :
 
-                                try {
-                                    TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-                                    Class c = Class.forName(telephonyManager.getClass().getName());
-                                    Method m = c.getDeclaredMethod("getITelephony");
-                                    m.setAccessible(true);
-                                    com.android.internal.telephony.ITelephony telephonyService = (ITelephony) m.invoke(telephonyManager);
+                                // Runtime.exec(String) had an I/O problem, try to fall back
+                                String enforcedPerm = "android.permission.CALL_PRIVILEGED";
+                                Intent btnDown = new Intent(Intent.ACTION_MEDIA_BUTTON).putExtra(
+                                        Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN,
+                                                KeyEvent.KEYCODE_HEADSETHOOK));
+                                Intent btnUp = new Intent(Intent.ACTION_MEDIA_BUTTON).putExtra(
+                                        Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP,
+                                                KeyEvent.KEYCODE_HEADSETHOOK));
 
-                                    telephonyService.answerRingingCall();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                                mContext.sendOrderedBroadcast(btnDown, enforcedPerm);
+                                mContext.sendOrderedBroadcast(btnUp, enforcedPerm);
+                                /*
+                                try {
+                                    Log.d(PACKAGE_NAME, "SlidingLayout : answer | yes");
+                                    Runtime.getRuntime().exec("input keyevent " +
+                                            Integer.toString(KeyEvent.KEYCODE_HEADSETHOOK));
+                                } catch (IOException e) {
+                                    Log.d(PACKAGE_NAME, "SlidingLayout : answer | no");
+                                    answerRingingCallWithIntent();
                                 }
+                                */
+
+                                /*
+                                    Intent buttonDown = new Intent(Intent.ACTION_MEDIA_BUTTON);
+                                    buttonDown.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK));
+                                    mContext.sendOrderedBroadcast(buttonDown, "android.permission.CALL_PRIVILEGED");
+                                */
+                                /*
+                                    try {
+                                        Runtime.getRuntime().exec("input keyevent " + Integer.toString(KeyEvent.KEYCODE_HEADSETHOOK));
+                                    } catch (IOException e) {
+                                        //handle error here
+                                    }
+                                */
+                                /*
+                                    try {
+                                        TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+                                        Class c = Class.forName(telephonyManager.getClass().getName());
+                                        Method m = c.getDeclaredMethod("getITelephony");
+                                        m.setAccessible(true);
+                                        com.android.internal.telephony.ITelephony telephonyService = (ITelephony) m.invoke(telephonyManager);
+
+                                        telephonyService.answerRingingCall();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                */
                                 break;
 
                         }
@@ -301,27 +347,79 @@ public class LayoutSliding extends LinearLayout {
         timer_start();
     }
 
-    public void now_CALL_STATE_OFFHOOK() {
+    public String change_NUMBER(String number) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return PhoneNumberUtils.formatNumber(number, Locale.getDefault().getCountry());
+        } else {
+            return number;
+        }
+    }
+
+    public void now_CALL_STATE_OFFHOOK(String incomming_NUMBER) {
 
         Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_OFFHOOK");
+
+        if (call_end != null) {
+            call_end.setVisibility(VISIBLE);
+            call_end.setHeight(150);
+
+            ////////////////////////////////
+            call_state.setText("수신 번호");
+            call_number.setText(change_NUMBER(incomming_NUMBER));
+            ////////////////////////////////
+        }
+        if (call_start != null) {
+            call_start.setVisibility(GONE);
+        }
+
         open_slide();
         kill_timer();
 
     }
 
-    public void now_CALL_STATE_RINGING() {
+    public void now_NEW_OUTGOING_CALL(String outgoing_NUMBER) {
+
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_NEW_OUTGOING_CALL | " + outgoing_NUMBER);
+        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
+
+        if (call_end != null) {
+            call_end.setVisibility(VISIBLE);
+            call_end.setHeight(150);
+
+            ////////////////////////////////
+            call_state.setText("발신 번호");
+            call_number.setText(change_NUMBER(outgoing_NUMBER));
+            ////////////////////////////////
+        }
+        if (call_start != null) {
+            call_start.setVisibility(GONE);
+        }
+
+        open_slide();
+        kill_timer();
+
+    }
+
+
+    public void now_CALL_STATE_RINGING(String incomming_NUMBER) {
 
         Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_RINGING");
         if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
 
-
         if (call_end != null) {
-            call_end.setHeight(40);
             call_end.setVisibility(VISIBLE);
+            call_end.setHeight(40);
+
+            ////////////////////////////////
+            call_state.setText("수신 번호");
+            call_number.setText(change_NUMBER(incomming_NUMBER));
+            ////////////////////////////////
         }
         if (call_start != null) {
+            call_start.setVisibility(VISIBLE);
             call_start.setText("전화 받기");
         }
+
         open_slide();
         kill_timer();
 
@@ -335,31 +433,19 @@ public class LayoutSliding extends LinearLayout {
         if (call_end != null) {
             call_end.setHeight(0);
             call_end.setVisibility(GONE);
+
+            ////////////////////////////////
+            call_state.setText("기본 발신번호");
+            call_number.setText("010-3315-8130");
+            ////////////////////////////////
         }
         if (call_start != null) {
+            call_start.setVisibility(VISIBLE);
             call_start.setText("전화 걸기");
         }
         close_slide();
 
     }
-
-    public void now_NEW_OUTGOING_CALL(String outgoing_NUMBER) {
-
-        Log.d(PACKAGE_NAME, "SlidingLayout : now_NEW_OUTGOING_CALL | " + outgoing_NUMBER);
-        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
-
-        if (call_end != null) {
-            call_end.setHeight(40);
-            call_end.setVisibility(VISIBLE);
-        }
-        if (call_start != null) {
-            call_start.setText("전화 받기");
-        }
-        open_slide();
-        kill_timer();
-
-    }
-
 
     TimerTask timertask;
     Timer timer = new Timer();
@@ -406,6 +492,38 @@ public class LayoutSliding extends LinearLayout {
         timer.cancel();
         timer.purge();
         Log.d(PACKAGE_NAME, "SlidingLayout : timer_start : kill_timer");
+    }
+
+    public void answerRingingCallWithIntent() {
+        try {
+            Log.d(PACKAGE_NAME, "SlidingLayout : answerRingingCallWithIntent | yes");
+            Intent localIntent1 = new Intent(Intent.ACTION_HEADSET_PLUG);
+            localIntent1.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            localIntent1.putExtra("state", 1);
+            localIntent1.putExtra("microphone", 1);
+            localIntent1.putExtra("name", "Headset");
+            getContext().sendOrderedBroadcast(localIntent1, "android.permission.CALL_PRIVILEGED");
+
+            Intent localIntent2 = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            KeyEvent localKeyEvent1 = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK);
+            localIntent2.putExtra(Intent.EXTRA_KEY_EVENT, localKeyEvent1);
+            getContext().sendOrderedBroadcast(localIntent2, "android.permission.CALL_PRIVILEGED");
+
+            Intent localIntent3 = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            KeyEvent localKeyEvent2 = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK);
+            localIntent3.putExtra(Intent.EXTRA_KEY_EVENT, localKeyEvent2);
+            getContext().sendOrderedBroadcast(localIntent3, "android.permission.CALL_PRIVILEGED");
+
+            Intent localIntent4 = new Intent(Intent.ACTION_HEADSET_PLUG);
+            localIntent4.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            localIntent4.putExtra("state", 0);
+            localIntent4.putExtra("microphone", 1);
+            localIntent4.putExtra("name", "Headset");
+            getContext().sendOrderedBroadcast(localIntent4, "android.permission.CALL_PRIVILEGED");
+        } catch (Exception e2) {
+            Log.d(PACKAGE_NAME, "SlidingLayout : answerRingingCallWithIntent | no");
+            e2.printStackTrace();
+        }
     }
 
 }

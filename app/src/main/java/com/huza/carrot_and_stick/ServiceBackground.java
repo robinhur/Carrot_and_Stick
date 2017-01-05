@@ -257,6 +257,10 @@ public class ServiceBackground extends Service {
     }
 
     public void Start_AoT() {
+        //// 혹시 몰라 noti 지우기 ////
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(737);
+        ///////////////////////////////
         if (checkServiceRunning(AoT_SERVICE_NAME)) return;
 
         lets_stop_thisloop = false;
@@ -550,6 +554,10 @@ public class ServiceBackground extends Service {
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : CT 죽여? : second : " + msg.getData().getString("extra_data"));
                     changeUserCredit(Integer.valueOf(msg.getData().getString("extra_data")));
                     shutdown_CT();
+                    //// 혹시 몰라 noti 지우기 ////
+                    nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    nm.cancel(737);
+                    ///////////////////////////////
                     break;
             }
 

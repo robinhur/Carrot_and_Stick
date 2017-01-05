@@ -27,6 +27,9 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -239,7 +242,9 @@ public class ServiceAlwaysOnTop extends Service {
 
         PB1 = (ProgressBar) OnTop_view.findViewById(R.id.progress_bar1);
         PB2 = (ProgressBar) OnTop_view.findViewById(R.id.progress_bar2);
-        tv_time = (TextView) OnTop_view.findViewById(R.id.tv_time);
+        ////////////시계////////////
+        //tv_time = (TextView) OnTop_view.findViewById(R.id.tv_time);
+        ////////////////////////////
         tv_main_credit = (TextView) OnTop_view.findViewById(R.id.tv_main_credit);
         iv_main_credit = (ImageView) OnTop_view.findViewById(R.id.iv_main_updown);
 
@@ -310,7 +315,7 @@ public class ServiceAlwaysOnTop extends Service {
                         text_phonestate1.setText("전화 ");
                         text_phonestate2.setTextColor(Color.YELLOW);
                         text_phonestate2.setText("수신 중");
-                        aot_custom_slidinglayout.now_CALL_STATE_RINGING();
+                        aot_custom_slidinglayout.now_CALL_STATE_RINGING(incomingNumber);
                         //울리는중
                         break;
                     case TelephonyManager.CALL_STATE_OFFHOOK:
@@ -320,7 +325,7 @@ public class ServiceAlwaysOnTop extends Service {
                             text_phonestate1.setText("수신 ");
                             text_phonestate2.setTextColor(Color.GREEN);
                             text_phonestate2.setText("통화 중");
-                            aot_custom_slidinglayout.now_CALL_STATE_OFFHOOK();
+                            aot_custom_slidinglayout.now_CALL_STATE_OFFHOOK(incomingNumber);
                             //수신중
                         } else {
                             image_phonestate.setImageResource(R.drawable.phone_state_offhook);
@@ -359,7 +364,6 @@ public class ServiceAlwaysOnTop extends Service {
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand");
         OnTop_view.setSystemUiVisibility(ui_Options);
-        timer_start();
 
         return super.onStartCommand(intent, flags, startId);
 
@@ -464,6 +468,11 @@ public class ServiceAlwaysOnTop extends Service {
                     text_phonestate2 = (TextView) layout.findViewById(R.id.text_phonestate2);
                     manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
                     manager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+
+                    //시계시계//
+                    tv_time = (TextView) layout.findViewById(R.id.tv_time);
+                    timer_start();
+                    ////////////
                     break;
                 case 2:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 2(history)");
@@ -516,7 +525,9 @@ public class ServiceAlwaysOnTop extends Service {
             @Override
             public void run() {
                 now_time = Calendar.getInstance();
-                tv_time.setText(time_format.format(now_time.getTime()));
+                Spannable sp = new SpannableString(time_format.format(now_time.getTime()));
+                sp.setSpan(new RelativeSizeSpan(0.7f), sp.length()-5, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                tv_time.setText(sp);
             }
         };
 
