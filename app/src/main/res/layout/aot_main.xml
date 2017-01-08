@@ -66,9 +66,23 @@
 
         <LinearLayout
             android:layout_width="match_parent"
+            android:orientation="horizontal"
             android:background="#0000ff00"
             android:layout_height="0dp"
             android:layout_weight="2">
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:background="#ffffff"
+                android:id="@+id/bar_graph_past"
+                android:layout_width="0dp"
+                android:layout_weight="55"
+                android:layout_height="match_parent" />
+            <com.github.mikephil.charting.charts.BarChart
+                android:background="#dddddd"
+                android:id="@+id/bar_graph_today"
+                android:layout_width="0dp"
+                android:layout_weight="15"
+                android:layout_height="match_parent" />
 
         </LinearLayout>
 
@@ -96,6 +110,9 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <!-- android:visibility="gone"
+         -->
 
     <LinearLayout
         android:orientation="vertical"

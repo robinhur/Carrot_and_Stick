@@ -46,6 +46,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -81,6 +88,8 @@ public class ServiceAlwaysOnTop extends Service {
     ProgressBar PB2; // on aot
     ProgressBar PB3; // on history
 
+    BarChart bar_graph_past;
+    BarChart bar_graph_today;
     LayoutSliding aot_custom_slidinglayout;
     TelephonyManager manager;
     ImageView image_phonestate;
@@ -369,6 +378,90 @@ public class ServiceAlwaysOnTop extends Service {
 
     }
 
+
+    private void init_bar_graph() {
+
+        ArrayList<BarEntry> dataset_past = new ArrayList<>();
+
+        for (int i = 0; i < 6; i ++) {
+            dataset_past.add(new BarEntry(i, (float)(Math.random()* 100000)));
+        }
+
+        BarDataSet set1 = new BarDataSet(dataset_past, null);
+        //set1.setColors(ColorTemplate.MATERIAL_COLORS);
+
+        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        dataSets.add(set1);
+
+        BarData data = new BarData(dataSets);
+        data.setValueTextSize(10f);
+        //data.setBarWidth(0.9f);
+
+        bar_graph_past.setTouchEnabled(false);
+        bar_graph_past.setDragEnabled(false);
+
+        bar_graph_past.getXAxis().setDrawGridLines(false);
+        bar_graph_past.getXAxis().setDrawAxisLine(false);
+        bar_graph_past.getXAxis().setDrawLabels(false);
+        bar_graph_past.getXAxis().setTextSize(15f);
+        bar_graph_past.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+
+        bar_graph_past.getAxisLeft().setDrawGridLines(false);
+        bar_graph_past.getAxisLeft().setDrawAxisLine(false);
+        bar_graph_past.getAxisLeft().setDrawLabels(false);
+
+        bar_graph_past.getAxisRight().setDrawGridLines(false);
+        bar_graph_past.getAxisRight().setDrawAxisLine(false);
+        bar_graph_past.getAxisRight().setDrawLabels(false);
+
+        bar_graph_past.setDrawValueAboveBar(true);
+        bar_graph_past.setDrawMarkers(false);
+        bar_graph_past.setDescription(null);
+
+        bar_graph_past.getLegend().setEnabled(false);
+        bar_graph_past.setData(data);
+
+
+        ArrayList<BarEntry> dataset_today = new ArrayList<>();
+        dataset_today.add(new BarEntry(6, (float)(Math.random()*1000)));
+
+        BarDataSet set2 = new BarDataSet(dataset_today, null);
+        set2.setColors(ColorTemplate.MATERIAL_COLORS);
+
+        ArrayList<IBarDataSet> dataSets2 = new ArrayList<>();
+        dataSets2.add(set2);
+
+        BarData data_today = new BarData(dataSets2);
+        data_today.setBarWidth(20f);
+        data_today.setValueTextSize(15f);
+
+        bar_graph_today.setTouchEnabled(false);
+        bar_graph_today.setDragEnabled(false);
+
+        bar_graph_today.getXAxis().setDrawGridLines(false);
+        bar_graph_today.getXAxis().setDrawAxisLine(false);
+        bar_graph_today.getXAxis().setDrawLabels(false);
+        bar_graph_today.getXAxis().setTextSize(20f);
+        bar_graph_today.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+
+        bar_graph_today.getAxisLeft().setDrawGridLines(false);
+        bar_graph_today.getAxisLeft().setDrawAxisLine(false);
+        bar_graph_today.getAxisLeft().setDrawLabels(false);
+
+        bar_graph_today.getAxisRight().setDrawGridLines(false);
+        bar_graph_today.getAxisRight().setDrawAxisLine(false);
+        bar_graph_today.getAxisRight().setDrawLabels(false);
+
+        bar_graph_today.setDrawValueAboveBar(true);
+        bar_graph_today.setDrawMarkers(false);
+        bar_graph_today.setDescription(null);
+
+        bar_graph_today.getLegend().setEnabled(false);
+        bar_graph_today.setData(data_today);
+
+    }
+
+
     public void start_creditticker() {
         Log.d(PACKAGE_NAME, "AlwaysOnTop : start_creditticker");
 
@@ -462,6 +555,12 @@ public class ServiceAlwaysOnTop extends Service {
                     break;
                 case 1:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 1(main)");
+                    bar_graph_past = (BarChart) layout.findViewById(R.id.bar_graph_past);
+                    bar_graph_today = (BarChart) layout.findViewById(R.id.bar_graph_today);
+                    /// temporary ///
+                    init_bar_graph();
+                    /////////////////
+
                     aot_custom_slidinglayout = (LayoutSliding) layout.findViewById(R.id.aot_custom_slidinglayout);
                     image_phonestate = (ImageView) layout.findViewById(R.id.image_phonestate);
                     text_phonestate1 = (TextView) layout.findViewById(R.id.text_phonestate1);
