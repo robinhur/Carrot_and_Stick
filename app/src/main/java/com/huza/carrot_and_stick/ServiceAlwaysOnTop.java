@@ -124,7 +124,7 @@ public class ServiceAlwaysOnTop extends Service {
             PixelFormat.TRANSLUCENT);
     //// TYPE_SYSTEM_ERROR or TYPE_PRIORITY_PHONE or TYPE_PHONE
     int AoT_MaintextColor;
-    SimpleDateFormat time_format = new SimpleDateFormat("aa hh : mm : ss", Locale.KOREA);
+    SimpleDateFormat time_format = new SimpleDateFormat("aa hh:mm:ss", Locale.KOREA);
     Calendar now_time;
 
     TimerTask timertask;
@@ -420,10 +420,19 @@ public class ServiceAlwaysOnTop extends Service {
 
         bar_graph_past.getLegend().setEnabled(false);
         bar_graph_past.setData(data);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : X : " +
+                bar_graph_past.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_past.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past1 : Y : " +
+                bar_graph_past.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_past.getAxisLeft().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today2 : Y : " +
+                bar_graph_past.getAxisRight().getAxisMinimum() + "|" +
+                bar_graph_past.getAxisRight().getAxisMaximum());
 
 
         ArrayList<BarEntry> dataset_today = new ArrayList<>();
-        dataset_today.add(new BarEntry(6, (float)(Math.random()*1000)));
+        dataset_today.add(new BarEntry(6, (float)(Math.random()*100000)));
 
         BarDataSet set2 = new BarDataSet(dataset_today, null);
         set2.setColors(ColorTemplate.MATERIAL_COLORS);
@@ -458,6 +467,25 @@ public class ServiceAlwaysOnTop extends Service {
 
         bar_graph_today.getLegend().setEnabled(false);
         bar_graph_today.setData(data_today);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today1 : X : " +
+                bar_graph_today.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_today.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today1 : Y : " +
+                bar_graph_today.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_today.getAxisLeft().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today2 : Y : " +
+                bar_graph_today.getAxisRight().getAxisMinimum() + "|" +
+                bar_graph_today.getAxisRight().getAxisMaximum());
+
+        bar_graph_past.getAxisLeft().setAxisMinimum(0);
+        bar_graph_past.getAxisRight().setAxisMinimum(0);
+        bar_graph_today.getAxisLeft().setAxisMinimum(0);
+        bar_graph_today.getAxisRight().setAxisMinimum(0);
+
+        if (bar_graph_past.getAxisLeft().getAxisMaximum() > bar_graph_today.getAxisLeft().getAxisMaximum())
+            bar_graph_today.getAxisLeft().setAxisMaximum(bar_graph_past.getAxisLeft().getAxisMaximum());
+        else
+            bar_graph_past.getAxisLeft().setAxisMaximum(bar_graph_today.getAxisLeft().getAxisMaximum());
 
     }
 
@@ -625,7 +653,7 @@ public class ServiceAlwaysOnTop extends Service {
             public void run() {
                 now_time = Calendar.getInstance();
                 Spannable sp = new SpannableString(time_format.format(now_time.getTime()));
-                sp.setSpan(new RelativeSizeSpan(0.7f), sp.length()-5, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                sp.setSpan(new RelativeSizeSpan(0.7f), sp.length()-3, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 tv_time.setText(sp);
             }
         };

@@ -72,7 +72,7 @@
             android:layout_weight="2">
 
             <com.github.mikephil.charting.charts.BarChart
-                android:background="#ffffff"
+                android:background="#dddddd"
                 android:id="@+id/bar_graph_past"
                 android:layout_width="0dp"
                 android:layout_weight="55"
