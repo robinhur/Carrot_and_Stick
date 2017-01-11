@@ -22,8 +22,6 @@ public class ActivityMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
     }
 
     @Override

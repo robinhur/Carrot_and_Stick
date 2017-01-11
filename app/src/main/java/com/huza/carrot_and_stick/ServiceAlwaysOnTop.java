@@ -57,6 +57,7 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.crash.FirebaseCrash;
 import com.matthewtamlin.sliding_intro_screen_library.indicators.DotIndicator;
 
 import java.text.SimpleDateFormat;
@@ -180,6 +181,11 @@ public class ServiceAlwaysOnTop extends Service {
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         OnTop_view = inflater.inflate(R.layout.service_alwaysontop, null);
+
+        // FIREBASE CRASH REPORT //
+        //FirebaseCrash.report(new Exception("My first Android non-fatal error"));
+        //tv_time.setText("asdf");
+        ///////////////////////////
 
         /// 배너 광고!! ///
         MobileAds.initialize(OnTop_view.getContext(), "ca-app-pub-7701727044020114~2802773583");
