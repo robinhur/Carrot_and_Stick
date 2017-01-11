@@ -30,11 +30,18 @@ dependencies {
     compile 'com.android.support:appcompat-v7:24.2.1'
     testCompile 'junit:junit:4.12'
     compile 'com.matthew-tamlin:sliding-intro-screen:3.2.0'
+<<<<<<< HEAD
     compile 'com.google.firebase:firebase-auth:9.6.1'
     compile 'com.google.firebase:firebase-database:9.6.1'
     compile 'com.google.firebase:firebase-ads:9.6.1'
 
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.1'
+=======
+    compile 'com.google.firebase:firebase-auth:10.0.1'
+    compile 'com.google.firebase:firebase-database:10.0.1'
+    compile 'com.google.firebase:firebase-ads:10.0.1'
+    compile 'com.google.firebase:firebase-crash:10.0.1'
+>>>>>>> feature/FIREBASE_CRASH_REPORT
 }
 
 apply plugin: 'com.google.gms.google-services'
