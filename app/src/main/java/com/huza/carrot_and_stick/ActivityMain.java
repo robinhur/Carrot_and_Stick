@@ -12,6 +12,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.google.firebase.crash.FirebaseCrash;
+
 public class ActivityMain extends AppCompatActivity {
 
     private static final String PACKAGE_NAME = "Carrot_and_Stick";
@@ -20,6 +22,8 @@ public class ActivityMain extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FirebaseCrash.report(new Exception("My first Android non-fatal error"));
     }
 
     @Override
