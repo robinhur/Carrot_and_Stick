@@ -90,17 +90,18 @@ public class ServiceCreditTicker extends Service {
             stopSelf();
         }
 
-        if (intent.getAction() != null) {
-            Log.d(PACKAGE_NAME, "ServiceCreditTicker : " + intent.getAction());
-            switch (intent.getAction()) {
-                case "CLICKtoCLOSE":
-                    requestTOdisconnect();
-                    break;
-                default:
-                    break;
+        if(intent != null && intent.getAction() != null) {
+            if (intent.getAction() == "CLICKtoCLOSE") {
+                Log.d(PACKAGE_NAME, "ServiceCreditTicker : " + intent.getAction());
+                switch (intent.getAction()) {
+                    case "CLICKtoCLOSE":
+                        requestTOdisconnect();
+                        break;
+                    default:
+                        break;
+                }
+                return super.onStartCommand(intent, flags, startId);
             }
-
-            return super.onStartCommand(intent, flags, startId);
         }
 
         pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
