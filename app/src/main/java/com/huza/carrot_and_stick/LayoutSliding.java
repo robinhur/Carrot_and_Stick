@@ -111,12 +111,12 @@ public class LayoutSliding extends LinearLayout {
                     @Override
                     public void onClick(View view) {
 
-                        Log.d(PACKAGE_NAME, "SlidingLayout : call_start : onClick | " + ((Button)view).getText().toString());
+                        Log.d(PACKAGE_NAME, "SlidingLayout : call_start!!!!!!!!! : onClick | " + ((Button)view).getText().toString());
 
                         switch (((Button)view).getText().toString()) {
                             case "전화 걸기" :
 
-                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-3315-8130"));
+                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-5784-4785"));
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                                 if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -128,7 +128,15 @@ public class LayoutSliding extends LinearLayout {
 
                             case "전화 받기" :
 
-                                // Runtime.exec(String) had an I/O problem, try to fall back
+                                Log.d(PACKAGE_NAME, "SlidingLayout : call_start : onClick | 전화 받기!!!!!!!!!!");
+
+                                Intent i = new Intent(mContext, ActivityForAcceptCall.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                        | Intent.FLAG_ACTIVITY_NO_HISTORY
+                                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                                mContext.startActivity(i);
+
+                                /*// Runtime.exec(String) had an I/O problem, try to fall back
                                 String enforcedPerm = "android.permission.CALL_PRIVILEGED";
                                 Intent btnDown = new Intent(Intent.ACTION_MEDIA_BUTTON).putExtra(
                                         Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN,
@@ -138,7 +146,7 @@ public class LayoutSliding extends LinearLayout {
                                                 KeyEvent.KEYCODE_HEADSETHOOK));
 
                                 mContext.sendOrderedBroadcast(btnDown, enforcedPerm);
-                                mContext.sendOrderedBroadcast(btnUp, enforcedPerm);
+                                mContext.sendOrderedBroadcast(btnUp, enforcedPerm);*/
                                 /*
                                 try {
                                     Log.d(PACKAGE_NAME, "SlidingLayout : answer | yes");
