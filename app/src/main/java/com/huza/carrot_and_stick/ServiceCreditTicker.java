@@ -88,6 +88,7 @@ public class ServiceCreditTicker extends Service {
         if (intent == null) {
             Log.d(PACKAGE_NAME, "ServiceCreditTicker : intent가 없으므로 gg");
             stopSelf();
+            return super.onStartCommand(intent, flags, startId);
         }
 
         try {
@@ -106,6 +107,7 @@ public class ServiceCreditTicker extends Service {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            return super.onStartCommand(intent, flags, startId);
         }
 
         pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);

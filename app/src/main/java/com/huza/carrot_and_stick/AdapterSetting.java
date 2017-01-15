@@ -1,13 +1,7 @@
 package com.huza.carrot_and_stick;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,136 +23,68 @@ public class AdapterSetting extends BaseAdapter {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
 
+    ///////////////////////////////////////////////
+    ///////////////////////////////////////////////
+    ///////////////////////////////////////////////
+    //// setting menu count ///////////////////////
+    ///////////////////////////////////////////////
+    int setting_count = 6; ////////////////////////
+    ///////////////////////////////////////////////
+    ////// 1. 알림영역 새로고침 | Switch | T //////
+    ////// 2. 메인화면 자동복귀 | Switch | F //////
+    ////// 3. 홈화면으로 이동   | Switch | F //////
+    ////// 4. Credit 변화효과   | Switch | T //////
+    ////// 5. 어플 완전 종료    | Button |   //●//
+    ////// 6. 어플 삭제         | Button |   //●//
+    ///////////////////////////////////////////////
+    ///////////////////////////////////////////////
+    ///////////////////////////////////////////////
+
     Context mContext;
 
     String[][] setting;
-    int setting_count = 8;
 
     public AdapterSetting(Context context) {
         mContext = context;
 
         setting = new String[setting_count][3];
 
-        setting[0][0] = "광고영역 표시";
-        setting[0][1] = "잠금상태에서 하단 광고영역을 숨깁니다.";
+        setting[0][0] = "알림영역 새로고침";
+        setting[0][1] = "당근을 사용 시, 알림바를 매 초 갱신합니다.";
         setting[0][2] = "!Switch";
 
-        setting[1][0] = "네비게이션바 표시";
-        setting[1][1] = "잠금상태에서 하단 네비게이션바를 표시합니다.";
+        setting[1][0] = "메인화면 자동복귀";
+        setting[1][1] = "Credit에 변화가 있을 시, 자동으로 메인화면으로 돌아옵니다.";
         setting[1][2] = "Switch";
 
-        setting[2][0] = "알림영역 새로고침";
-        setting[2][1] = "당근을 사용 시, 알림바를 매 초 갱신합니다.";
-        setting[2][2] = "!Switch";
+        setting[2][0] = "홈화면으로 이동";
+        setting[2][1] = "잠금상태가 시작될 때, 홈화면으로 이동합니다.";
+        setting[2][2] = "Switch";
 
-        setting[3][0] = "메인화면 자동복귀";
-        setting[3][1] = "Credit에 변화가 있을 시, 자동으로 메인화면으로 돌아옵니다.";
+        setting[3][0] = "Credit 변화효과";
+        setting[3][1] = "Credit에 변화가 있을 시, 깜빡이는 효과를 적용합니다.";
         setting[3][2] = "!Switch";
 
-        setting[4][0] = "Credit 변화효과";
-        setting[4][1] = "Credit에 변화가 있을 시, 깜빡이는 효과를 적용합니다.";
-        setting[4][2] = "!Switch";
+        setting[4][0] = "어플리케이션 완전 종료";
+        setting[4][1] = "어플리케이션을 로그아웃하고 종료합니다.";
+        setting[4][2] = "Button";
 
-        setting[5][0] = "홈화면으로 이동";
-        setting[5][1] = "잠금상태가 시작될 때, 홈화면으로 이동합니다.";
-        setting[5][2] = "!Switch";
-
-        setting[6][0] = "어플리케이션 완전 종료";
-        setting[6][1] = "어플리케이션을 로그아웃하고 종료합니다.";
-        setting[6][2] = "Button";
-
-        setting[7][0] = "어플리케이션 삭제";
-        setting[7][1] = "어플리케이션을 기기에서 삭제합니다.";
-        setting[7][2] = "Button";
+        setting[5][0] = "어플리케이션 삭제";
+        setting[5][1] = "어플리케이션을 기기에서 삭제합니다.";
+        setting[5][2] = "Button";
     }
-
-    View.OnClickListener setting_btn_click = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            switch (view.getId()-1){
-                case 6:
-                    //send_final_close_msg();
-                    Toast.makeText(mContext, "어플리케이션 완전 종료", Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        }
-    };
-    CompoundButton.OnCheckedChangeListener setting_cb_click = new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-
-            /*if (b)
-                Toast.makeText(mContext, setting[compoundButton.getId()-1][0] + " : true", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(mContext, setting[compoundButton.getId()-1][0] + " : false", Toast.LENGTH_SHORT).show();*/
-
-            switch (compoundButton.getId()-1) {
-                case 0:
-                    break;
-                case 1:
-                    break;
-                case 2:
-                    break;
-            }
-        }
-    };
-
-    Messenger mService_AoT = null;
-    Boolean mBound_AoT = false;
-    ServiceConnection mConnection_AoT = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mService_AoT = new Messenger(iBinder);
-            mBound_AoT = true;
-            Log.d(PACKAGE_NAME, "SettingAdapter : onServiceConnected");
-            send_final_close_msg();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mService_AoT = null;
-            mBound_AoT = false;
-            Log.d(PACKAGE_NAME, "SettingAdapter : onServiceConnected");
-        }
-    };
-
-    private void send_final_close_msg() {
-        Log.d(PACKAGE_NAME, "SettingAdapter : send_final_close_msg() : " + mBound_AoT);
-
-        if (!mBound_AoT){
-            mContext.bindService(new Intent(mContext, ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
-            Log.d(PACKAGE_NAME, "SettingAdapter : send_final_close_msg() : bindService");
-            return;
-        }
-
-        Message msg = Message.obtain(null, 2, 0, 0);
-        try {
-            Log.d(PACKAGE_NAME, "SettingAdapter : send_final_close_msg() : message sent");
-            mService_AoT.send(msg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-
-        mContext.unbindService(mConnection_AoT);
-        Log.d(PACKAGE_NAME, "SettingAdapter : send_final_close_msg() : unbindService");
-        mConnection_AoT.onServiceDisconnected(null);
-    }
-
     @Override
     public int getCount() {
         return setting.length;
     }
-
     @Override
     public Object getItem(int i) {
         return setting[i];
     }
-
     @Override
     public long getItemId(int i) {
         return i;
     }
-
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
 
@@ -212,5 +138,48 @@ public class AdapterSetting extends BaseAdapter {
         return view;
 
     }
+
+
+    View.OnClickListener setting_btn_click = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+            Log.d(PACKAGE_NAME, "SettingAdapter : OnClickListener | " + setting[view.getId()-1][0]);
+
+            switch (setting[view.getId()-1][0]){
+                case "어플리케이션 완전 종료":
+                    //send_final_close_msg();
+
+                    mContext.sendBroadcast(new Intent("com.huza.carrot_and_stick.finally_close"));
+                    Toast.makeText(mContext, "어플리케이션 완전 종료", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+
+        }
+    };
+    CompoundButton.OnCheckedChangeListener setting_cb_click = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+            Log.d(PACKAGE_NAME, "SettingAdapter : OnCheckedChangeListener | " + setting[compoundButton.getId()-1][0]);
+
+            switch (setting[compoundButton.getId()-1][0]) {
+                case "알림영역 새로고침":
+                    break;
+                case "메인화면 자동복귀":
+                    break;
+                case "홈화면으로 이동":
+                    break;
+                case "Credit 변화효과":
+                    break;
+            }
+
+            if (b)
+                setting[compoundButton.getId()-1][0] = "TRUE";
+            else
+                setting[compoundButton.getId()-1][1] = "FALSE";
+
+        }
+    };
 
 }

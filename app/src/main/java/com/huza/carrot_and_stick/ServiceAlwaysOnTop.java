@@ -25,8 +25,6 @@ import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
@@ -57,7 +55,6 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.firebase.crash.FirebaseCrash;
 import com.matthewtamlin.sliding_intro_screen_library.indicators.DotIndicator;
 
 import java.text.SimpleDateFormat;
@@ -75,8 +72,16 @@ public class ServiceAlwaysOnTop extends Service {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
 
+    static final int PHONE_STATE_NOT_YET = -1;
+    static final int PHONE_STATE_IDLE = 0;
+    static final int PHONE_STATE_RINGING = 1;
+    static final int PHONE_STATE_OUTGOING = 2;
+    static final int PHONE_STATE_OFFHOOK = 3;
+
     SharedPreferences pref;
     SharedPreferences.Editor editor;
+
+    ArrayList<ArrayList<String>> message_list;
 
     View OnTop_view;
 
@@ -92,10 +97,6 @@ public class ServiceAlwaysOnTop extends Service {
     BarChart bar_graph_past;
     BarChart bar_graph_today;
     LayoutSliding aot_custom_slidinglayout;
-    TelephonyManager manager;
-    ImageView image_phonestate;
-    TextView text_phonestate1;
-    TextView text_phonestate2;
 
     ListView aot_history;
     String last_forlistview;
@@ -134,13 +135,10 @@ public class ServiceAlwaysOnTop extends Service {
 
     int user_credit = -1;
 
-    PhoneStateListener phoneStateListener;
-
     public ServiceAlwaysOnTop() {
         Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop 생성");
     }
 
-    int what;
     String extra_data;
 
     //////// 홈화면 나가기 ////////
@@ -162,11 +160,11 @@ public class ServiceAlwaysOnTop extends Service {
 
         user_credit = pref.getInt("user_credit", -1);
 
-        what = 0;
+        message_list = new ArrayList<>();
+
         extra_data = null;
         bindService(new Intent(this, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
-        what = 101;
-        sendMessage();
+        sendMessage(101, null);
 
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = getApplicationContext().getTheme();
@@ -303,7 +301,7 @@ public class ServiceAlwaysOnTop extends Service {
         });
         ////////////////////////////////
 
-        phoneStateListener = new PhoneStateListener() {
+        /*phoneStateListener = new PhoneStateListener() {
             @Override
             public void onCallStateChanged(int state, String incomingNumber) {
 
@@ -358,7 +356,7 @@ public class ServiceAlwaysOnTop extends Service {
                         break;
                 }
             }
-        };
+        };*/
     }
     @Override
     public void onDestroy() {
@@ -369,8 +367,8 @@ public class ServiceAlwaysOnTop extends Service {
             OnTop_view = null;
         }
 
-        manager = null;
-        phoneStateListener = null;
+        //manager = null;
+        //phoneStateListener = null;
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT 소멸");
     }
@@ -524,8 +522,7 @@ public class ServiceAlwaysOnTop extends Service {
 
         //////
 
-        what = 197;
-        sendMessage();
+        sendMessage(197, null);
     }
     public void close_AoT_service() {
         Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");
@@ -533,8 +530,7 @@ public class ServiceAlwaysOnTop extends Service {
         Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_exit");
         OnTop_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
-        what = 199;
-        sendMessage();
+        sendMessage(199, null);
     }
 
     public void send_history(ArrayList<ArrayList<String>> history) {
@@ -596,11 +592,12 @@ public class ServiceAlwaysOnTop extends Service {
                     /////////////////
 
                     aot_custom_slidinglayout = (LayoutSliding) layout.findViewById(R.id.aot_custom_slidinglayout);
-                    image_phonestate = (ImageView) layout.findViewById(R.id.image_phonestate);
-                    text_phonestate1 = (TextView) layout.findViewById(R.id.text_phonestate1);
-                    text_phonestate2 = (TextView) layout.findViewById(R.id.text_phonestate2);
-                    manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                    manager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+                    aot_custom_slidinglayout.onPhoneStateListener(LayoutSliding.PHONE_STATE_NOT_YET, String.valueOf(AoT_MaintextColor));
+                    //image_phonestate = (ImageView) layout.findViewById(R.id.image_phonestate);
+                    //text_phonestate1 = (TextView) layout.findViewById(R.id.text_phonestate1);
+                    //text_phonestate2 = (TextView) layout.findViewById(R.id.text_phonestate2);
+                    //manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    //manager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
 
                     //시계시계//
                     tv_time = (TextView) layout.findViewById(R.id.tv_time);
@@ -750,7 +747,8 @@ public class ServiceAlwaysOnTop extends Service {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mService_background = new Messenger(iBinder);
             mBound_background = true;
-            sendMessage();
+            ///// for reconnect /////
+            sendMessage(-1, null);
         }
 
         @Override
@@ -761,20 +759,67 @@ public class ServiceAlwaysOnTop extends Service {
     };
 
 
-    ////////////////////////////////////////////////////////////////////////////////////ver.161228//
+    public void add_to_message_queue(int what, String extra_data) {
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : add_to_message_queue!! : " + what + " : " + extra_data);
+
+        ArrayList<String> message = new ArrayList<>();
+        message.add(String.valueOf(what));
+        message.add(extra_data);
+
+        message_list.add(message);
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : add_to_message_queue!! : " + message_list.size());
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////ver.170115//
     /////        ////          ////   //////  ////       ///////////// Background Service///////////
     ///  ////////////  ////////////  /  ////  ////  ////  /////////// AoT connected      : 101 /////
-    ////        /////          ////  ///  //  ////  /////  ////////// AoT diconn req     : 197 /////
-    //////////   ////  ////////////  /////    ////  ////  /////////// AoT end msg        : 199 /////
-    ///        //////          ////  ///////  ////       ///////////////////////////////////////////
+    ////        /////          ////  ///  //  ////  /////  ////////// AoT req CREDIT     : 102 /////
+    //////////   ////  ////////////  /////    ////  ////  /////////// AoT req SETTING    : 103 /////
+    ///        //////          ////  ///////  ////       //////////// AoT req LOG info   : 104 /////
+    ///////////////////////////////////////////////////////////////// AoT req PHONESTATE : 151 /////
+    ///////////////////////////////////////////////////////////////// AoT diconn req w/o : 196 /////
+    ///////////////////////////////////////////////////////////////// AoT diconn req     : 197 /////
+    ///////////////////////////////////////////////////////////////// AoT end msg        : 199 /////
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    public void sendMessage() {
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : sendMessage = " + mBound_background + " : " + what);
+    public synchronized void sender_unit(Message msg) {
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : sender_unit started " + msg.what + " | " + msg.getData());
 
-        if (!mBound_background)
+        try {
+            mService_background.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public void sendMessage(int what, String extra_data) {
+
+        if (what == 0) return;
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : sendMessage = " + mBound_background + " : " + what);
+        if (!mBound_background) {
+            if (what != -1)
+                add_to_message_queue(what, extra_data);
             bindService(new Intent(this, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
+        }
         else {
-            if (what == 0) return;
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : true : " + message_list.size());
+            while(message_list.size() != 0) {
+                Message msg = Message.obtain(null, Integer.valueOf(message_list.get(0).get(0)), 0, 0);
+
+                if (message_list.get(0).get(1) != null) {
+                    Bundle data = new Bundle();
+                    data.putString("extra_data", message_list.get(0).get(1));
+                    msg.setData(data);
+                }
+
+                sender_unit(msg);
+
+                message_list.remove(0);
+            }
 
             Message msg = Message.obtain(null, what, 0, 0);
 
@@ -784,11 +829,7 @@ public class ServiceAlwaysOnTop extends Service {
                 msg.setData(data);
             }
 
-            try {
-                mService_background.send(msg);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
+            sender_unit(msg);
 
             if (what == 199) {
                 unbindService(mConnection_background);
@@ -797,20 +838,19 @@ public class ServiceAlwaysOnTop extends Service {
                 Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : 나 이제 죽는다?");
                 stopSelf();
             }
-
-            what = 0;
-            extra_data = null;
         }
     }
 
 
-    ////////////////////////ver.161228//
+    ////////////////////////ver.170115//
     ///// Connect w/AoT      : 100 /////
     ///// send Credit        : 102 /////
     ///// send Setting       : 103 /////
     ///// send History       : 104 /////
-    ///// alert OutgoingCall : 152 /////
+    ///// AoT req PHONESTATE : 151 /////
     ///// Disconnect w/AoT   : 198 /////
+    ////////////////////////////////////
+    ///// FAIL!! resend code : 999 /////
     ////////////////////////////////////
     @Override
     public IBinder onBind(Intent intent) {
@@ -825,6 +865,10 @@ public class ServiceAlwaysOnTop extends Service {
             switch (msg.what) {
                 case 100:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler : Background connected");
+                    ServiceAlwaysOnTop.this.sendMessage(102, null);
+                    ServiceAlwaysOnTop.this.sendMessage(103, null);
+                    ServiceAlwaysOnTop.this.sendMessage(104, null);
+                    ServiceAlwaysOnTop.this.sendMessage(151, null);
                     break;
                 case 102:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler = " + msg.getData().getString("extra_data") + " : " + user_credit);
@@ -859,18 +903,33 @@ public class ServiceAlwaysOnTop extends Service {
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : received_history_size : " + received_history.size());
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : received_history_latest : " + received_history.get(0));
 
-                    send_history(received_history);
+                    ServiceAlwaysOnTop.this.send_history(received_history);
 
                     PB3.setVisibility(View.GONE);
                     aot_history.setVisibility(View.VISIBLE);
                     break;
-                case 152:
-                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | incomming :" + msg.getData().getString("extra_data").toString());
-                    isNowOutgoing = true;
+                case 151:
+                    if (aot_custom_slidinglayout == null) {
+                        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : onCallStateChanged | aot_custom_slidinglayout is not initialized");
+                        ServiceAlwaysOnTop.this.sendMessage(999, "151");
+                    }
+                    else {
+                        if (aot_custom_slidinglayout.isAllInitialized()) {
+                            Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : onCallStateChanged | incomming :" + msg.getData().getString("extra_data") + " | " + msg.getData().getString("call_number"));
+                            aot_custom_slidinglayout.onPhoneStateListener(Integer.parseInt(msg.getData().getString("extra_data")), msg.getData().getString("call_number"));
+                        } else {
+                            Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : onCallStateChanged | aot_custom_slidinglayout's components are not initialized");
+                            ServiceAlwaysOnTop.this.sendMessage(999, "151");
+                        }
+                        //isNowOutgoing = true;
+                    }
                     break;
                 case 198:
-                    close_AoT_service();
+                    ServiceAlwaysOnTop.this.close_AoT_service();
                     break;
+
+                case 999:
+                    ServiceAlwaysOnTop.this.sendMessage(Integer.valueOf(msg.getData().getString("extra_data")), null);
             }
 
         }

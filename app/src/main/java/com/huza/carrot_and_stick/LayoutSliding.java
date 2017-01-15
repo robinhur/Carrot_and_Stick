@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -39,6 +40,14 @@ public class LayoutSliding extends LinearLayout {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
 
+    static final int PHONE_STATE_NOT_YET = -1;
+    static final int PHONE_STATE_IDLE = 0;
+    static final int PHONE_STATE_RINGING = 1;
+    static final int PHONE_STATE_OUTGOING = 2;
+    static final int PHONE_STATE_OFFHOOK = 3;
+
+    int AoT_MaintextColor;
+
     SharedPreferences pref;
     SharedPreferences.Editor editor;
 
@@ -52,6 +61,9 @@ public class LayoutSliding extends LinearLayout {
     boolean isOpened;
 
     ImageView btn_init;
+
+    TextView text_phonestate1;
+    TextView text_phonestate2;
 
     Button call_start;
     Button call_end;
@@ -70,6 +82,14 @@ public class LayoutSliding extends LinearLayout {
         init();
     }
 
+    public String change_NUMBER(String number) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return PhoneNumberUtils.formatNumber(number, Locale.getDefault().getCountry());
+        } else {
+            return number;
+        }
+    }
+
     public void calculate_location() {
         width = thisView.getMeasuredWidth();
         height = thisView.getMeasuredHeight();
@@ -83,7 +103,25 @@ public class LayoutSliding extends LinearLayout {
         thisView.setTranslationY(-height*1/2);
         thisView.setVisibility(VISIBLE);
     }
-
+    public void close_slide(){
+        Log.d(PACKAGE_NAME, "SlidingLayout : close_slide");
+        //thisView.setTranslationY(0);
+        thisView.animate()
+                .translationY(-height*1/2)
+                .setDuration(200)
+                .start();
+        isOpened = false;
+    }
+    public void open_slide(){
+        Log.d(PACKAGE_NAME, "SlidingLayout : open_slide");
+        //thisView.setTranslationY(-height*3/4);
+        thisView.animate()
+                .translationY(0)
+                .setDuration(200)
+                .start();
+        isOpened = true;
+        timer_start();
+    }
     public void init() {
 
         Log.d(PACKAGE_NAME, "SlidingLayout : init called");
@@ -96,6 +134,10 @@ public class LayoutSliding extends LinearLayout {
             @Override
             public void run() {
                 Log.d(PACKAGE_NAME, "SlidingLayout : post called | outgoing_NUMBER = " + pref.getString("outgoing_NUMBER", "!"));
+
+                btn_init = (ImageView) thisView.findViewById(R.id.image_phonestate);
+                text_phonestate1 = (TextView) thisView.findViewById(R.id.text_phonestate1);
+                text_phonestate2 = (TextView) thisView.findViewById(R.id.text_phonestate2);
 
                 call_number = (TextView) thisView.findViewById(R.id.aot_sliding_call_number);
                 call_state = (TextView) thisView.findViewById(R.id.aot_sliding_call_state);
@@ -264,7 +306,6 @@ public class LayoutSliding extends LinearLayout {
 
                 isOpened = false;
 
-                btn_init = (ImageView) thisView.findViewById(R.id.image_phonestate);
                 btn_init.setOnTouchListener(new OnTouchListener() {
                     @Override
                     public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -335,130 +376,6 @@ public class LayoutSliding extends LinearLayout {
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
-    public void close_slide(){
-        Log.d(PACKAGE_NAME, "SlidingLayout : close_slide");
-        //thisView.setTranslationY(0);
-        thisView.animate()
-                .translationY(-height*1/2)
-                .setDuration(200)
-                .start();
-        isOpened = false;
-    }
-    public void open_slide(){
-        Log.d(PACKAGE_NAME, "SlidingLayout : open_slide");
-        //thisView.setTranslationY(-height*3/4);
-        thisView.animate()
-                .translationY(0)
-                .setDuration(200)
-                .start();
-        isOpened = true;
-        timer_start();
-    }
-
-    public String change_NUMBER(String number) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return PhoneNumberUtils.formatNumber(number, Locale.getDefault().getCountry());
-        } else {
-            return number;
-        }
-    }
-
-    public void now_CALL_STATE_OFFHOOK(String incomming_NUMBER) {
-
-        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_OFFHOOK");
-
-        if (call_end != null) {
-            call_end.setVisibility(VISIBLE);
-            call_end.setHeight(150);
-
-            ////////////////////////////////
-            call_state.setText("수신 번호");
-            call_number.setText(change_NUMBER(incomming_NUMBER));
-            ////////////////////////////////
-        }
-        if (call_start != null) {
-            call_start.setVisibility(GONE);
-        }
-
-        open_slide();
-        kill_timer();
-
-    }
-
-    public void now_NEW_OUTGOING_CALL(String outgoing_NUMBER) {
-
-        Log.d(PACKAGE_NAME, "SlidingLayout : now_NEW_OUTGOING_CALL | " + outgoing_NUMBER);
-        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
-
-        if (call_end != null) {
-            call_end.setVisibility(VISIBLE);
-            call_end.setHeight(150);
-
-            ////////////////////////////////
-            call_state.setText("발신 번호");
-            call_number.setText(change_NUMBER(outgoing_NUMBER));
-            ////////////////////////////////
-        }
-        if (call_start != null) {
-            call_start.setVisibility(GONE);
-        }
-
-        open_slide();
-        kill_timer();
-
-    }
-
-
-    public void now_CALL_STATE_RINGING(String incomming_NUMBER) {
-
-        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_RINGING");
-        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
-
-        if (call_end != null) {
-            call_end.setVisibility(VISIBLE);
-            call_end.setHeight(40);
-
-            ////////////////////////////////
-            call_state.setText("수신 번호");
-            call_number.setText(change_NUMBER(incomming_NUMBER));
-            ////////////////////////////////
-        }
-        if (call_start != null) {
-            call_start.setVisibility(VISIBLE);
-            call_start.setText("전화 받기");
-        }
-
-        open_slide();
-        kill_timer();
-
-    }
-
-    public void now_CALL_STATE_IDLE() {
-
-        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_IDLE");
-        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
-
-        if (call_end != null) {
-            call_end.setHeight(0);
-            call_end.setVisibility(GONE);
-
-            ////////////////////////////////
-            call_state.setText("기본 발신번호");
-            call_number.setText("010-3315-8130");
-            ////////////////////////////////
-        }
-        if (call_start != null) {
-            call_start.setVisibility(VISIBLE);
-            call_start.setText("전화 걸기");
-        }
-        close_slide();
-
-    }
-
-    TimerTask timertask;
-    Timer timer = new Timer();
-    Handler handler = new Handler();
-
     private void timer_start() {
 
         Log.d(PACKAGE_NAME, "SlidingLayout : timer_start : start");
@@ -479,7 +396,6 @@ public class LayoutSliding extends LinearLayout {
         timer.schedule(timertask, 2000);
 
     }
-
     private void times_up() {
         Log.d(PACKAGE_NAME, "SlidingLayout : timer_start : times_up");
         Runnable updater = new Runnable() {
@@ -494,14 +410,12 @@ public class LayoutSliding extends LinearLayout {
 
         kill_timer();
     }
-
     public void kill_timer() {
         timertask = null;
         timer.cancel();
         timer.purge();
         Log.d(PACKAGE_NAME, "SlidingLayout : timer_start : kill_timer");
     }
-
     public void answerRingingCallWithIntent() {
         try {
             Log.d(PACKAGE_NAME, "SlidingLayout : answerRingingCallWithIntent | yes");
@@ -534,4 +448,149 @@ public class LayoutSliding extends LinearLayout {
         }
     }
 
+    public void now_CALL_STATE_OFFHOOK(String incomming_NUMBER) {
+
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_OFFHOOK");
+
+        btn_init.setImageResource(R.drawable.phone_state_offhook);
+        text_phonestate1.setTextColor(Color.GREEN);
+        text_phonestate1.setText("수신 ");
+        text_phonestate2.setTextColor(Color.GREEN);
+        text_phonestate2.setText("통화 중");
+        if (call_end != null) {
+            call_end.setVisibility(VISIBLE);
+            call_end.setHeight(150);
+
+            ////////////////////////////////
+            call_state.setText("수신 번호");
+            call_number.setText(change_NUMBER(incomming_NUMBER));
+            ////////////////////////////////
+        }
+        if (call_start != null) {
+            call_start.setVisibility(GONE);
+        }
+
+        open_slide();
+        kill_timer();
+
+    }
+    public void now_NEW_OUTGOING_CALL(String outgoing_NUMBER) {
+
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_NEW_OUTGOING_CALL | " + outgoing_NUMBER);
+
+        btn_init.setImageResource(R.drawable.phone_state_offhook);
+        text_phonestate1.setTextColor(Color.rgb(255, 153, 0));
+        text_phonestate1.setText("발신 ");
+        text_phonestate2.setTextColor(Color.GREEN);
+        text_phonestate2.setText("통화 중");
+
+        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
+
+        if (call_end != null) {
+            call_end.setVisibility(VISIBLE);
+            call_end.setHeight(150);
+
+            ////////////////////////////////
+            call_state.setText("발신 번호");
+            call_number.setText(change_NUMBER(outgoing_NUMBER));
+            ////////////////////////////////
+        }
+        if (call_start != null) {
+            call_start.setVisibility(GONE);
+        }
+
+        open_slide();
+        kill_timer();
+
+    }
+    public void now_CALL_STATE_RINGING(String incomming_NUMBER) {
+
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_RINGING");
+        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
+
+        if (call_end != null) {
+            call_end.setVisibility(VISIBLE);
+            call_end.setHeight(40);
+
+            ////////////////////////////////
+            call_state.setText("수신 번호");
+            call_number.setText(change_NUMBER(incomming_NUMBER));
+            ////////////////////////////////
+        }
+        if (call_start != null) {
+            call_start.setVisibility(VISIBLE);
+            call_start.setText("전화 받기");
+        }
+
+        open_slide();
+        kill_timer();
+
+    }
+    public void now_CALL_STATE_IDLE() {
+
+        Log.d(PACKAGE_NAME, "SlidingLayout : now_CALL_STATE_IDLE");
+
+        btn_init.setImageResource(R.drawable.phone_state_idle);
+        text_phonestate1.setTextColor(AoT_MaintextColor);
+        text_phonestate1.setText("전화 ");
+        text_phonestate2.setTextColor(AoT_MaintextColor);
+        text_phonestate2.setText("대기 중");
+
+        if (call_end == null) Log.d(PACKAGE_NAME, "SlidingLayout : no!!!!!!!!!!!!");
+
+        if (call_end != null) {
+            call_end.setHeight(0);
+            call_end.setVisibility(GONE);
+
+            ////////////////////////////////
+            call_state.setText("기본 발신번호");
+            call_number.setText("010-3315-8130");
+            ////////////////////////////////
+        }
+        if (call_start != null) {
+            call_start.setVisibility(VISIBLE);
+            call_start.setText("전화 걸기");
+        }
+        close_slide();
+
+    }
+
+    TimerTask timertask;
+    Timer timer = new Timer();
+    Handler handler = new Handler();
+
+    public boolean isAllInitialized() {
+
+        Log.d(PACKAGE_NAME, "SlidingLayout : phoneStateListener : isAllInitialized : " + ((btn_init != null) && (text_phonestate1 != null) && (text_phonestate2 != null)));
+
+        if ((btn_init != null) && (text_phonestate1 != null) && (text_phonestate2 != null)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void onPhoneStateListener(int mode, String number) {
+
+        Log.d(PACKAGE_NAME, "SlidingLayout : phoneStateListener1 : " + mode + " | " + number + " = " + (btn_init != null) + " | " + (text_phonestate1 != null) + " | " + (text_phonestate2 != null));
+
+        switch (mode) {
+            case PHONE_STATE_NOT_YET:
+                AoT_MaintextColor = Integer.parseInt(number);
+                break;
+            case PHONE_STATE_IDLE:
+                now_CALL_STATE_IDLE();
+                break;
+            case PHONE_STATE_OFFHOOK:
+                now_CALL_STATE_OFFHOOK(number);
+                break;
+            case PHONE_STATE_OUTGOING:
+                now_NEW_OUTGOING_CALL(number);
+                break;
+            case PHONE_STATE_RINGING:
+                //now_CALL_STATE_RINGING(number);
+                break;
+        }
+
+    }
 }
