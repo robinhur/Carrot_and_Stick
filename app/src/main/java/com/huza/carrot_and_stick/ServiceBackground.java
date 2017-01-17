@@ -1,6 +1,7 @@
 package com.huza.carrot_and_stick;
 
 import android.app.ActivityManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
@@ -95,6 +96,23 @@ public class ServiceBackground extends Service {
         Init_firebase();
         Init_phonestatelistener();
         Start_AoT();
+    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
+
+        mBuilder.setContentTitle("채찍 가동 중")
+                .setContentText("")
+                .setSmallIcon(R.drawable.carrot_noti);
+
+        startForeground(0, mBuilder.build());
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(0);
+
+        Log.d(PACKAGE_NAME, "ServiceBackground : onStartCommand : startForeground 호출!!!");
+        return super.onStartCommand(intent, flags, startId);
+
     }
 
     static final int PHONE_STATE_NOT_YET = -1;
