@@ -52,7 +52,6 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -84,6 +83,9 @@ public class ServiceAlwaysOnTop extends Service {
     SharedPreferences.Editor editor;
 
     ArrayList<ArrayList<String>> message_list;
+
+    ArrayList<BarEntry> graph_dataset_past;
+    ArrayList<BarEntry> graph_dataset_today;
 
     View OnTop_view;
 
@@ -341,16 +343,141 @@ public class ServiceAlwaysOnTop extends Service {
     }
 
 
-    private void init_bar_graph() {
+    private void calculate_bar_graph(ArrayList<ArrayList<String>> history) {
 
-        ArrayList<BarEntry> dataset_past = new ArrayList<>();
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph");
 
-        for (int i = 0; i < 6; i ++) {
-            dataset_past.add(new BarEntry(i, (float)(Math.random()* 100000)));
+        Calendar date_before = Calendar.getInstance();
+        Calendar date_after = Calendar.getInstance();
+
+        date_before.add(Calendar.DATE, -7);
+        date_before.set(Calendar.HOUR, 0);
+        date_before.set(Calendar.MINUTE, 0);
+        date_before.set(Calendar.SECOND, 0);
+
+        date_after.add(Calendar.DATE, -6);
+        date_after.set(Calendar.HOUR, 0);
+        date_after.set(Calendar.MINUTE, 0);
+        date_after.set(Calendar.SECOND, 0);
+
+        int flag = -1;
+
+        if ((graph_dataset_today==null)||(graph_dataset_past == null)) {
+
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + ((graph_dataset_today==null)||(graph_dataset_past == null)));
+
+            graph_dataset_past = new ArrayList<>();
+            graph_dataset_today = new ArrayList<>();
+
+            for (int i = history.size()-1; i >= 0; i--) {
+
+                while ((date_before.getTimeInMillis()/1000 > Long.valueOf(history.get(i).get(0)))
+                        ||((Long.valueOf(history.get(i).get(0)) >= date_after.getTimeInMillis()/1000))) {
+
+                    flag++;
+
+                    if (flag != 6)
+                        graph_dataset_past.add(new BarEntry(flag, 0));
+                    else
+                        graph_dataset_today.add(new BarEntry(0, 0));
+
+                    date_before.add(Calendar.DATE, 1);
+                    date_after.add(Calendar.DATE, 1);
+
+                }
+
+
+                if (((history.get(i).get(3).equals("정산"))||(history.get(i).get(3).equals("비정산 정산")))
+                        && (history.get(i).get(1).equals("-"))) {
+
+                    if (flag != 6) {
+                        graph_dataset_past.get(flag).setY(
+                                graph_dataset_past.get(flag).getY() + Float.valueOf(history.get(i).get(2))
+                        );
+                    } else {
+                        graph_dataset_today.get(0).setY(
+                                graph_dataset_today.get(0).getY() + Float.valueOf(history.get(i).get(2))
+                        );
+                    }
+
+                }
+            }
+
+            /*for (int i = history.size()-1; i >= 0; i--) {
+
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " +
+                    history.get(i).get(3) + " | " + history.get(i).get(2));
+
+                if (Long.valueOf(history.get(i).get(0)) > (date.getTimeInMillis()/1000)) {
+
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " +
+                            date.getTimeInMillis()/1000);
+
+                    date.add(Calendar.DATE, 1);
+                    flag++;
+
+                    if (flag != 6)
+                        graph_dataset_past.add(new BarEntry(flag, 0));
+                    else
+                        graph_dataset_today.add(new BarEntry(0, 0));
+                }
+
+                if (((history.get(i).get(3).equals("정산"))||(history.get(i).get(3).equals("비정산 정산")))
+                        && (history.get(i).get(1).equals("-"))) {
+
+                    if (flag != 6) {
+                        graph_dataset_past.get(flag).setY(
+                                graph_dataset_past.get(flag).getY() + Float.valueOf(history.get(i).get(2))
+                        );
+                    } else {
+                        graph_dataset_today.get(0).setY(
+                                graph_dataset_today.get(0).getY() + Float.valueOf(history.get(i).get(2))
+                        );
+                    }
+
+                }
+
+            }*/
+
+        } else {
+
+            // 필요 없음 ㅎㅎ;ㅎ;ㅎ;ㅎ;
+            /*Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + ((graph_dataset_today==null)||(graph_dataset_past == null)));
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + history.get(0).get(2));
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + graph_dataset_today.get(0).getY());
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + graph_dataset_today.get(0).getY() + Long.valueOf(history.get(0).get(2)));
+
+
+
+            if (((history.get(0).get(3).equals("정산"))||(history.get(0).get(3).equals("비정산 정산")))
+                    && (history.get(0).get(1).equals("-"))) {
+
+                graph_dataset_today.get(0).setY(
+                        graph_dataset_today.get(0).getY() + Long.valueOf(history.get(0).get(2))
+                );
+
+            }*/
+
         }
 
-        BarDataSet set1 = new BarDataSet(dataset_past, null);
-        //set1.setColors(ColorTemplate.MATERIAL_COLORS);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + graph_dataset_past);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + graph_dataset_today);
+
+        init_bar_graph();
+
+    }
+
+
+    private void init_bar_graph() {
+
+
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : " + graph_dataset_past);
+
+
+
+        BarDataSet set1 = new BarDataSet(graph_dataset_past, null);
+        set1.setColors(Color.rgb(180,180,180));
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         dataSets.add(set1);
@@ -382,22 +509,15 @@ public class ServiceAlwaysOnTop extends Service {
 
         bar_graph_past.getLegend().setEnabled(false);
         bar_graph_past.setData(data);
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : X : " +
-                bar_graph_past.getXAxis().getAxisMinimum() + "|" +
-                bar_graph_past.getXAxis().getAxisMaximum());
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past1 : Y : " +
-                bar_graph_past.getAxisLeft().getAxisMinimum() + "|" +
-                bar_graph_past.getAxisLeft().getAxisMaximum());
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today2 : Y : " +
-                bar_graph_past.getAxisRight().getAxisMinimum() + "|" +
-                bar_graph_past.getAxisRight().getAxisMaximum());
 
 
-        ArrayList<BarEntry> dataset_today = new ArrayList<>();
-        dataset_today.add(new BarEntry(6, (float)(Math.random()*100000)));
 
-        BarDataSet set2 = new BarDataSet(dataset_today, null);
-        set2.setColors(ColorTemplate.MATERIAL_COLORS);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : " + graph_dataset_today);
+
+
+
+        BarDataSet set2 = new BarDataSet(graph_dataset_today, null);
+        set2.setColors(Color.rgb(255, 121, 0));
 
         ArrayList<IBarDataSet> dataSets2 = new ArrayList<>();
         dataSets2.add(set2);
@@ -429,25 +549,61 @@ public class ServiceAlwaysOnTop extends Service {
 
         bar_graph_today.getLegend().setEnabled(false);
         bar_graph_today.setData(data_today);
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today1 : X : " +
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : X : " +
+                bar_graph_past.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_past.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : Y : " +
+                bar_graph_past.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_past.getAxisLeft().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today : X : " +
                 bar_graph_today.getXAxis().getAxisMinimum() + "|" +
                 bar_graph_today.getXAxis().getAxisMaximum());
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today1 : Y : " +
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today : Y : " +
                 bar_graph_today.getAxisLeft().getAxisMinimum() + "|" +
                 bar_graph_today.getAxisLeft().getAxisMaximum());
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today2 : Y : " +
-                bar_graph_today.getAxisRight().getAxisMinimum() + "|" +
-                bar_graph_today.getAxisRight().getAxisMaximum());
 
         bar_graph_past.getAxisLeft().setAxisMinimum(0);
         bar_graph_past.getAxisRight().setAxisMinimum(0);
         bar_graph_today.getAxisLeft().setAxisMinimum(0);
         bar_graph_today.getAxisRight().setAxisMinimum(0);
 
+        if (Float.isInfinite(bar_graph_past.getAxisLeft().getAxisMaximum()))
+            bar_graph_past.getAxisLeft().setAxisMaximum(0);
+        if (Float.isInfinite(bar_graph_today.getAxisLeft().getAxisMaximum()))
+            bar_graph_today.getAxisLeft().setAxisMaximum(0);
+
         if (bar_graph_past.getAxisLeft().getAxisMaximum() > bar_graph_today.getAxisLeft().getAxisMaximum())
             bar_graph_today.getAxisLeft().setAxisMaximum(bar_graph_past.getAxisLeft().getAxisMaximum());
-        else
-            bar_graph_past.getAxisLeft().setAxisMaximum(bar_graph_today.getAxisLeft().getAxisMaximum());
+        else{
+            bar_graph_today.getAxisLeft().setAxisMaximum(bar_graph_today.getAxisLeft().getAxisMaximum() + 400);
+            bar_graph_past.getAxisLeft().setAxisMaximum(bar_graph_today.getAxisLeft().getAxisMaximum() + 400);
+        }
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : X : " +
+                bar_graph_past.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_past.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : Y : " +
+                bar_graph_past.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_past.getAxisLeft().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today : X : " +
+                bar_graph_today.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_today.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today : Y : " +
+                bar_graph_today.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_today.getAxisLeft().getAxisMaximum());
+
+        //bar_graph_past.notify();
+        //bar_graph_today.notify();
+
+        //bar_graph_past.notifyAll();
+        //bar_graph_today.notifyAll();
+
+        bar_graph_past.invalidate();
+        bar_graph_today.invalidate();
+
+        bar_graph_past.notifyDataSetChanged();
+        bar_graph_today.notifyDataSetChanged();
 
     }
 
@@ -492,6 +648,7 @@ public class ServiceAlwaysOnTop extends Service {
     }
 
     public void send_history(ArrayList<ArrayList<String>> history) {
+        calculate_bar_graph(history);
         history_adapter.setHistory(history);
         //history_adapter.notifyDataSetChanged();
     }
@@ -546,7 +703,7 @@ public class ServiceAlwaysOnTop extends Service {
                     bar_graph_past = (BarChart) layout.findViewById(R.id.bar_graph_past);
                     bar_graph_today = (BarChart) layout.findViewById(R.id.bar_graph_today);
                     /// temporary ///
-                    init_bar_graph();
+                    //init_bar_graph();
                     /////////////////
 
                     aot_custom_slidinglayout = (LayoutSliding) layout.findViewById(R.id.aot_custom_slidinglayout);
@@ -876,6 +1033,11 @@ public class ServiceAlwaysOnTop extends Service {
                         if (aot_custom_slidinglayout.isAllInitialized()) {
                             Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : onCallStateChanged | incomming :" + msg.getData().getString("extra_data") + " | " + msg.getData().getString("call_number"));
                             aot_custom_slidinglayout.onPhoneStateListener(Integer.parseInt(msg.getData().getString("extra_data")), msg.getData().getString("call_number"));
+
+                            if (msg.getData().getString("extra_data").equals("1")) {
+                                ServiceAlwaysOnTop.this.sendMessage(196, null);
+                            }
+
                         } else {
                             Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : onCallStateChanged | aot_custom_slidinglayout's components are not initialized");
                             ServiceAlwaysOnTop.this.sendMessage(999, "151");

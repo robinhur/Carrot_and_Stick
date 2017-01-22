@@ -143,8 +143,12 @@ public class ServiceBackground extends Service {
                         call_number = incomingNumber;
                         break;
                     case TelephonyManager.CALL_STATE_OFFHOOK:
-                        if (phone_state != PHONE_STATE_OUTGOING)
+                        if (phone_state != PHONE_STATE_OUTGOING) {
                             phone_state = PHONE_STATE_OFFHOOK;
+                            call_number = incomingNumber;
+                        } else {
+                            Start_AoT();
+                        }
                         break;
                 }
 
@@ -257,7 +261,7 @@ public class ServiceBackground extends Service {
                     item_history.add(dataSnapshot.child("content").getValue().toString());
 
                     history.add(0, item_history);
-                    history.remove(history.size()-1);
+                    //history.remove(history.size()-1);
 
                     if (checkServiceRunning(AoT_SERVICE_NAME))
                         sendHistory();
