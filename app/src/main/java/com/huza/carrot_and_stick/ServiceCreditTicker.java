@@ -68,6 +68,10 @@ public class ServiceCreditTicker extends Service {
         nm.cancel(737);
         ///////////////////////////////
 
+        Log.d(PACKAGE_NAME, "ServiceCreditTicker : onDestory : " + pref.getInt("second", -1));
+        editor.remove("second");
+        editor.commit();
+
         super.onDestroy();
     }
 
@@ -85,11 +89,28 @@ public class ServiceCreditTicker extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(PACKAGE_NAME, "ServiceCreditTicker : onStartCommand 생성");
 
+        pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        editor = pref.edit();
+
         if (intent == null) {
             Log.d(PACKAGE_NAME, "ServiceCreditTicker : intent가 없으므로 gg");
             stopSelf();
             return super.onStartCommand(intent, flags, startId);
         }
+
+
+        Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
+
+        mBuilder.setContentTitle("채찍 사용 중")
+                .setContentText("")
+                .setSmallIcon(R.drawable.carrot_noti);
+
+        startForeground(0, mBuilder.build());
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(0);
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand : startForeground 호출!!!");
+
 
         try {
             if(intent.getAction() != null) {
@@ -109,9 +130,6 @@ public class ServiceCreditTicker extends Service {
             e.printStackTrace();
             return super.onStartCommand(intent, flags, startId);
         }
-
-        pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
-        editor = pref.edit();
 
         user_credit = intent.getIntExtra("user_credit", -1);
         Log.d(PACKAGE_NAME, "ServiceCreditTicker : Received credit " + user_credit);
@@ -221,8 +239,9 @@ public class ServiceCreditTicker extends Service {
     private void sendMessage() {
         Log.d(PACKAGE_NAME, "ServiceCreditTicker : MESSAGE : sendMessage = " + mBound_background + " : " + what);
 
-        if (!mBound_background)
+        if (!mBound_background) {
             bindService(new Intent(this, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
+        }
         else {
             if (what == 0) return;
 

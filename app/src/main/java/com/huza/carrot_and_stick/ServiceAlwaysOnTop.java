@@ -4,6 +4,8 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -301,62 +303,6 @@ public class ServiceAlwaysOnTop extends Service {
         });
         ////////////////////////////////
 
-        /*phoneStateListener = new PhoneStateListener() {
-            @Override
-            public void onCallStateChanged(int state, String incomingNumber) {
-
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | state:" + state
-                        + "    (ringing:" + TelephonyManager.CALL_STATE_RINGING
-                        + ", offhook:" + TelephonyManager.CALL_STATE_OFFHOOK
-                        + ", idle:" + TelephonyManager.CALL_STATE_IDLE + ")"
-                        + "|number:" + incomingNumber + " | " + isNowOutgoing + " | " + pref.getString("outgoing_NUMBER", ""));
-
-                switch (state) {
-                    case TelephonyManager.CALL_STATE_IDLE:
-                        image_phonestate.setImageResource(R.drawable.phone_state_idle);
-                        text_phonestate1.setTextColor(AoT_MaintextColor);
-                        text_phonestate1.setText("전화 ");
-                        text_phonestate2.setTextColor(AoT_MaintextColor);
-                        text_phonestate2.setText("대기 중");
-                        aot_custom_slidinglayout.now_CALL_STATE_IDLE();
-                        isNowOutgoing = false;
-                        //평상시
-                        break;
-                    case TelephonyManager.CALL_STATE_RINGING:
-                        image_phonestate.setImageResource(R.drawable.phone_state_ringing);
-                        text_phonestate1.setTextColor(Color.YELLOW);
-                        text_phonestate1.setText("전화 ");
-                        text_phonestate2.setTextColor(Color.YELLOW);
-                        text_phonestate2.setText("수신 중");
-                        aot_custom_slidinglayout.now_CALL_STATE_RINGING(incomingNumber);
-                        //울리는중
-                        break;
-                    case TelephonyManager.CALL_STATE_OFFHOOK:
-                        if (!isNowOutgoing && pref.getString("outgoing_NUMBER", "") == "") {
-                            image_phonestate.setImageResource(R.drawable.phone_state_offhook);
-                            text_phonestate1.setTextColor(Color.GREEN);
-                            text_phonestate1.setText("수신 ");
-                            text_phonestate2.setTextColor(Color.GREEN);
-                            text_phonestate2.setText("통화 중");
-                            aot_custom_slidinglayout.now_CALL_STATE_OFFHOOK(incomingNumber);
-                            //수신중
-                        } else {
-                            image_phonestate.setImageResource(R.drawable.phone_state_offhook);
-                            text_phonestate1.setTextColor(Color.rgb(255, 153, 0));
-                            text_phonestate1.setText("발신 ");
-                            text_phonestate2.setTextColor(Color.GREEN);
-                            text_phonestate2.setText("통화 중");
-                            aot_custom_slidinglayout.now_NEW_OUTGOING_CALL(pref.getString("outgoing_NUMBER", ""));
-                            isNowOutgoing = true;
-
-                            editor.remove("outgoing_NUMBER");
-                            editor.commit();
-                            //발신중
-                        }
-                        break;
-                }
-            }
-        };*/
     }
     @Override
     public void onDestroy() {
@@ -377,6 +323,18 @@ public class ServiceAlwaysOnTop extends Service {
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand");
         OnTop_view.setSystemUiVisibility(ui_Options);
+
+        Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
+
+        mBuilder.setContentTitle("당근과 채찍 실행 중")
+                .setContentText("")
+                .setSmallIcon(R.drawable.carrot_noti);
+
+        startForeground(0, mBuilder.build());
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(0);
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand : startForeground 호출!!!");
 
         return super.onStartCommand(intent, flags, startId);
 
@@ -803,6 +761,7 @@ public class ServiceAlwaysOnTop extends Service {
         if (!mBound_background) {
             if (what != -1)
                 add_to_message_queue(what, extra_data);
+
             bindService(new Intent(this, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
         }
         else {

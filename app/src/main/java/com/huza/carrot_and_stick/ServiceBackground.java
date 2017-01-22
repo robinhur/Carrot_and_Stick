@@ -28,6 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 
 public class ServiceBackground extends Service {
@@ -102,7 +103,7 @@ public class ServiceBackground extends Service {
 
         Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
 
-        mBuilder.setContentTitle("채찍 가동 중")
+        mBuilder.setContentTitle("당근과 채찍 실행 중")
                 .setContentText("")
                 .setSmallIcon(R.drawable.carrot_noti);
 
@@ -188,8 +189,17 @@ public class ServiceBackground extends Service {
 
         ////////log history////////
         history = new ArrayList<>();
-        //history_initialized = false;
-        databaseReference.child("logs").child(pref.getString("user_uid", null)).orderByKey().endAt("9999999999").limitToLast(100).addListenerForSingleValueEvent(new ValueEventListener() {
+
+        Calendar date = Calendar.getInstance();
+        Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_init : " + date.getTimeInMillis());
+        date.add(Calendar.DATE,-6);
+        date.set(Calendar.HOUR, 0);
+        date.set(Calendar.MINUTE, 0);
+        date.set(Calendar.SECOND, 0);
+        Log.d(PACKAGE_NAME, "ServiceBackground : Init_firebase : log_init : " + date.getTimeInMillis());
+
+        //databaseReference.child("logs").child(pref.getString("user_uid", null)).orderByKey().endAt("9999999999").limitToLast(100).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.child("logs").child(pref.getString("user_uid", null)).orderByKey().startAt(String.valueOf(date.getTimeInMillis()/1000)).endAt("9999999999").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
@@ -279,7 +289,24 @@ public class ServiceBackground extends Service {
     }
 
     public void check_settle_up() {
-        Log.d(PACKAGE_NAME, "ServiceBackground : check_settle_up");
+
+        if (pref.getInt("second", -1) != -1) {
+            Log.d(PACKAGE_NAME, "ServiceBackground : check_settle_up | found | " + pref.getInt("second", -1));
+
+            databaseReference.child("users").child(pref.getString("user_uid", null)).child("credit").setValue(user_credit - pref.getInt("second", -1));
+
+            /////////////// Log ///////////////
+            DataLog log = new DataLog(System.currentTimeMillis()/1000, "-", pref.getInt("second", -1), "비정상 정산");
+            databaseReference.child("logs").child(pref.getString("user_uid", null)).child(String.valueOf(log.getTimestamp())).setValue(log);
+            //////////////////////////////////
+
+            editor.remove("second");
+            editor.commit();
+        } else {
+            Log.d(PACKAGE_NAME, "ServiceBackground : check_settle_up | not-found");
+
+        }
+
     }
     public void sendUserCredit() {
 
@@ -456,6 +483,7 @@ public class ServiceBackground extends Service {
             if (!mBound_AoT){
                 if (what != -1)
                     add_to_message_queue(what, extra_data);
+
                 bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
             }
             else {
@@ -528,6 +556,7 @@ public class ServiceBackground extends Service {
             if (!mBound_Ticker){
                 if ((what-500) != -1)
                     add_to_message_queue(what, extra_data);
+
                 bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
             }
             else {
@@ -622,8 +651,11 @@ public class ServiceBackground extends Service {
                     break;
                 case 5:
                     if (checkServiceRunning(CreditTicker_SERVICE_NAME)) {
+                        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler = checkServiceRunning(CreditTicker_SERVICE_NAME) | true");
                         lets_stop_thisloop = true;
                         Close_CreditTicker();
+                    } else {
+                        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler = checkServiceRunning(CreditTicker_SERVICE_NAME) | false");
                     }
                     break;
                 case 99:
@@ -683,6 +715,7 @@ public class ServiceBackground extends Service {
                     nm.cancel(737);
                     ///////////////////////////////
                     break;
+
 
                 case 999:
                     ServiceBackground.this.sendMessage(Integer.valueOf(msg.getData().getString("extra_data")), null);
