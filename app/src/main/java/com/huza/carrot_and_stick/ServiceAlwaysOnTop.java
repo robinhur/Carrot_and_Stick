@@ -7,24 +7,22 @@ import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Spannable;
@@ -301,6 +299,16 @@ public class ServiceAlwaysOnTop extends Service {
                 if (aot_custom_slidinglayout != null)
                     aot_custom_slidinglayout.calculate_location();
                 //Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_listen : " + OnTop_view.getWindowSystemUiVisibility());
+            }
+        });
+        ////////////////////////////////
+
+        //// SCREEN OFF button 장착 ////
+        ImageView btn_screenoff = (ImageView) OnTop_view.findViewById(R.id.btn_screenoff);
+        btn_screenoff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                off_screen();
             }
         });
         ////////////////////////////////
@@ -750,8 +758,6 @@ public class ServiceAlwaysOnTop extends Service {
 
     }
 
-    boolean isNowOutgoing = false;
-
 
     private void timer_start() {
 
@@ -825,24 +831,11 @@ public class ServiceAlwaysOnTop extends Service {
     }
 
 
-    public void aot_test_call(View v) {
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : aot_test_call : start");
-        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:010-1234-5678"));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-        }
-
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : aot_test_call : now outgoing calling");
-        startActivity(intent);
+    public void off_screen() {
+        ComponentName adminComponent = new ComponentName(getApplicationContext(), ReceiverDeviceAdmin.class);
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+        devicePolicyManager.lockNow();
     }
 
 
@@ -860,6 +853,7 @@ public class ServiceAlwaysOnTop extends Service {
     private ServiceConnection mConnection_background = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : mConnection_background : connected");
             mService_background = new Messenger(iBinder);
             mBound_background = true;
             ///// for reconnect /////
@@ -868,6 +862,7 @@ public class ServiceAlwaysOnTop extends Service {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : mConnection_background : disconnected");
             mService_background = null;
             mBound_background = false;
         }
@@ -883,7 +878,7 @@ public class ServiceAlwaysOnTop extends Service {
 
         message_list.add(message);
 
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : add_to_message_queue!! : " + message_list.size());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : add_to_message_queue size : " + message_list.size());
     }
 
 
@@ -899,6 +894,9 @@ public class ServiceAlwaysOnTop extends Service {
     ///////////////////////////////////////////////////////////////// AoT end msg        : 199 /////
     ////////////////////////////////////////////////////////////////////////////////////////////////
     public synchronized void sender_unit(Message msg) {
+
+        if (msg.what == -1) return;
+
         Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : sender_unit started " + msg.what + " | " + msg.getData());
 
         try {
@@ -922,14 +920,18 @@ public class ServiceAlwaysOnTop extends Service {
             bindService(new Intent(this, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
         }
         else {
-            Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : true : " + message_list.size());
             while(message_list.size() != 0) {
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : queue_list_size : " + message_list.size());
                 Message msg = Message.obtain(null, Integer.valueOf(message_list.get(0).get(0)), 0, 0);
 
                 if (message_list.get(0).get(1) != null) {
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : queue : " + message_list.get(0).get(0) + " | " + message_list.get(0).get(1));
+
                     Bundle data = new Bundle();
                     data.putString("extra_data", message_list.get(0).get(1));
                     msg.setData(data);
+                } else {
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : queue : " + message_list.get(0).get(0));
                 }
 
                 sender_unit(msg);

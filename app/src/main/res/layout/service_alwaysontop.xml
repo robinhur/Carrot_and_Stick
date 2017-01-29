@@ -151,7 +151,7 @@
         android:layout_alignParentStart="true">
 
         <android.support.v4.widget.Space
-            android:layout_width="50dp"
+            android:layout_width="70dp"
             android:layout_height="wrap_content" />
 
         <LinearLayout
@@ -164,13 +164,19 @@
 
             <ImageView
                 android:layout_width="wrap_content"
-                android:padding="10dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingRight="2dp"
                 android:src="@mipmap/carrot_icon"
                 android:layout_height="match_parent" />
 
             <TextView
                 android:layout_width="wrap_content"
-                android:padding="10dp"
+                android:paddingLeft="2dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:paddingRight="10dp"
                 android:gravity="center"
                 android:textColor="#ffffff"
                 android:textSize="30dp"
@@ -179,9 +185,31 @@
 
         </LinearLayout>
 
-        <android.support.v4.widget.Space
+        <RelativeLayout
+            android:layout_width="70dp"
+            android:layout_height="match_parent">
+
+        <!--<Button
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/btn_screenoff"/>-->
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:paddingRight="0dp"
+                android:paddingLeft="15dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="17dp"
+                android:clickable="true"
+                android:id="@+id/btn_screenoff"
+                android:src="@drawable/light_bulb_white"/>
+
+        </RelativeLayout>
+
+        <!--<android.support.v4.widget.Space
             android:layout_width="50dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content" />-->
 
     </LinearLayout>
 </RelativeLayout>
