@@ -378,6 +378,10 @@ public class ServiceBackground extends Service {
         nm.cancel(737);
         ///////////////////////////////
         if (checkServiceRunning(AoT_SERVICE_NAME)) return;
+        if (checkServiceRunning(CreditTicker_SERVICE_NAME)){
+            Close_CreditTicker();
+            return;
+        }
 
         lets_stop_thisloop = false;
 
@@ -386,6 +390,10 @@ public class ServiceBackground extends Service {
     }
     public void Start_CreditTicker() {
         if (checkServiceRunning(CreditTicker_SERVICE_NAME)) return;
+        if (checkServiceRunning(AoT_SERVICE_NAME)){
+            Close_AoT();
+            return;
+        }
 
         lets_stop_thisloop = false;
 
@@ -451,9 +459,12 @@ public class ServiceBackground extends Service {
 
         message_list.add(message);
 
-        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : add_to_message_queue!! : " + message_list.size());
+        Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : add_to_message_queue size : " + message_list.size());
     }
     public synchronized void sender_unit(int mode, Message msg) {
+
+        if (msg.what == -1) return;
+
         Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sender_unit started " + mode + " : " + msg.what + " | " + msg.getData());
 
         switch(mode) {
@@ -483,16 +494,18 @@ public class ServiceBackground extends Service {
 
         if (what/499 == 0 || ((what == 999)&&(extra_data.substring(0, 1).equals("1")))) {
 
-            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage0 = " + mBound_AoT + " : " + what + " | " + extra_data + " : lets_stop_thisloop = " + lets_stop_thisloop);
+            Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : sendMessage = " + mBound_AoT + " : " + what + " | " + extra_data + " : lets_stop_thisloop = " + lets_stop_thisloop);
             if (!mBound_AoT){
                 if (what != -1)
                     add_to_message_queue(what, extra_data);
 
-                bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
+                if (mBound_from_AoT)
+                    bindService(new Intent(getApplicationContext(), ServiceAlwaysOnTop.class), mConnection_AoT, Context.BIND_AUTO_CREATE);
             }
             else {
-                Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : true0 : " + message_list.size());
+                Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : queue_list_size : " + message_list.size());
                 while(message_list.size() != 0) {
+                    Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : queue : " + message_list.get(0).get(0));
                     Message msg = Message.obtain(null, Integer.valueOf(message_list.get(0).get(0)) , 0, 0);
 
                     Bundle data = new Bundle();
@@ -543,11 +556,6 @@ public class ServiceBackground extends Service {
                 if (what == 198) {
                     unbindService(mConnection_AoT);
                     mConnection_AoT.onServiceDisconnected(null);
-
-                    if (!lets_stop_thisloop)
-                        Start_CreditTicker();
-
-                    lets_stop_thisloop = false;
                 }
                 /*else if (what == 104) {
                     history_initialized = true;
@@ -561,7 +569,8 @@ public class ServiceBackground extends Service {
                 if ((what-500) != -1)
                     add_to_message_queue(what, extra_data);
 
-                bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
+                if (mBound_from_Ticker)
+                    bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
             }
             else {
                 Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : true1 : " + message_list.size());
@@ -595,11 +604,6 @@ public class ServiceBackground extends Service {
                 if (what == 598) {
                     unbindService(mConnection_Ticker);
                     mConnection_Ticker.onServiceDisconnected(null);
-
-                    if (!lets_stop_thisloop)
-                        Start_AoT();
-
-                    lets_stop_thisloop = false;
                 }
 
             }
@@ -677,6 +681,7 @@ public class ServiceBackground extends Service {
 
                 case 101:
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : AoT connected");
+                    mBound_from_AoT = true;
                     connect_with_AoT();
                     break;
                 case 102:
@@ -698,11 +703,17 @@ public class ServiceBackground extends Service {
                 case 199:
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : AoT 죽여?");
                     shutdown_AoT();
+
+                    if (!lets_stop_thisloop)
+                        Start_CreditTicker();
+
+                    lets_stop_thisloop = false;
                     break;
 
 
                 case 501:
                     Log.d(PACKAGE_NAME, "ServiceBackground : MESSAGE : BackgroundIncomingHandler : Ticker connected");
+                    mBound_from_Ticker = true;
                     bindService(new Intent(getApplicationContext(), ServiceCreditTicker.class), mConnection_Ticker, Context.BIND_AUTO_CREATE);
                     break;
                 case 596:
@@ -718,6 +729,11 @@ public class ServiceBackground extends Service {
                     nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                     nm.cancel(737);
                     ///////////////////////////////
+
+                    if (!lets_stop_thisloop)
+                        Start_AoT();
+
+                    lets_stop_thisloop = false;
                     break;
 
 
@@ -754,6 +770,7 @@ public class ServiceBackground extends Service {
     //Service Connection//
     Messenger mService_AoT = null;
     boolean mBound_AoT;
+    boolean mBound_from_AoT = false;
     private ServiceConnection mConnection_AoT = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -776,6 +793,7 @@ public class ServiceBackground extends Service {
 
     Messenger mService_Ticker = null;
     boolean mBound_Ticker;
+    boolean mBound_from_Ticker = false;
     private ServiceConnection mConnection_Ticker = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {

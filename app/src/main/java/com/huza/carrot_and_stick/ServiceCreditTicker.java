@@ -18,6 +18,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.google.firebase.crash.FirebaseCrash;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -93,6 +95,7 @@ public class ServiceCreditTicker extends Service {
         editor = pref.edit();
 
         if (intent == null) {
+            FirebaseCrash.report(new Exception("My first Android non-fatal error"));
             Log.d(PACKAGE_NAME, "ServiceCreditTicker : intent가 없으므로 gg");
             stopSelf();
             return super.onStartCommand(intent, flags, startId);
@@ -101,13 +104,13 @@ public class ServiceCreditTicker extends Service {
 
         Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
 
-        mBuilder.setContentTitle("채찍 사용 중")
+        mBuilder.setContentTitle("Credit Ticker!!")
                 .setContentText("")
                 .setSmallIcon(R.drawable.carrot_noti);
 
-        startForeground(0, mBuilder.build());
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotificationManager.cancel(0);
+        startForeground(737, mBuilder.build());
+        //NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        //mNotificationManager.cancel(0);
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand : startForeground 호출!!!");
 
@@ -216,6 +219,7 @@ public class ServiceCreditTicker extends Service {
     private ServiceConnection mConnection_background = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.d(PACKAGE_NAME, "ServiceCreditTicker : mConnection_background : connected");
             mService_background = new Messenger(iBinder);
             mBound_background = true;
             sendMessage();
@@ -223,6 +227,7 @@ public class ServiceCreditTicker extends Service {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(PACKAGE_NAME, "ServiceCreditTicker : mConnection_background : disconnected");
             mService_background = null;
             mBound_background = false;
         }

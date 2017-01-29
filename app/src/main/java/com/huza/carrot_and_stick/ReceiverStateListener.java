@@ -86,11 +86,15 @@ public class ReceiverStateListener extends BroadcastReceiver {
             case Intent.ACTION_BOOT_COMPLETED:
             case "com.huza.carrot_and_stick.restartBACKGROUNDSERVICE":
                 if (isLoggedin()) {
-                    if (!checkServiceRunning(Background_SERVICE_NAME))
-                        context.startService(new Intent(mContext, ServiceBackground.class));
+                    if (!checkServiceRunning(Background_SERVICE_NAME)){
+                        mContext.startService(new Intent(mContext, ServiceBackground.class));
+                        //mContext.bindService(new Intent(mContext, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
+                    } else {
+                        mContext.sendBroadcast(new Intent("com.huza.carrot_and_stick.restartAoTSERVICE"));
+                    }
                 } else {
                     if (!checkServiceRunning(Main_ACTIVITY_NAME))
-                        context.startActivity(new Intent(mContext, ActivityMain.class));
+                        mContext.startActivity(new Intent(mContext, ActivityMain.class));
                 }
                 break;
 
@@ -99,6 +103,7 @@ public class ReceiverStateListener extends BroadcastReceiver {
                 Log.d(PACKAGE_NAME, "ReceiverStateListener : onReceive : SCREEN_ON is now Under Construction");
                 break;
             case Intent.ACTION_USER_PRESENT:
+            case "com.huza.carrot_and_stick.restartAoTSERVICE":
                 what = 1;
                 sendMessage();
                 break;
