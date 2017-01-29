@@ -11,9 +11,12 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="permission_button" parent="Theme.AppCompat.Light">
-        <item name="colorControlHighlight">@color/Permission_button_highlited</item>
-        <item name="colorButtonNormal">@color/Permission_button</item>
+    <style name="InvisibleForAcceptCall">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
-
 </resources>

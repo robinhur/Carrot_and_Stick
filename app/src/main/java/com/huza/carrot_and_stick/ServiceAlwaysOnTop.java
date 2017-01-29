@@ -4,6 +4,8 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,8 +27,6 @@ import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
@@ -46,6 +46,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -67,8 +73,19 @@ public class ServiceAlwaysOnTop extends Service {
 
     final String PACKAGE_NAME = "Carrot_and_Stick";
 
+    static final int PHONE_STATE_NOT_YET = -1;
+    static final int PHONE_STATE_IDLE = 0;
+    static final int PHONE_STATE_RINGING = 1;
+    static final int PHONE_STATE_OUTGOING = 2;
+    static final int PHONE_STATE_OFFHOOK = 3;
+
     SharedPreferences pref;
     SharedPreferences.Editor editor;
+
+    ArrayList<ArrayList<String>> message_list;
+
+    ArrayList<BarEntry> graph_dataset_past;
+    ArrayList<BarEntry> graph_dataset_today;
 
     View OnTop_view;
 
@@ -81,11 +98,9 @@ public class ServiceAlwaysOnTop extends Service {
     ProgressBar PB2; // on aot
     ProgressBar PB3; // on history
 
+    BarChart bar_graph_past;
+    BarChart bar_graph_today;
     LayoutSliding aot_custom_slidinglayout;
-    TelephonyManager manager;
-    ImageView image_phonestate;
-    TextView text_phonestate1;
-    TextView text_phonestate2;
 
     ListView aot_history;
     String last_forlistview;
@@ -115,7 +130,7 @@ public class ServiceAlwaysOnTop extends Service {
             PixelFormat.TRANSLUCENT);
     //// TYPE_SYSTEM_ERROR or TYPE_PRIORITY_PHONE or TYPE_PHONE
     int AoT_MaintextColor;
-    SimpleDateFormat time_format = new SimpleDateFormat("aa hh : mm : ss", Locale.KOREA);
+    SimpleDateFormat time_format = new SimpleDateFormat("aa hh:mm:ss", Locale.KOREA);
     Calendar now_time;
 
     TimerTask timertask;
@@ -124,13 +139,10 @@ public class ServiceAlwaysOnTop extends Service {
 
     int user_credit = -1;
 
-    PhoneStateListener phoneStateListener;
-
     public ServiceAlwaysOnTop() {
         Log.d(PACKAGE_NAME, "ServiceAlwaysOnTop 생성");
     }
 
-    int what;
     String extra_data;
 
     //////// 홈화면 나가기 ////////
@@ -152,11 +164,11 @@ public class ServiceAlwaysOnTop extends Service {
 
         user_credit = pref.getInt("user_credit", -1);
 
-        what = 0;
+        message_list = new ArrayList<>();
+
         extra_data = null;
         bindService(new Intent(this, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
-        what = 101;
-        sendMessage();
+        sendMessage(101, null);
 
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = getApplicationContext().getTheme();
@@ -171,6 +183,11 @@ public class ServiceAlwaysOnTop extends Service {
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         OnTop_view = inflater.inflate(R.layout.service_alwaysontop, null);
+
+        // FIREBASE CRASH REPORT //
+        //FirebaseCrash.report(new Exception("My first Android non-fatal error"));
+        //tv_time.setText("asdf");
+        ///////////////////////////
 
         /// 배너 광고!! ///
         MobileAds.initialize(OnTop_view.getContext(), "ca-app-pub-7701727044020114~2802773583");
@@ -288,62 +305,6 @@ public class ServiceAlwaysOnTop extends Service {
         });
         ////////////////////////////////
 
-        phoneStateListener = new PhoneStateListener() {
-            @Override
-            public void onCallStateChanged(int state, String incomingNumber) {
-
-                Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | state:" + state
-                        + "    (ringing:" + TelephonyManager.CALL_STATE_RINGING
-                        + ", offhook:" + TelephonyManager.CALL_STATE_OFFHOOK
-                        + ", idle:" + TelephonyManager.CALL_STATE_IDLE + ")"
-                        + "|number:" + incomingNumber + " | " + isNowOutgoing + " | " + pref.getString("outgoing_NUMBER", ""));
-
-                switch (state) {
-                    case TelephonyManager.CALL_STATE_IDLE:
-                        image_phonestate.setImageResource(R.drawable.phone_state_idle);
-                        text_phonestate1.setTextColor(AoT_MaintextColor);
-                        text_phonestate1.setText("전화 ");
-                        text_phonestate2.setTextColor(AoT_MaintextColor);
-                        text_phonestate2.setText("대기 중");
-                        aot_custom_slidinglayout.now_CALL_STATE_IDLE();
-                        isNowOutgoing = false;
-                        //평상시
-                        break;
-                    case TelephonyManager.CALL_STATE_RINGING:
-                        image_phonestate.setImageResource(R.drawable.phone_state_ringing);
-                        text_phonestate1.setTextColor(Color.YELLOW);
-                        text_phonestate1.setText("전화 ");
-                        text_phonestate2.setTextColor(Color.YELLOW);
-                        text_phonestate2.setText("수신 중");
-                        aot_custom_slidinglayout.now_CALL_STATE_RINGING(incomingNumber);
-                        //울리는중
-                        break;
-                    case TelephonyManager.CALL_STATE_OFFHOOK:
-                        if (!isNowOutgoing && pref.getString("outgoing_NUMBER", "") == "") {
-                            image_phonestate.setImageResource(R.drawable.phone_state_offhook);
-                            text_phonestate1.setTextColor(Color.GREEN);
-                            text_phonestate1.setText("수신 ");
-                            text_phonestate2.setTextColor(Color.GREEN);
-                            text_phonestate2.setText("통화 중");
-                            aot_custom_slidinglayout.now_CALL_STATE_OFFHOOK(incomingNumber);
-                            //수신중
-                        } else {
-                            image_phonestate.setImageResource(R.drawable.phone_state_offhook);
-                            text_phonestate1.setTextColor(Color.rgb(255, 153, 0));
-                            text_phonestate1.setText("발신 ");
-                            text_phonestate2.setTextColor(Color.GREEN);
-                            text_phonestate2.setText("통화 중");
-                            aot_custom_slidinglayout.now_NEW_OUTGOING_CALL(pref.getString("outgoing_NUMBER", ""));
-                            isNowOutgoing = true;
-
-                            editor.remove("outgoing_NUMBER");
-                            editor.commit();
-                            //발신중
-                        }
-                        break;
-                }
-            }
-        };
     }
     @Override
     public void onDestroy() {
@@ -354,8 +315,8 @@ public class ServiceAlwaysOnTop extends Service {
             OnTop_view = null;
         }
 
-        manager = null;
-        phoneStateListener = null;
+        //manager = null;
+        //phoneStateListener = null;
 
         Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT 소멸");
     }
@@ -365,9 +326,287 @@ public class ServiceAlwaysOnTop extends Service {
         Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand");
         OnTop_view.setSystemUiVisibility(ui_Options);
 
+        Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
+
+        mBuilder.setContentTitle("당근과 채찍 실행 중")
+                .setContentText("")
+                .setSmallIcon(R.drawable.carrot_noti);
+
+        startForeground(0, mBuilder.build());
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager.cancel(0);
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand : startForeground 호출!!!");
+
         return super.onStartCommand(intent, flags, startId);
 
     }
+
+
+    private void calculate_bar_graph(ArrayList<ArrayList<String>> history) {
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph");
+
+        Calendar date_before = Calendar.getInstance();
+        Calendar date_after = Calendar.getInstance();
+
+        date_before.add(Calendar.DATE, -7);
+        date_before.set(Calendar.HOUR, 0);
+        date_before.set(Calendar.MINUTE, 0);
+        date_before.set(Calendar.SECOND, 0);
+
+        date_after.add(Calendar.DATE, -6);
+        date_after.set(Calendar.HOUR, 0);
+        date_after.set(Calendar.MINUTE, 0);
+        date_after.set(Calendar.SECOND, 0);
+
+        int flag = -1;
+
+        if ((graph_dataset_today==null)||(graph_dataset_past == null)) {
+
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + ((graph_dataset_today==null)||(graph_dataset_past == null)));
+
+            graph_dataset_past = new ArrayList<>();
+            graph_dataset_today = new ArrayList<>();
+
+            for (int i = history.size()-1; i >= 0; i--) {
+
+                while ((date_before.getTimeInMillis()/1000 > Long.valueOf(history.get(i).get(0)))
+                        ||((Long.valueOf(history.get(i).get(0)) >= date_after.getTimeInMillis()/1000))) {
+
+                    flag++;
+
+                    if (flag != 6)
+                        graph_dataset_past.add(new BarEntry(flag, 0));
+                    else
+                        graph_dataset_today.add(new BarEntry(0, 0));
+
+                    date_before.add(Calendar.DATE, 1);
+                    date_after.add(Calendar.DATE, 1);
+
+                }
+
+
+                if (((history.get(i).get(3).equals("정산"))||(history.get(i).get(3).equals("비정산 정산")))
+                        && (history.get(i).get(1).equals("-"))) {
+
+                    if (flag != 6) {
+                        graph_dataset_past.get(flag).setY(
+                                graph_dataset_past.get(flag).getY() + Float.valueOf(history.get(i).get(2))
+                        );
+                    } else {
+                        graph_dataset_today.get(0).setY(
+                                graph_dataset_today.get(0).getY() + Float.valueOf(history.get(i).get(2))
+                        );
+                    }
+
+                }
+            }
+
+            /*for (int i = history.size()-1; i >= 0; i--) {
+
+                Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " +
+                    history.get(i).get(3) + " | " + history.get(i).get(2));
+
+                if (Long.valueOf(history.get(i).get(0)) > (date.getTimeInMillis()/1000)) {
+
+                    Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " +
+                            date.getTimeInMillis()/1000);
+
+                    date.add(Calendar.DATE, 1);
+                    flag++;
+
+                    if (flag != 6)
+                        graph_dataset_past.add(new BarEntry(flag, 0));
+                    else
+                        graph_dataset_today.add(new BarEntry(0, 0));
+                }
+
+                if (((history.get(i).get(3).equals("정산"))||(history.get(i).get(3).equals("비정산 정산")))
+                        && (history.get(i).get(1).equals("-"))) {
+
+                    if (flag != 6) {
+                        graph_dataset_past.get(flag).setY(
+                                graph_dataset_past.get(flag).getY() + Float.valueOf(history.get(i).get(2))
+                        );
+                    } else {
+                        graph_dataset_today.get(0).setY(
+                                graph_dataset_today.get(0).getY() + Float.valueOf(history.get(i).get(2))
+                        );
+                    }
+
+                }
+
+            }*/
+
+        } else {
+
+            // 필요 없음 ㅎㅎ;ㅎ;ㅎ;ㅎ;
+            /*Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + ((graph_dataset_today==null)||(graph_dataset_past == null)));
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + history.get(0).get(2));
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + graph_dataset_today.get(0).getY());
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + graph_dataset_today.get(0).getY() + Long.valueOf(history.get(0).get(2)));
+
+
+
+            if (((history.get(0).get(3).equals("정산"))||(history.get(0).get(3).equals("비정산 정산")))
+                    && (history.get(0).get(1).equals("-"))) {
+
+                graph_dataset_today.get(0).setY(
+                        graph_dataset_today.get(0).getY() + Long.valueOf(history.get(0).get(2))
+                );
+
+            }*/
+
+        }
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + graph_dataset_past);
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : calculate_bar_graph : " + graph_dataset_today);
+
+        init_bar_graph();
+
+    }
+
+
+    private void init_bar_graph() {
+
+
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : " + graph_dataset_past);
+
+
+
+        BarDataSet set1 = new BarDataSet(graph_dataset_past, null);
+        set1.setColors(Color.rgb(180,180,180));
+
+        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        dataSets.add(set1);
+
+        BarData data = new BarData(dataSets);
+        data.setValueTextSize(10f);
+        //data.setBarWidth(0.9f);
+
+        bar_graph_past.setTouchEnabled(false);
+        bar_graph_past.setDragEnabled(false);
+
+        bar_graph_past.getXAxis().setDrawGridLines(false);
+        bar_graph_past.getXAxis().setDrawAxisLine(false);
+        bar_graph_past.getXAxis().setDrawLabels(false);
+        bar_graph_past.getXAxis().setTextSize(15f);
+        bar_graph_past.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+
+        bar_graph_past.getAxisLeft().setDrawGridLines(false);
+        bar_graph_past.getAxisLeft().setDrawAxisLine(false);
+        bar_graph_past.getAxisLeft().setDrawLabels(false);
+
+        bar_graph_past.getAxisRight().setDrawGridLines(false);
+        bar_graph_past.getAxisRight().setDrawAxisLine(false);
+        bar_graph_past.getAxisRight().setDrawLabels(false);
+
+        bar_graph_past.setDrawValueAboveBar(true);
+        bar_graph_past.setDrawMarkers(false);
+        bar_graph_past.setDescription(null);
+
+        bar_graph_past.getLegend().setEnabled(false);
+        bar_graph_past.setData(data);
+
+
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : " + graph_dataset_today);
+
+
+
+        BarDataSet set2 = new BarDataSet(graph_dataset_today, null);
+        set2.setColors(Color.rgb(255, 121, 0));
+
+        ArrayList<IBarDataSet> dataSets2 = new ArrayList<>();
+        dataSets2.add(set2);
+
+        BarData data_today = new BarData(dataSets2);
+        data_today.setBarWidth(20f);
+        data_today.setValueTextSize(15f);
+
+        bar_graph_today.setTouchEnabled(false);
+        bar_graph_today.setDragEnabled(false);
+
+        bar_graph_today.getXAxis().setDrawGridLines(false);
+        bar_graph_today.getXAxis().setDrawAxisLine(false);
+        bar_graph_today.getXAxis().setDrawLabels(false);
+        bar_graph_today.getXAxis().setTextSize(20f);
+        bar_graph_today.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+
+        bar_graph_today.getAxisLeft().setDrawGridLines(false);
+        bar_graph_today.getAxisLeft().setDrawAxisLine(false);
+        bar_graph_today.getAxisLeft().setDrawLabels(false);
+
+        bar_graph_today.getAxisRight().setDrawGridLines(false);
+        bar_graph_today.getAxisRight().setDrawAxisLine(false);
+        bar_graph_today.getAxisRight().setDrawLabels(false);
+
+        bar_graph_today.setDrawValueAboveBar(true);
+        bar_graph_today.setDrawMarkers(false);
+        bar_graph_today.setDescription(null);
+
+        bar_graph_today.getLegend().setEnabled(false);
+        bar_graph_today.setData(data_today);
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : X : " +
+                bar_graph_past.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_past.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : Y : " +
+                bar_graph_past.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_past.getAxisLeft().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today : X : " +
+                bar_graph_today.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_today.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today : Y : " +
+                bar_graph_today.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_today.getAxisLeft().getAxisMaximum());
+
+        bar_graph_past.getAxisLeft().setAxisMinimum(0);
+        bar_graph_past.getAxisRight().setAxisMinimum(0);
+        bar_graph_today.getAxisLeft().setAxisMinimum(0);
+        bar_graph_today.getAxisRight().setAxisMinimum(0);
+
+        if (Float.isInfinite(bar_graph_past.getAxisLeft().getAxisMaximum()))
+            bar_graph_past.getAxisLeft().setAxisMaximum(0);
+        if (Float.isInfinite(bar_graph_today.getAxisLeft().getAxisMaximum()))
+            bar_graph_today.getAxisLeft().setAxisMaximum(0);
+
+        if (bar_graph_past.getAxisLeft().getAxisMaximum() > bar_graph_today.getAxisLeft().getAxisMaximum())
+            bar_graph_today.getAxisLeft().setAxisMaximum(bar_graph_past.getAxisLeft().getAxisMaximum());
+        else{
+            bar_graph_today.getAxisLeft().setAxisMaximum(bar_graph_today.getAxisLeft().getAxisMaximum() + 400);
+            bar_graph_past.getAxisLeft().setAxisMaximum(bar_graph_today.getAxisLeft().getAxisMaximum() + 400);
+        }
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : X : " +
+                bar_graph_past.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_past.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_past : Y : " +
+                bar_graph_past.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_past.getAxisLeft().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today : X : " +
+                bar_graph_today.getXAxis().getAxisMinimum() + "|" +
+                bar_graph_today.getXAxis().getAxisMaximum());
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : init_bar_graph : bar_graph_today : Y : " +
+                bar_graph_today.getAxisLeft().getAxisMinimum() + "|" +
+                bar_graph_today.getAxisLeft().getAxisMaximum());
+
+        //bar_graph_past.notify();
+        //bar_graph_today.notify();
+
+        //bar_graph_past.notifyAll();
+        //bar_graph_today.notifyAll();
+
+        bar_graph_past.invalidate();
+        bar_graph_today.invalidate();
+
+        bar_graph_past.notifyDataSetChanged();
+        bar_graph_today.notifyDataSetChanged();
+
+    }
+
 
     public void start_creditticker() {
         Log.d(PACKAGE_NAME, "AlwaysOnTop : start_creditticker");
@@ -397,8 +636,7 @@ public class ServiceAlwaysOnTop extends Service {
 
         //////
 
-        what = 197;
-        sendMessage();
+        sendMessage(197, null);
     }
     public void close_AoT_service() {
         Log.d(PACKAGE_NAME, "AlwaysOnTop : AoT screen setSystemUiVisibility 해제");
@@ -406,11 +644,11 @@ public class ServiceAlwaysOnTop extends Service {
         Log.d(PACKAGE_NAME, "AlwaysOnTop : onSystemUiVisibilityChange_exit");
         OnTop_view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
-        what = 199;
-        sendMessage();
+        sendMessage(199, null);
     }
 
     public void send_history(ArrayList<ArrayList<String>> history) {
+        calculate_bar_graph(history);
         history_adapter.setHistory(history);
         //history_adapter.notifyDataSetChanged();
     }
@@ -462,12 +700,19 @@ public class ServiceAlwaysOnTop extends Service {
                     break;
                 case 1:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : instantiateItem : 1(main)");
+                    bar_graph_past = (BarChart) layout.findViewById(R.id.bar_graph_past);
+                    bar_graph_today = (BarChart) layout.findViewById(R.id.bar_graph_today);
+                    /// temporary ///
+                    //init_bar_graph();
+                    /////////////////
+
                     aot_custom_slidinglayout = (LayoutSliding) layout.findViewById(R.id.aot_custom_slidinglayout);
-                    image_phonestate = (ImageView) layout.findViewById(R.id.image_phonestate);
-                    text_phonestate1 = (TextView) layout.findViewById(R.id.text_phonestate1);
-                    text_phonestate2 = (TextView) layout.findViewById(R.id.text_phonestate2);
-                    manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                    manager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+                    aot_custom_slidinglayout.onPhoneStateListener(LayoutSliding.PHONE_STATE_NOT_YET, String.valueOf(AoT_MaintextColor));
+                    //image_phonestate = (ImageView) layout.findViewById(R.id.image_phonestate);
+                    //text_phonestate1 = (TextView) layout.findViewById(R.id.text_phonestate1);
+                    //text_phonestate2 = (TextView) layout.findViewById(R.id.text_phonestate2);
+                    //manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                    //manager.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
 
                     //시계시계//
                     tv_time = (TextView) layout.findViewById(R.id.tv_time);
@@ -526,7 +771,7 @@ public class ServiceAlwaysOnTop extends Service {
             public void run() {
                 now_time = Calendar.getInstance();
                 Spannable sp = new SpannableString(time_format.format(now_time.getTime()));
-                sp.setSpan(new RelativeSizeSpan(0.7f), sp.length()-5, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                sp.setSpan(new RelativeSizeSpan(0.7f), sp.length()-3, sp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 tv_time.setText(sp);
             }
         };
@@ -617,7 +862,8 @@ public class ServiceAlwaysOnTop extends Service {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mService_background = new Messenger(iBinder);
             mBound_background = true;
-            sendMessage();
+            ///// for reconnect /////
+            sendMessage(-1, null);
         }
 
         @Override
@@ -628,20 +874,68 @@ public class ServiceAlwaysOnTop extends Service {
     };
 
 
-    ////////////////////////////////////////////////////////////////////////////////////ver.161228//
+    public void add_to_message_queue(int what, String extra_data) {
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : add_to_message_queue!! : " + what + " : " + extra_data);
+
+        ArrayList<String> message = new ArrayList<>();
+        message.add(String.valueOf(what));
+        message.add(extra_data);
+
+        message_list.add(message);
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : add_to_message_queue!! : " + message_list.size());
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////ver.170115//
     /////        ////          ////   //////  ////       ///////////// Background Service///////////
     ///  ////////////  ////////////  /  ////  ////  ////  /////////// AoT connected      : 101 /////
-    ////        /////          ////  ///  //  ////  /////  ////////// AoT diconn req     : 197 /////
-    //////////   ////  ////////////  /////    ////  ////  /////////// AoT end msg        : 199 /////
-    ///        //////          ////  ///////  ////       ///////////////////////////////////////////
+    ////        /////          ////  ///  //  ////  /////  ////////// AoT req CREDIT     : 102 /////
+    //////////   ////  ////////////  /////    ////  ////  /////////// AoT req SETTING    : 103 /////
+    ///        //////          ////  ///////  ////       //////////// AoT req LOG info   : 104 /////
+    ///////////////////////////////////////////////////////////////// AoT req PHONESTATE : 151 /////
+    ///////////////////////////////////////////////////////////////// AoT diconn req w/o : 196 /////
+    ///////////////////////////////////////////////////////////////// AoT diconn req     : 197 /////
+    ///////////////////////////////////////////////////////////////// AoT end msg        : 199 /////
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    public void sendMessage() {
-        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : sendMessage = " + mBound_background + " : " + what);
+    public synchronized void sender_unit(Message msg) {
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : sender_unit started " + msg.what + " | " + msg.getData());
 
-        if (!mBound_background)
+        try {
+            mService_background.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    public void sendMessage(int what, String extra_data) {
+
+        if (what == 0) return;
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : sendMessage = " + mBound_background + " : " + what);
+        if (!mBound_background) {
+            if (what != -1)
+                add_to_message_queue(what, extra_data);
+
             bindService(new Intent(this, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
+        }
         else {
-            if (what == 0) return;
+            Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : true : " + message_list.size());
+            while(message_list.size() != 0) {
+                Message msg = Message.obtain(null, Integer.valueOf(message_list.get(0).get(0)), 0, 0);
+
+                if (message_list.get(0).get(1) != null) {
+                    Bundle data = new Bundle();
+                    data.putString("extra_data", message_list.get(0).get(1));
+                    msg.setData(data);
+                }
+
+                sender_unit(msg);
+
+                message_list.remove(0);
+            }
 
             Message msg = Message.obtain(null, what, 0, 0);
 
@@ -651,11 +945,7 @@ public class ServiceAlwaysOnTop extends Service {
                 msg.setData(data);
             }
 
-            try {
-                mService_background.send(msg);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
+            sender_unit(msg);
 
             if (what == 199) {
                 unbindService(mConnection_background);
@@ -664,20 +954,19 @@ public class ServiceAlwaysOnTop extends Service {
                 Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : 나 이제 죽는다?");
                 stopSelf();
             }
-
-            what = 0;
-            extra_data = null;
         }
     }
 
 
-    ////////////////////////ver.161228//
+    ////////////////////////ver.170115//
     ///// Connect w/AoT      : 100 /////
     ///// send Credit        : 102 /////
     ///// send Setting       : 103 /////
     ///// send History       : 104 /////
-    ///// alert OutgoingCall : 152 /////
+    ///// AoT req PHONESTATE : 151 /////
     ///// Disconnect w/AoT   : 198 /////
+    ////////////////////////////////////
+    ///// FAIL!! resend code : 999 /////
     ////////////////////////////////////
     @Override
     public IBinder onBind(Intent intent) {
@@ -692,6 +981,10 @@ public class ServiceAlwaysOnTop extends Service {
             switch (msg.what) {
                 case 100:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler : Background connected");
+                    ServiceAlwaysOnTop.this.sendMessage(102, null);
+                    ServiceAlwaysOnTop.this.sendMessage(103, null);
+                    ServiceAlwaysOnTop.this.sendMessage(104, null);
+                    ServiceAlwaysOnTop.this.sendMessage(151, null);
                     break;
                 case 102:
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : BackgroundIncomingHandler = " + msg.getData().getString("extra_data") + " : " + user_credit);
@@ -726,18 +1019,38 @@ public class ServiceAlwaysOnTop extends Service {
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : received_history_size : " + received_history.size());
                     Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : received_history_latest : " + received_history.get(0));
 
-                    send_history(received_history);
+                    ServiceAlwaysOnTop.this.send_history(received_history);
 
                     PB3.setVisibility(View.GONE);
                     aot_history.setVisibility(View.VISIBLE);
                     break;
-                case 152:
-                    Log.d(PACKAGE_NAME, "AlwaysOnTop : AOTAdapter : onCallStateChanged | incomming :" + msg.getData().getString("extra_data").toString());
-                    isNowOutgoing = true;
+                case 151:
+                    if (aot_custom_slidinglayout == null) {
+                        Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : onCallStateChanged | aot_custom_slidinglayout is not initialized");
+                        ServiceAlwaysOnTop.this.sendMessage(999, "151");
+                    }
+                    else {
+                        if (aot_custom_slidinglayout.isAllInitialized()) {
+                            Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : onCallStateChanged | incomming :" + msg.getData().getString("extra_data") + " | " + msg.getData().getString("call_number"));
+                            aot_custom_slidinglayout.onPhoneStateListener(Integer.parseInt(msg.getData().getString("extra_data")), msg.getData().getString("call_number"));
+
+                            if (msg.getData().getString("extra_data").equals("1")) {
+                                ServiceAlwaysOnTop.this.sendMessage(196, null);
+                            }
+
+                        } else {
+                            Log.d(PACKAGE_NAME, "AlwaysOnTop : MESSAGE : onCallStateChanged | aot_custom_slidinglayout's components are not initialized");
+                            ServiceAlwaysOnTop.this.sendMessage(999, "151");
+                        }
+                        //isNowOutgoing = true;
+                    }
                     break;
                 case 198:
-                    close_AoT_service();
+                    ServiceAlwaysOnTop.this.close_AoT_service();
                     break;
+
+                case 999:
+                    ServiceAlwaysOnTop.this.sendMessage(Integer.valueOf(msg.getData().getString("extra_data")), null);
             }
 
         }

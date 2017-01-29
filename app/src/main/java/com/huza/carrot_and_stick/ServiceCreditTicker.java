@@ -18,6 +18,8 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.google.firebase.crash.FirebaseCrash;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -68,6 +70,10 @@ public class ServiceCreditTicker extends Service {
         nm.cancel(737);
         ///////////////////////////////
 
+        Log.d(PACKAGE_NAME, "ServiceCreditTicker : onDestory : " + pref.getInt("second", -1));
+        editor.remove("second");
+        editor.commit();
+
         super.onDestroy();
     }
 
@@ -85,26 +91,48 @@ public class ServiceCreditTicker extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(PACKAGE_NAME, "ServiceCreditTicker : onStartCommand 생성");
 
+        pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
+        editor = pref.edit();
+
         if (intent == null) {
+            FirebaseCrash.report(new Exception("My first Android non-fatal error"));
             Log.d(PACKAGE_NAME, "ServiceCreditTicker : intent가 없으므로 gg");
             stopSelf();
-        }
-
-        if (intent.getAction() != null) {
-            Log.d(PACKAGE_NAME, "ServiceCreditTicker : " + intent.getAction());
-            switch (intent.getAction()) {
-                case "CLICKtoCLOSE":
-                    requestTOdisconnect();
-                    break;
-                default:
-                    break;
-            }
-
             return super.onStartCommand(intent, flags, startId);
         }
 
-        pref = getSharedPreferences("Carrot_and_Stick", MODE_PRIVATE);
-        editor = pref.edit();
+
+        Notification.Builder mBuilder = new Notification.Builder(getApplicationContext());
+
+        mBuilder.setContentTitle("Credit Ticker!!")
+                .setContentText("")
+                .setSmallIcon(R.drawable.carrot_noti);
+
+        startForeground(737, mBuilder.build());
+        //NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        //mNotificationManager.cancel(0);
+
+        Log.d(PACKAGE_NAME, "AlwaysOnTop : onStartCommand : startForeground 호출!!!");
+
+
+        try {
+            if(intent.getAction() != null) {
+                if (intent.getAction() == "CLICKtoCLOSE") {
+                    Log.d(PACKAGE_NAME, "ServiceCreditTicker : " + intent.getAction());
+                    switch (intent.getAction()) {
+                        case "CLICKtoCLOSE":
+                            requestTOdisconnect();
+                            break;
+                        default:
+                            break;
+                    }
+                    return super.onStartCommand(intent, flags, startId);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return super.onStartCommand(intent, flags, startId);
+        }
 
         user_credit = intent.getIntExtra("user_credit", -1);
         Log.d(PACKAGE_NAME, "ServiceCreditTicker : Received credit " + user_credit);
@@ -191,6 +219,7 @@ public class ServiceCreditTicker extends Service {
     private ServiceConnection mConnection_background = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.d(PACKAGE_NAME, "ServiceCreditTicker : mConnection_background : connected");
             mService_background = new Messenger(iBinder);
             mBound_background = true;
             sendMessage();
@@ -198,6 +227,7 @@ public class ServiceCreditTicker extends Service {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            Log.d(PACKAGE_NAME, "ServiceCreditTicker : mConnection_background : disconnected");
             mService_background = null;
             mBound_background = false;
         }
@@ -214,8 +244,9 @@ public class ServiceCreditTicker extends Service {
     private void sendMessage() {
         Log.d(PACKAGE_NAME, "ServiceCreditTicker : MESSAGE : sendMessage = " + mBound_background + " : " + what);
 
-        if (!mBound_background)
+        if (!mBound_background) {
             bindService(new Intent(this, ServiceBackground.class), mConnection_background, Context.BIND_AUTO_CREATE);
+        }
         else {
             if (what == 0) return;
 
